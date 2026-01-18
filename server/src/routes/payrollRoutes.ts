@@ -1,0 +1,61 @@
+/**
+ * Payroll Routes
+ * مسارات المرتبات
+ */
+
+import express from 'express';
+import PayrollController from '../controllers/PayrollController';
+import { authenticateToken as authMiddleware } from '../middleware/auth';
+
+const router = express.Router();
+
+// ============== إدارة الموظفين ==============
+
+// الحصول على قائمة الموظفين
+router.get('/employees', authMiddleware, PayrollController.getEmployees.bind(PayrollController));
+
+// الحصول على موظف واحد
+router.get('/employees/:id', authMiddleware, PayrollController.getEmployeeById.bind(PayrollController));
+
+// إنشاء موظف جديد
+router.post('/employees', authMiddleware, PayrollController.createEmployee.bind(PayrollController));
+
+// تحديث موظف
+router.put('/employees/:id', authMiddleware, PayrollController.updateEmployee.bind(PayrollController));
+
+// حذف موظف
+router.delete('/employees/:id', authMiddleware, PayrollController.deleteEmployee.bind(PayrollController));
+
+// ============== صرف المرتبات ==============
+
+// صرف مرتب لموظف
+router.post('/salaries/pay', authMiddleware, PayrollController.paySalary.bind(PayrollController));
+
+// صرف مرتبات لعدة موظفين
+router.post('/salaries/pay-multiple', authMiddleware, PayrollController.payMultipleSalaries.bind(PayrollController));
+
+// الحصول على سجل مرتبات شهر معين
+router.get('/salaries', authMiddleware, PayrollController.getSalaryPaymentsByMonth.bind(PayrollController));
+
+// الحصول على كشف حركة مرتب موظف
+router.get('/salaries/statement/:employeeId', authMiddleware, PayrollController.getEmployeeSalaryStatement.bind(PayrollController));
+
+// ============== المكافآت والزيادات ==============
+
+// الحصول على المكافآت
+router.get('/bonuses', authMiddleware, PayrollController.getBonuses.bind(PayrollController));
+
+// صرف مكافأة أو زيادة
+router.post('/bonuses/pay', authMiddleware, PayrollController.payBonus.bind(PayrollController));
+
+// ============== الإحصائيات ==============
+
+// إحصائيات المرتبات
+router.get('/stats', authMiddleware, PayrollController.getPayrollStats.bind(PayrollController));
+
+// ============== حساب الموظف ==============
+
+// جلب حساب موظف معين
+router.get('/employees/:id/account', authMiddleware, PayrollController.getEmployeeAccount.bind(PayrollController));
+
+export default router;

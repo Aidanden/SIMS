@@ -1,0 +1,82 @@
+[
+  {
+    "RoleID": "role_admin_001",
+    "RoleName": "admin",
+    "DisplayName": "مدير النظام",
+    "Permissions": [
+      "screen.all"
+    ],
+    "Description": "مدير النظام له جميع الصلاحيات - يمكنه الوصول لجميع الشاشات",
+    "IsActive": true
+  },
+  {
+    "RoleID": "role_manager_001",
+    "RoleName": "manager",
+    "DisplayName": "مدير",
+    "Permissions": [
+      "screen.dashboard",
+      "screen.companies",
+      "screen.products",
+      "screen.sales",
+      "screen.sale_returns",
+      "screen.purchases",
+      "screen.payment_receipts",
+      "screen.warehouse_dispatch",
+      "screen.customer_accounts",
+      "screen.supplier_accounts",
+      "screen.accountant",
+      "screen.treasury",
+      "screen.reports",
+      "screen.users"
+    ],
+    "Description": "مدير له صلاحيات إدارية محدودة - يمكنه الوصول لمعظم الشاشات",
+    "IsActive": true
+  },
+  {
+    "RoleID": "role_cashier_001",
+    "RoleName": "cashier",
+    "DisplayName": "صراف",
+    "Permissions": [
+      "screen.dashboard",
+      "screen.sales",
+      "screen.sale_returns",
+      "screen.purchases",
+      "screen.customer_accounts",
+      "screen.supplier_accounts"
+    ],
+    "Description": "صراف يمكنه إجراء عمليات البيع والشراء وإدارة الحسابات",
+    "IsActive": true
+  },
+  {
+    "RoleID": "role_accountant_001",
+    "RoleName": "accountant",
+    "DisplayName": "محاسب",
+    "Permissions": [
+      "screen.dashboard",
+      "screen.accountant",
+      "screen.customer_accounts",
+      "screen.supplier_accounts",
+      "screen.treasury",
+      "screen.reports",
+      "screen.payment_receipts",
+      "screen.external_stores",
+      "screen.external_store_invoices"
+    ],
+    "Description": "محاسب يمكنه عرض التقارير والحسابات المالية",
+    "IsActive": true
+  },
+  {
+    "RoleID": "role_warehouse_001",
+    "RoleName": "warehouse",
+    "DisplayName": "أمين مخزن",
+    "Permissions": [
+      "screen.dashboard",
+      "screen.products",
+      "screen.warehouse_dispatch",
+      "screen.damage_reports",
+      "screen.purchases"
+    ],
+    "Description": "أمين مخزن يمكنه إدارة المخزون والأصناف",
+    "IsActive": true
+  }
+]

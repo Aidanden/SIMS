@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "name": "مخزن التقازي",
+    "code": "TG",
+    "isParent": true,
+    "parentId": null
+  },
+  {
+    "id": 2,
+    "name": "صالة الامارات",
+    "code": "EM",
+    "isParent": false,
+    "parentId": 1
+  }
+]
