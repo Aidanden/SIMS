@@ -3,6 +3,7 @@ import { RootState } from '@/app/redux';
 import { baseQueryWithAuthInterceptor } from './apiUtils';
 import { API_CACHE_CONFIG } from '@/lib/config';
 import { paymentReceiptsApi } from './api/paymentReceiptsApi';
+import { treasuryApi } from './treasuryApi';
 
 export interface PurchaseLine {
   id?: number;
@@ -47,6 +48,7 @@ export interface Purchase {
   totalExpenses: number;
   finalTotal: number;
   currency: 'LYD' | 'USD' | 'EUR';
+  exchangeRate?: number;
   createdAt: string;
   lines: PurchaseLine[];
   payments: PurchasePayment[];
@@ -212,7 +214,9 @@ export const purchaseApi = createApi({
           await queryFulfilled;
           // تحديث cache إيصالات الدفع بشكل فوري
           dispatch(paymentReceiptsApi.util.invalidateTags(['PaymentReceipts']));
-        } catch {}
+          // تحديث الخزائن
+          dispatch(treasuryApi.util.invalidateTags(['Treasury', 'TreasuryTransaction', 'TreasuryStats'] as any));
+        } catch { }
       },
     }),
 
@@ -235,7 +239,9 @@ export const purchaseApi = createApi({
           await queryFulfilled;
           // تحديث cache إيصالات الدفع بشكل فوري
           dispatch(paymentReceiptsApi.util.invalidateTags(['PaymentReceipts']));
-        } catch {}
+          // تحديث الخزائن
+          dispatch(treasuryApi.util.invalidateTags(['Treasury', 'TreasuryTransaction', 'TreasuryStats'] as any));
+        } catch { }
       },
     }),
 
@@ -250,7 +256,9 @@ export const purchaseApi = createApi({
           await queryFulfilled;
           // تحديث cache إيصالات الدفع بشكل فوري
           dispatch(paymentReceiptsApi.util.invalidateTags(['PaymentReceipts']));
-        } catch {}
+          // تحديث الخزائن
+          dispatch(treasuryApi.util.invalidateTags(['Treasury', 'TreasuryTransaction', 'TreasuryStats'] as any));
+        } catch { }
       },
     }),
 
@@ -271,7 +279,9 @@ export const purchaseApi = createApi({
           await queryFulfilled;
           // تحديث cache إيصالات الدفع بشكل فوري
           dispatch(paymentReceiptsApi.util.invalidateTags(['PaymentReceipts']));
-        } catch {}
+          // تحديث الخزائن
+          dispatch(treasuryApi.util.invalidateTags(['Treasury', 'TreasuryTransaction', 'TreasuryStats'] as any));
+        } catch { }
       },
     }),
 

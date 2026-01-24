@@ -161,7 +161,7 @@ export default function ReportsPage() {
       printData = salesReport.data.sales.filter((sale: any) => {
         if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
         if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-        if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
+        if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
         if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
         return true;
       });
@@ -784,8 +784,8 @@ export default function ReportsPage() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">التقارير</h1>
-        <p className="text-gray-600 mt-1">عرض وتحليل تقارير النظام</p>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-text-primary">التقارير</h1>
+        <p className="text-slate-500 dark:text-text-secondary mt-1">عرض وتحليل تقارير النظام</p>
       </div>
 
       {/* Report Tabs */}
@@ -798,12 +798,12 @@ export default function ReportsPage() {
               key={report.id}
               onClick={() => handleReportChange(report.id)}
               className={`p-4 rounded-lg border-2 transition-all ${isActive
-                ? `border-${report.color}-500 bg-${report.color}-50`
-                : "border-gray-200 hover:border-gray-300"
+                ? `border-${report.color}-500 bg-${report.color}-50 dark:bg-${report.color}-900/20 dark:border-${report.color}-700`
+                : "border-gray-200 dark:border-border-primary hover:border-gray-300 dark:hover:border-border-hover bg-white dark:bg-surface-primary"
                 }`}
             >
-              <Icon className={`w-6 h-6 mx-auto mb-2 ${isActive ? `text-${report.color}-600` : "text-gray-400"}`} />
-              <p className={`text-sm font-medium ${isActive ? `text-${report.color}-700` : "text-gray-600"}`}>
+              <Icon className={`w-6 h-6 mx-auto mb-2 ${isActive ? `text-${report.color}-600 dark:text-${report.color}-400` : "text-gray-400 dark:text-text-tertiary"}`} />
+              <p className={`text-sm font-medium ${isActive ? `text-${report.color}-700 dark:text-${report.color}-300` : "text-gray-600 dark:text-text-secondary"}`}>
                 {report.name}
               </p>
             </button>
@@ -813,9 +813,9 @@ export default function ReportsPage() {
 
       {/* Filters Section */}
       {(activeReport === "sales" || activeReport === "stock" || activeReport === "customers" || activeReport === "top-products" || activeReport === "suppliers" || activeReport === "purchases" || activeReport === "product-movement" || activeReport === "profit" || activeReport === "company-stock" || activeReport === "group-stock") && (
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
+        <div className="bg-white dark:bg-surface-primary p-4 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-medium text-gray-700 flex items-center gap-2">
+            <h3 className="text-sm font-medium text-slate-700 dark:text-text-primary flex items-center gap-2">
               <Search className="w-4 h-4" />
               الفلاتر والبحث
             </h3>
@@ -827,7 +827,7 @@ export default function ReportsPage() {
                 setProductCodeSearch('');
                 setProductNameSearch('');
               }}
-              className="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1"
+              className="text-sm text-slate-600 dark:text-text-secondary hover:text-slate-800 dark:hover:text-text-primary flex items-center gap-1 transition-colors"
             >
               <X className="w-4 h-4" />
               مسح الفلاتر
@@ -838,14 +838,14 @@ export default function ReportsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* فلتر الشركة */}
             <div>
-              <label className="block text-sm text-gray-600 mb-1 flex items-center gap-1">
+              <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1 flex items-center gap-1">
                 <Building2 className="w-4 h-4" />
                 الشركة
               </label>
               <select
                 value={selectedCompanyId || ""}
                 onChange={(e) => setSelectedCompanyId(e.target.value ? Number(e.target.value) : undefined)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
               >
                 <option value="">جميع الشركات</option>
                 {companies.map((company: any) => (
@@ -858,21 +858,21 @@ export default function ReportsPage() {
 
             {/* Date Range */}
             <div>
-              <label className="block text-sm text-gray-600 mb-1">من تاريخ</label>
+              <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">من تاريخ</label>
               <input
                 type="date"
                 value={dateRange.startDate}
                 onChange={(e) => setDateRange({ ...dateRange, startDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-600 mb-1">إلى تاريخ</label>
+              <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">إلى تاريخ</label>
               <input
                 type="date"
                 value={dateRange.endDate}
                 onChange={(e) => setDateRange({ ...dateRange, endDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
               />
             </div>
 
@@ -880,53 +880,53 @@ export default function ReportsPage() {
             {activeReport === "sales" && (
               <>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">رقم الفاتورة</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">رقم الفاتورة</label>
                   <input
                     type="text"
                     value={filters.invoiceNumber}
                     onChange={(e) => setFilters({ ...filters, invoiceNumber: e.target.value })}
                     placeholder="ابحث برقم الفاتورة"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">اسم العميل</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم العميل</label>
                   <input
                     type="text"
                     value={filters.customerName}
                     onChange={(e) => setFilters({ ...filters, customerName: e.target.value })}
                     placeholder="ابحث باسم العميل"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">الحد الأدنى للمبلغ</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">الحد الأدنى للمبلغ</label>
                   <input
                     type="number"
                     value={filters.minAmount}
                     onChange={(e) => setFilters({ ...filters, minAmount: e.target.value })}
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">الحد الأقصى للمبلغ</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">الحد الأقصى للمبلغ</label>
                   <input
                     type="number"
                     value={filters.maxAmount}
                     onChange={(e) => setFilters({ ...filters, maxAmount: e.target.value })}
                     placeholder="غير محدد"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">قيمة الفاتورة</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">قيمة الفاتورة</label>
                   <input
                     type="number"
                     value={filters.invoiceAmount}
                     onChange={(e) => setFilters({ ...filters, invoiceAmount: e.target.value })}
                     placeholder="ابحث بقيمة محددة"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
               </>
@@ -936,23 +936,23 @@ export default function ReportsPage() {
             {activeReport === "stock" && (
               <>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">كود الصنف</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">كود الصنف</label>
                   <input
                     type="text"
                     value={filters.productCode || ""}
                     onChange={(e) => setFilters({ ...filters, productCode: e.target.value })}
                     placeholder="ابحث بكود الصنف"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">اسم الصنف</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم الصنف</label>
                   <input
                     type="text"
                     value={filters.productName || ""}
                     onChange={(e) => setFilters({ ...filters, productName: e.target.value })}
                     placeholder="ابحث باسم الصنف"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
               </>
@@ -964,23 +964,23 @@ export default function ReportsPage() {
             {activeReport === "customers" && (
               <>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">اسم العميل</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم العميل</label>
                   <input
                     type="text"
                     value={filters.customerName}
                     onChange={(e) => setFilters({ ...filters, customerName: e.target.value })}
                     placeholder="ابحث باسم العميل"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">هاتف العميل</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">هاتف العميل</label>
                   <input
                     type="text"
                     value={filters.customerPhone}
                     onChange={(e) => setFilters({ ...filters, customerPhone: e.target.value })}
                     placeholder="ابحث برقم الهاتف"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
               </>
@@ -989,13 +989,13 @@ export default function ReportsPage() {
             {/* Top Products Filters */}
             {activeReport === "top-products" && (
               <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">اسم المنتج</label>
+                <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم المنتج</label>
                 <input
                   type="text"
                   value={filters.productName}
                   onChange={(e) => setFilters({ ...filters, productName: e.target.value })}
                   placeholder="ابحث باسم المنتج"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                 />
               </div>
             )}
@@ -1004,23 +1004,23 @@ export default function ReportsPage() {
             {activeReport === "suppliers" && (
               <>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">اسم المورد</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم المورد</label>
                   <input
                     type="text"
                     value={filters.supplierReportName}
                     onChange={(e) => setFilters({ ...filters, supplierReportName: e.target.value })}
                     placeholder="ابحث باسم المورد"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">هاتف المورد</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">هاتف المورد</label>
                   <input
                     type="text"
                     value={filters.supplierReportPhone}
                     onChange={(e) => setFilters({ ...filters, supplierReportPhone: e.target.value })}
                     placeholder="ابحث برقم الهاتف"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
               </>
@@ -1029,11 +1029,11 @@ export default function ReportsPage() {
             {/* Company Stock Report Filters */}
             {activeReport === "company-stock" && (
               <div className="md:col-span-2">
-                <label className="block text-sm text-gray-600 mb-1">اختر المورد</label>
+                <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اختر المورد</label>
                 <select
                   value={filters.supplierId}
                   onChange={(e) => setFilters({ ...filters, supplierId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                 >
                   <option value="">اختر مورد...</option>
                   {suppliersList.map((supplier: any) => (
@@ -1054,7 +1054,7 @@ export default function ReportsPage() {
                 <select
                   value={filters.groupId}
                   onChange={(e) => setFilters({ ...filters, groupId: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                 >
                   <option value="">اختر المجموعة...</option>
                   {groupsList.map((group: any) => (
@@ -1071,63 +1071,63 @@ export default function ReportsPage() {
             {activeReport === "purchases" && (
               <>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">رقم الفاتورة</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">رقم الفاتورة</label>
                   <input
                     type="text"
                     value={filters.invoiceNumber}
                     onChange={(e) => setFilters({ ...filters, invoiceNumber: e.target.value })}
                     placeholder="ابحث برقم الفاتورة"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">اسم المورد</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">اسم المورد</label>
                   <input
                     type="text"
                     value={filters.supplierName}
                     onChange={(e) => setFilters({ ...filters, supplierName: e.target.value })}
                     placeholder="ابحث باسم المورد"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">هاتف المورد</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">هاتف المورد</label>
                   <input
                     type="text"
                     value={filters.supplierPhone}
                     onChange={(e) => setFilters({ ...filters, supplierPhone: e.target.value })}
                     placeholder="ابحث برقم الهاتف"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">الحد الأدنى للمبلغ</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">الحد الأدنى للمبلغ</label>
                   <input
                     type="number"
                     value={filters.minAmount}
                     onChange={(e) => setFilters({ ...filters, minAmount: e.target.value })}
                     placeholder="0"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">الحد الأقصى للمبلغ</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">الحد الأقصى للمبلغ</label>
                   <input
                     type="number"
                     value={filters.maxAmount}
                     onChange={(e) => setFilters({ ...filters, maxAmount: e.target.value })}
                     placeholder="غير محدد"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">قيمة الفاتورة</label>
+                  <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">قيمة الفاتورة</label>
                   <input
                     type="number"
                     value={filters.invoiceAmount}
                     onChange={(e) => setFilters({ ...filters, invoiceAmount: e.target.value })}
                     placeholder="ابحث بقيمة محددة"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus-border-transparent"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                   />
                 </div>
               </>
@@ -1139,7 +1139,7 @@ export default function ReportsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* البحث بالكود */}
                   <div className="relative code-dropdown-container">
-                    <label className="block text-sm text-gray-600 mb-1">🔢 البحث بالكود</label>
+                    <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">🔢 البحث بالكود</label>
                     <div className="relative">
                       <input
                         type="text"
@@ -1151,10 +1151,10 @@ export default function ReportsPage() {
                         }}
                         onFocus={() => productCodeSearch && setShowCodeDropdown(true)}
                         placeholder="أدخل كود الصنف..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all text-sm"
                       />
                       {showCodeDropdown && productCodeSearch && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-surface-secondary border border-slate-300 dark:border-border-primary rounded-md shadow-lg max-h-60 overflow-y-auto">
                           {products
                             .filter((p: any) => p.sku.toLowerCase().trim() === productCodeSearch.toLowerCase().trim())
                             .map((p: any) => (
@@ -1166,19 +1166,19 @@ export default function ReportsPage() {
                                   setProductNameSearch(p.name);
                                   setShowCodeDropdown(false);
                                 }}
-                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 text-right"
+                                className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 text-right"
                               >
                                 <div className="flex justify-between items-center">
-                                  <div className="font-bold text-gray-900 text-sm">{p.sku}</div>
-                                  <div className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                                  <div className="font-bold text-slate-900 dark:text-text-primary text-sm">{p.sku}</div>
+                                  <div className="text-[10px] bg-slate-100 dark:bg-surface-elevated px-1.5 py-0.5 rounded text-slate-600 dark:text-text-secondary">
                                     {p.createdByCompany?.name || 'شركة غير معروفة'}
                                   </div>
                                 </div>
-                                <div className="text-xs text-gray-500 truncate">{p.name}</div>
+                                <div className="text-xs text-slate-500 dark:text-text-secondary truncate">{p.name}</div>
                               </div>
                             ))}
                           {products.filter((p: any) => p.sku.toLowerCase().trim() === productCodeSearch.toLowerCase().trim()).length === 0 && (
-                            <div className="px-3 py-2 text-sm text-gray-500 text-center">لا توجد نتائج</div>
+                            <div className="px-3 py-2 text-sm text-slate-500 dark:text-text-secondary text-center">لا توجد نتائج</div>
                           )}
                         </div>
                       )}
@@ -1187,7 +1187,7 @@ export default function ReportsPage() {
 
                   {/* البحث بالاسم */}
                   <div className="relative name-dropdown-container">
-                    <label className="block text-sm text-gray-600 mb-1">🔍 البحث بالاسم</label>
+                    <label className="block text-sm text-slate-600 dark:text-text-secondary mb-1">🔍 البحث بالاسم</label>
                     <div className="relative">
                       <input
                         type="text"
@@ -1199,10 +1199,10 @@ export default function ReportsPage() {
                         }}
                         onFocus={() => productNameSearch && setShowNameDropdown(true)}
                         placeholder="ابحث باسم الصنف..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all text-sm"
                       />
                       {showNameDropdown && productNameSearch && (
-                        <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                        <div className="absolute z-50 w-full mt-1 bg-white dark:bg-surface-secondary border border-slate-300 dark:border-border-primary rounded-md shadow-lg max-h-60 overflow-y-auto">
                           {products
                             .filter((p: any) => normalizeArabic(p.name).includes(normalizeArabic(productNameSearch)))
                             .slice(0, 20)
@@ -1215,19 +1215,19 @@ export default function ReportsPage() {
                                   setProductCodeSearch(p.sku);
                                   setShowNameDropdown(false);
                                 }}
-                                className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 text-right"
+                                className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 text-right"
                               >
                                 <div className="flex justify-between items-center">
-                                  <div className="font-bold text-gray-900 text-sm">{p.name}</div>
-                                  <div className="text-[10px] bg-gray-100 px-1.5 py-0.5 rounded text-gray-600">
+                                  <div className="font-bold text-slate-900 dark:text-text-primary text-sm">{p.name}</div>
+                                  <div className="text-[10px] bg-slate-100 dark:bg-surface-elevated px-1.5 py-0.5 rounded text-slate-600 dark:text-text-secondary">
                                     {p.createdByCompany?.name || 'شركة غير معروفة'}
                                   </div>
                                 </div>
-                                <div className="text-xs text-gray-500 truncate">كود: {p.sku}</div>
+                                <div className="text-xs text-slate-500 dark:text-text-secondary truncate">كود: {p.sku}</div>
                               </div>
                             ))}
                           {products.filter((p: any) => normalizeArabic(p.name).includes(normalizeArabic(productNameSearch))).length === 0 && (
-                            <div className="px-3 py-2 text-sm text-gray-500 text-center">لا توجد نتائج</div>
+                            <div className="px-3 py-2 text-sm text-slate-500 dark:text-text-secondary text-center">لا توجد نتائج</div>
                           )}
                         </div>
                       )}
@@ -1236,7 +1236,7 @@ export default function ReportsPage() {
                 </div>
 
                 {selectedProductId && (
-                  <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg border border-blue-200 text-sm flex items-center justify-between animate-in fade-in slide-in-from-top-1">
+                  <div className="bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-800/30 text-sm flex items-center justify-between animate-in fade-in slide-in-from-top-1">
                     <div className="flex items-center gap-2">
                       <span className="flex h-2 w-2 rounded-full bg-blue-600"></span>
                       <span>الصنف المختار: <span className="font-bold">{products.find((p: any) => p.id === selectedProductId)?.name}</span></span>
@@ -1264,8 +1264,8 @@ export default function ReportsPage() {
       {/* Loading State */}
       {isLoading && (
         <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">جاري تحميل التقرير...</p>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+          <p className="mt-4 text-slate-600 dark:text-text-secondary">جاري تحميل التقرير...</p>
         </div>
       )}
 
@@ -1274,7 +1274,7 @@ export default function ReportsPage() {
         <div className="mb-4 flex justify-end">
           <button
             onClick={() => handlePrint()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors shadow-sm"
           >
             <FileText className="w-5 h-5" />
             طباعة التقرير
@@ -1300,64 +1300,64 @@ export default function ReportsPage() {
           <div className="space-y-6">
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="bg-white p-4 rounded-lg shadow">
-                <p className="text-sm text-gray-600">إجمالي المبيعات</p>
-                <p className="text-2xl font-bold text-blue-600">
+              <div className="bg-white dark:bg-surface-primary p-4 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary">
+                <p className="text-sm text-slate-600 dark:text-text-secondary">إجمالي المبيعات</p>
+                <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                   {salesReport.data.stats.totalSales.toLocaleString("ar-LY", { minimumFractionDigits: 2 })} د.ل
                 </p>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <p className="text-sm text-gray-600">المبيعات النقدية</p>
-                <p className="text-2xl font-bold text-green-600">
+              <div className="bg-white dark:bg-surface-primary p-4 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary">
+                <p className="text-sm text-slate-600 dark:text-text-secondary">المبيعات النقدية</p>
+                <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                   {salesReport.data.stats.totalCash.toLocaleString("ar-LY", { minimumFractionDigits: 2 })} د.ل
                 </p>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <p className="text-sm text-gray-600">المبيعات الآجلة</p>
-                <p className="text-2xl font-bold text-orange-600">
+              <div className="bg-white dark:bg-surface-primary p-4 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary">
+                <p className="text-sm text-slate-600 dark:text-text-secondary">المبيعات الآجلة</p>
+                <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">
                   {salesReport.data.stats.totalCredit.toLocaleString("ar-LY", { minimumFractionDigits: 2 })} د.ل
                 </p>
               </div>
-              <div className="bg-white p-4 rounded-lg shadow">
-                <p className="text-sm text-gray-600">عدد الفواتير</p>
-                <p className="text-2xl font-bold text-purple-600">
+              <div className="bg-white dark:bg-surface-primary p-4 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary">
+                <p className="text-sm text-slate-600 dark:text-text-secondary">عدد الفواتير</p>
+                <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
                   {salesReport.data.stats.salesCount.toLocaleString("ar-LY")}
                 </p>
               </div>
             </div>
 
             {/* Sales Table */}
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="bg-white dark:bg-surface-primary rounded-lg shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-slate-200 dark:divide-border-primary">
+                  <thead className="bg-slate-50 dark:bg-surface-secondary">
                     <tr>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">رقم الفاتورة</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">التاريخ</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">العميل</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">النوع</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">المبلغ</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">الحالة</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">رقم الفاتورة</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">التاريخ</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">العميل</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">النوع</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">المبلغ</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase">الحالة</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-surface-primary divide-y divide-slate-200 dark:divide-border-primary">
                     {(() => {
                       const filteredSales = salesReport.data.sales.filter((sale: any) => {
                         if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
                         if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-                        if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
+                        if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
                         if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
                         return true;
                       });
                       return paginateData(filteredSales).map((sale: any) => (
-                        <tr key={sale.id} className="hover:bg-gray-50 print:hover:bg-white">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <tr key={sale.id} className="hover:bg-slate-50 dark:hover:bg-surface-hover print:hover:bg-white transition-colors">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-text-primary">
                             {sale.invoiceNumber || "-"}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-text-secondary">
                             {new Date(sale.createdAt).toLocaleDateString("ar-LY")}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 dark:text-text-primary">
                             {sale.customer?.name || "عميل نقدي"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1368,7 +1368,7 @@ export default function ReportsPage() {
                               {sale.saleType === "CASH" ? "نقدي" : "آجل"}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 dark:text-text-primary">
                             {sale.total.toLocaleString("ar-LY", { minimumFractionDigits: 2 })} د.ل
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -1391,7 +1391,7 @@ export default function ReportsPage() {
                 filteredItems={salesReport.data.sales.filter((sale: any) => {
                   if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
                   if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-                  if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
+                  if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
                   if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
                   return true;
                 })}
@@ -1757,7 +1757,7 @@ export default function ReportsPage() {
                         if (filters.invoiceNumber && !textSearch(purchase.invoiceNumber, filters.invoiceNumber)) return false;
                         if (filters.supplierName && !textSearch(purchase.supplier?.name, filters.supplierName)) return false;
                         if (filters.supplierPhone && !textSearch(purchase.supplier?.phone, filters.supplierPhone)) return false;
-                        if (filters.minAmount && Number(purchase.total) < Number(filters.minAmount)) return false;
+                        if (filters.minAmount && Number(purchase.total) <Number(filters.minAmount)) return false;
                         if (filters.maxAmount && Number(purchase.total) > Number(filters.maxAmount)) return false;
                         if (filters.invoiceAmount && Number(purchase.total) !== Number(filters.invoiceAmount)) return false;
                         return true;
@@ -1813,7 +1813,7 @@ export default function ReportsPage() {
                   if (filters.invoiceNumber && !textSearch(purchase.invoiceNumber, filters.invoiceNumber)) return false;
                   if (filters.supplierName && !textSearch(purchase.supplier?.name, filters.supplierName)) return false;
                   if (filters.supplierPhone && !textSearch(purchase.supplier?.phone, filters.supplierPhone)) return false;
-                  if (filters.minAmount && Number(purchase.total) < Number(filters.minAmount)) return false;
+                  if (filters.minAmount && Number(purchase.total) <Number(filters.minAmount)) return false;
                   if (filters.maxAmount && Number(purchase.total) > Number(filters.maxAmount)) return false;
                   if (filters.invoiceAmount && Number(purchase.total) !== Number(filters.invoiceAmount)) return false;
                   return true;

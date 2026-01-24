@@ -16,24 +16,17 @@ import { useGetCompaniesQuery } from '@/state/companyApi';
 import {
     Wallet,
     Building2,
-    Landmark,
     Plus,
-    ArrowDownCircle,
-    ArrowUpCircle,
-    ArrowLeftRight,
     Search,
     Filter,
     RefreshCw,
     Trash2,
     X,
-    ChevronLeft,
-    ChevronRight,
     Calendar,
     TrendingUp,
     TrendingDown,
     DollarSign,
     CreditCard,
-    Printer,
 } from 'lucide-react';
 
 // تنسيق العملة
@@ -101,9 +94,9 @@ const TreasuryTypeIcon = ({ type }: { type: string }) => {
         case 'GENERAL':
             return <Wallet className="w-5 h-5 text-green-600" />;
         case 'BANK':
-            return <Landmark className="w-5 h-5 text-purple-600" />;
+            return <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>;
         default:
-            return <Wallet className="w-5 h-5 text-gray-600" />;
+            return <Wallet className="w-5 h-5 text-slate-600 dark:text-text-secondary" />;
     }
 };
 
@@ -117,12 +110,12 @@ interface MainStatCardProps {
 
 const MainStatCard = ({ title, value, subtitle, icon: Icon, iconBgColor }: MainStatCardProps) => {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-6 hover:shadow-md hover:border-blue-200 transition-all duration-300">
+        <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-                    <p className="text-2xl font-bold text-slate-800">{value}</p>
-                    {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+                    <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary mb-1">{title}</p>
+                    <p className="text-2xl font-bold text-slate-800 dark:text-text-primary">{value}</p>
+                    {subtitle && <p className="text-xs text-slate-400 dark:text-text-muted mt-1">{subtitle}</p>}
                 </div>
                 <div className={`w-14 h-14 ${iconBgColor} rounded-xl flex items-center justify-center shadow-sm`}>
                     <Icon className="w-7 h-7 text-white" />
@@ -179,7 +172,7 @@ export default function TreasuryPage() {
         endDate: dateTo || undefined,
         type: transactionTypeFilter || undefined,
         page,
-        limit: 20,
+        limit: 15,
     });
     const { data: companiesData } = useGetCompaniesQuery({});
     const companies = companiesData?.data?.companies || [];
@@ -473,43 +466,44 @@ export default function TreasuryPage() {
     };
 
     return (
-        <div className="p-6 space-y-6">
+        <div className="max-w-full space-y-8">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                        <Wallet className="w-8 h-8 text-blue-600" />
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="space-y-1">
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-text-primary tracking-tight flex items-center gap-3">
+                        <Wallet className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                         حركات الخزينة
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400 mt-1">
+                    <p className="text-slate-500 dark:text-text-secondary font-medium flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                         إدارة الخزائن والحسابات المصرفية وحركات الأموال
                     </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-3">
                     <button
                         onClick={openDepositModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-lg shadow-green-100 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
-                        <ArrowDownCircle className="w-5 h-5" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" /></svg>
                         إيداع
                     </button>
                     <button
                         onClick={openWithdrawModal}
-                        className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-100 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
-                        <ArrowUpCircle className="w-5 h-5" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 11l3-3m0 0l3 3m-3-3v8m0 5a9 9 0 110-18 9 9 0 010 18z" /></svg>
                         سحب
                     </button>
                     <button
                         onClick={() => setShowTransferModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-bold shadow-lg shadow-purple-100 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
-                        <ArrowLeftRight className="w-5 h-5" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                         تحويل
                     </button>
                     <button
                         onClick={() => setShowCreateTreasuryModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-100 dark:shadow-none hover:scale-[1.02] active:scale-[0.98] transition-all"
                     >
                         <Plus className="w-5 h-5" />
                         خزينة جديدة
@@ -548,102 +542,100 @@ export default function TreasuryPage() {
             )}
 
             {/* Tabs */}
-            <div className="border-b border-gray-200 dark:border-gray-700">
-                <nav className="flex gap-4">
-                    <button
-                        onClick={() => setActiveTab('overview')}
-                        className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors ${activeTab === 'overview'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        نظرة عامة
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('transactions')}
-                        className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors ${activeTab === 'transactions'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        الحركات
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('treasuries')}
-                        className={`py-3 px-4 border-b-2 font-medium text-sm transition-colors ${activeTab === 'treasuries'
-                            ? 'border-blue-600 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700'
-                            }`}
-                    >
-                        الخزائن
-                    </button>
-                </nav>
+            <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-primary self-start w-fit">
+                <button
+                    onClick={() => setActiveTab('overview')}
+                    className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'overview'
+                        ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400'
+                        : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'
+                        }`}
+                >
+                    نظرة عامة
+                </button>
+                <button
+                    onClick={() => setActiveTab('transactions')}
+                    className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'transactions'
+                        ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400'
+                        : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'
+                        }`}
+                >
+                    الحركات
+                </button>
+                <button
+                    onClick={() => setActiveTab('treasuries')}
+                    className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${activeTab === 'treasuries'
+                        ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400'
+                        : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'
+                        }`}
+                >
+                    الخزائن
+                </button>
             </div>
 
             {/* Tab Content */}
             {activeTab === 'overview' && (
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Company Treasuries */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                    <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary dark:text-white flex items-center gap-2 mb-4">
                             <Building2 className="w-5 h-5 text-blue-600" />
                             خزائن الشركات
                         </h3>
                         <div className="space-y-3">
                             {stats?.companyTreasuries?.map((treasury: Treasury) => (
-                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">{treasury.name}</p>
-                                        <p className="text-sm text-gray-500">{treasury.company?.name}</p>
+                                        <p className="font-medium text-slate-900 dark:text-text-primary dark:text-white">{treasury.name}</p>
+                                        <p className="text-sm text-slate-500 dark:text-text-tertiary">{treasury.company?.name}</p>
                                     </div>
                                     <p className="font-bold text-blue-600">{formatCurrency(treasury.balance)}</p>
                                 </div>
                             ))}
                             {(!stats?.companyTreasuries || stats.companyTreasuries.length === 0) && (
-                                <p className="text-gray-500 text-center py-4">لا توجد خزائن شركات</p>
+                                <p className="text-slate-500 dark:text-text-tertiary text-center py-4">لا توجد خزائن شركات</p>
                             )}
                         </div>
                     </div>
 
                     {/* General Treasuries */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+                    <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary flex items-center gap-2 mb-4">
                             <Wallet className="w-5 h-5 text-green-600" />
                             الخزائن العامة
                         </h3>
                         <div className="space-y-3">
                             {stats?.generalTreasuries?.map((treasury: Treasury) => (
-                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-xl">
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">{treasury.name}</p>
+                                        <p className="font-medium text-slate-900 dark:text-text-primary dark:text-white">{treasury.name}</p>
                                     </div>
                                     <p className="font-bold text-green-600">{formatCurrency(treasury.balance)}</p>
                                 </div>
                             ))}
                             {(!stats?.generalTreasuries || stats.generalTreasuries.length === 0) && (
-                                <p className="text-gray-500 text-center py-4">لا توجد خزائن عامة</p>
+                                <p className="text-slate-500 dark:text-text-tertiary text-center py-4">لا توجد خزائن عامة</p>
                             )}
                         </div>
                     </div>
 
                     {/* Bank Accounts */}
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
-                            <Landmark className="w-5 h-5 text-purple-600" />
+                    <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary flex items-center gap-2 mb-4">
+                            <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
                             الحسابات المصرفية
                         </h3>
                         <div className="space-y-3">
                             {stats?.bankAccounts?.map((treasury: Treasury) => (
-                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <div key={treasury.id} className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">{treasury.name}</p>
-                                        <p className="text-sm text-gray-500">{treasury.bankName} - {treasury.accountNumber}</p>
+                                        <p className="font-medium text-slate-900 dark:text-text-primary dark:text-white">{treasury.name}</p>
+                                        <p className="text-sm text-slate-500 dark:text-text-tertiary">{treasury.bankName} - {treasury.accountNumber}</p>
                                     </div>
                                     <p className="font-bold text-purple-600">{formatCurrency(treasury.balance)}</p>
                                 </div>
                             ))}
                             {(!stats?.bankAccounts || stats.bankAccounts.length === 0) && (
-                                <p className="text-gray-500 text-center py-4">لا توجد حسابات مصرفية</p>
+                                <p className="text-slate-500 dark:text-text-tertiary text-center py-4">لا توجد حسابات مصرفية</p>
                             )}
                         </div>
                     </div>
@@ -651,14 +643,14 @@ export default function TreasuryPage() {
             )}
 
             {activeTab === 'transactions' && (
-                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary">
                     {/* Filters */}
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="p-4 border-b border-slate-200 dark:border-border-primary">
                         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                             <select
                                 value={selectedTreasury || ''}
                                 onChange={(e) => setSelectedTreasury(e.target.value ? Number(e.target.value) : null)}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                             >
                                 <option value="">جميع الخزائن</option>
                                 {treasuries?.map((t: Treasury) => (
@@ -668,7 +660,7 @@ export default function TreasuryPage() {
                             <select
                                 value={transactionTypeFilter}
                                 onChange={(e) => setTransactionTypeFilter(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                             >
                                 <option value="">جميع الأنواع</option>
                                 <option value="DEPOSIT">إيداع</option>
@@ -679,22 +671,22 @@ export default function TreasuryPage() {
                                 type="date"
                                 value={dateFrom}
                                 onChange={(e) => setDateFrom(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 placeholder="من تاريخ"
                             />
                             <input
                                 type="date"
                                 value={dateTo}
                                 onChange={(e) => setDateTo(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                className="px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 placeholder="إلى تاريخ"
                             />
                             <button
                                 onClick={handlePrintTransactions}
-                                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors"
                                 title="طباعة الحركات"
                             >
-                                <Printer className="w-5 h-5" />
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
                                 <span>طباعة</span>
                             </button>
                         </div>
@@ -703,24 +695,24 @@ export default function TreasuryPage() {
                     {/* Transactions Table */}
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50 dark:bg-gray-700">
+                            <thead className="bg-slate-50 dark:bg-surface-secondary dark:bg-gray-700">
                                 <tr>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">التاريخ</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الخزينة</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">النوع</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المصدر</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">المبلغ</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الرصيد بعد</th>
-                                    <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400">الوصف</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">التاريخ</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">الخزينة</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">النوع</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">المصدر</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">المبلغ</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">الرصيد بعد</th>
+                                    <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-tertiary dark:text-gray-400">الوصف</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                                 {transactionsData?.transactions?.map((transaction: TreasuryTransaction) => (
-                                    <tr key={transaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                    <tr key={transaction.id} className="hover:bg-slate-50 dark:bg-surface-secondary dark:hover:bg-gray-700/50">
+                                        <td className="px-4 py-3 text-sm text-slate-900 dark:text-text-primary dark:text-white">
                                             {formatDate(transaction.createdAt)}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                        <td className="px-4 py-3 text-sm text-slate-900 dark:text-text-primary dark:text-white">
                                             {transaction.treasury?.name}
                                         </td>
                                         <td className="px-4 py-3">
@@ -733,7 +725,7 @@ export default function TreasuryPage() {
                                                 {getTransactionTypeLabel(transaction.type)}
                                             </span>
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-text-tertiary">
                                             {getTransactionSourceLabel(transaction.source)}
                                         </td>
                                         <td className={`px-4 py-3 text-sm font-medium ${transaction.type === 'DEPOSIT' || transaction.source === 'TRANSFER_IN'
@@ -743,10 +735,10 @@ export default function TreasuryPage() {
                                             {transaction.type === 'DEPOSIT' || transaction.source === 'TRANSFER_IN' ? '+' : '-'}
                                             {formatCurrency(Number(transaction.amount))}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                                        <td className="px-4 py-3 text-sm text-slate-900 dark:text-text-primary dark:text-white">
                                             {formatCurrency(Number(transaction.balanceAfter))}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                        <td className="px-4 py-3 text-sm text-slate-500 dark:text-text-tertiary">
                                             {transaction.description || '-'}
                                         </td>
                                     </tr>
@@ -757,61 +749,80 @@ export default function TreasuryPage() {
 
                     {/* Pagination */}
                     {transactionsData?.pagination && transactionsData.pagination.pages > 1 && (
-                        <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
-                            <p className="text-sm text-gray-500">
-                                صفحة {transactionsData.pagination.page} من {transactionsData.pagination.pages}
-                            </p>
-                            <div className="flex gap-2">
+                        <div className="bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-border-primary mt-6 rounded-xl">
+                            <div className="flex-1 flex justify-between sm:hidden">
                                 <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
-                                    className="p-2 border rounded-lg disabled:opacity-50"
+                                    className="relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
                                 >
-                                    <ChevronRight className="w-5 h-5" />
+                                    السابق
                                 </button>
                                 <button
                                     onClick={() => setPage(p => Math.min(transactionsData.pagination.pages, p + 1))}
                                     disabled={page === transactionsData.pagination.pages}
-                                    className="p-2 border rounded-lg disabled:opacity-50"
+                                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
                                 >
-                                    <ChevronLeft className="w-5 h-5" />
+                                    التالي
                                 </button>
+                            </div>
+                            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-sm text-slate-500 dark:text-text-tertiary">
+                                        عرض صفحة <span className="font-bold text-slate-900 dark:text-text-primary">{page}</span> من <span className="font-bold text-slate-900 dark:text-text-primary">{transactionsData.pagination.pages}</span>
+                                    </p>
+                                </div>
+                                <nav className="relative z-0 inline-flex rounded-xl shadow-sm space-x-1 rtl:space-x-reverse" aria-label="Pagination">
+                                    {Array.from({ length: transactionsData.pagination.pages }, (_, i) => (
+                                        <button
+                                            key={i + 1}
+                                            onClick={() => setPage(i + 1)}
+                                            className={`relative inline-flex items-center px-4 py-2 text-sm font-bold rounded-xl transition-all ${page === i + 1
+                                                ? 'z-10 bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none'
+                                                : 'bg-white dark:bg-surface-primary border-2 border-slate-100 dark:border-border-primary text-slate-500 dark:text-text-tertiary hover:bg-slate-50 dark:hover:bg-surface-hover'
+                                                }`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    ))}
+                                </nav>
                             </div>
                         </div>
                     )}
+
                 </div>
             )}
 
             {activeTab === 'treasuries' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {treasuries?.map((treasury: Treasury) => (
-                        <div key={treasury.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                        <div key={treasury.id} className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
                             <div className="flex items-start justify-between">
                                 <div className="flex items-center gap-3">
                                     <TreasuryTypeIcon type={treasury.type} />
                                     <div>
-                                        <h3 className="font-semibold text-gray-900 dark:text-white">{treasury.name}</h3>
-                                        <p className="text-sm text-gray-500">{getTreasuryTypeLabel(treasury.type)}</p>
+                                        <h3 className="font-semibold text-slate-900 dark:text-text-primary dark:text-white">{treasury.name}</h3>
+                                        <p className="text-sm text-slate-500 dark:text-text-tertiary">{getTreasuryTypeLabel(treasury.type)}</p>
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => handleDeleteTreasury(treasury.id)}
-                                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="p-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
                             </div>
                             {treasury.company && (
-                                <p className="text-sm text-gray-500 mt-2">الشركة: {treasury.company.name}</p>
+                                <p className="text-sm text-slate-500 dark:text-text-tertiary mt-2">الشركة: {treasury.company.name}</p>
                             )}
                             {treasury.bankName && (
-                                <p className="text-sm text-gray-500 mt-2">البنك: {treasury.bankName}</p>
+                                <p className="text-sm text-slate-500 dark:text-text-tertiary mt-2">البنك: {treasury.bankName}</p>
                             )}
                             {treasury.accountNumber && (
-                                <p className="text-sm text-gray-500">رقم الحساب: {treasury.accountNumber}</p>
+                                <p className="text-sm text-slate-500 dark:text-text-tertiary">رقم الحساب: {treasury.accountNumber}</p>
                             )}
-                            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <p className="text-sm text-gray-500">الرصيد الحالي</p>
+                            <div className="mt-4 pt-4 border-t border-slate-200 dark:border-border-primary">
+                                <p className="text-sm text-slate-500 dark:text-text-tertiary">الرصيد الحالي</p>
                                 <p className={`text-2xl font-bold ${treasury.balance >= 0 ? 'text-green-600' : 'text-red-600'
                                     }`}>
                                     {formatCurrency(treasury.balance)}
@@ -825,10 +836,10 @@ export default function TreasuryPage() {
             {/* Create Treasury Modal */}
             {showCreateTreasuryModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">إنشاء خزينة جديدة</h3>
-                            <button onClick={() => setShowCreateTreasuryModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                    <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl w-full max-w-md mx-4">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-primary dark:border-border-primary">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary dark:text-white">إنشاء خزينة جديدة</h3>
+                            <button onClick={() => setShowCreateTreasuryModal(false)} className="p-2 hover:bg-slate-100 dark:bg-surface-hover rounded-xl">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -841,7 +852,7 @@ export default function TreasuryPage() {
                                     type="text"
                                     value={treasuryForm.name}
                                     onChange={(e) => setTreasuryForm({ ...treasuryForm, name: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 />
                             </div>
@@ -852,7 +863,7 @@ export default function TreasuryPage() {
                                 <select
                                     value={treasuryForm.type}
                                     onChange={(e) => setTreasuryForm({ ...treasuryForm, type: e.target.value as any })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 >
                                     <option value="GENERAL">خزينة عامة</option>
                                     <option value="COMPANY">خزينة شركة</option>
@@ -867,7 +878,7 @@ export default function TreasuryPage() {
                                     <select
                                         value={treasuryForm.companyId}
                                         onChange={(e) => setTreasuryForm({ ...treasuryForm, companyId: e.target.value })}
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                        className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         required
                                     >
                                         <option value="">اختر الشركة</option>
@@ -887,7 +898,7 @@ export default function TreasuryPage() {
                                             type="text"
                                             value={treasuryForm.bankName}
                                             onChange={(e) => setTreasuryForm({ ...treasuryForm, bankName: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                             required
                                         />
                                     </div>
@@ -899,7 +910,7 @@ export default function TreasuryPage() {
                                             type="text"
                                             value={treasuryForm.accountNumber}
                                             onChange={(e) => setTreasuryForm({ ...treasuryForm, accountNumber: e.target.value })}
-                                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                            className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         />
                                     </div>
                                 </>
@@ -913,21 +924,21 @@ export default function TreasuryPage() {
                                     step="0.01"
                                     value={treasuryForm.openingBalance}
                                     onChange={(e) => setTreasuryForm({ ...treasuryForm, openingBalance: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 />
                             </div>
                             <div className="flex gap-3 pt-4">
                                 <button
                                     type="button"
                                     onClick={() => setShowCreateTreasuryModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    className="flex-1 px-4 py-2 border border-slate-200 dark:border-border-primary text-gray-700 dark:text-text-secondary rounded-xl hover:bg-gray-50 dark:hover:bg-surface-hover outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isCreatingTreasury}
-                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
                                 >
                                     {isCreatingTreasury ? 'جاري الإنشاء...' : 'إنشاء'}
                                 </button>
@@ -940,12 +951,12 @@ export default function TreasuryPage() {
             {/* Transaction Modal */}
             {showTransactionModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl w-full max-w-md mx-4">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-primary dark:border-border-primary">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary dark:text-white">
                                 {transactionType === 'DEPOSIT' ? 'إيداع مبلغ' : 'سحب مبلغ'}
                             </h3>
-                            <button onClick={() => setShowTransactionModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                            <button onClick={() => setShowTransactionModal(false)} className="p-2 hover:bg-slate-100 dark:bg-surface-hover rounded-xl">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -957,7 +968,7 @@ export default function TreasuryPage() {
                                 <select
                                     value={transactionForm.treasuryId}
                                     onChange={(e) => setTransactionForm({ ...transactionForm, treasuryId: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 >
                                     <option value="">اختر الخزينة</option>
@@ -976,7 +987,7 @@ export default function TreasuryPage() {
                                     min="0.01"
                                     value={transactionForm.amount}
                                     onChange={(e) => setTransactionForm({ ...transactionForm, amount: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 />
                             </div>
@@ -987,7 +998,7 @@ export default function TreasuryPage() {
                                 <textarea
                                     value={transactionForm.description}
                                     onChange={(e) => setTransactionForm({ ...transactionForm, description: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     rows={3}
                                 />
                             </div>
@@ -995,14 +1006,14 @@ export default function TreasuryPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowTransactionModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    className="flex-1 px-4 py-2 border border-slate-200 dark:border-border-primary text-gray-700 dark:text-text-secondary rounded-xl hover:bg-gray-50 dark:hover:bg-surface-hover outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isCreatingTransaction}
-                                    className={`flex-1 px-4 py-2 text-white rounded-lg disabled:opacity-50 ${transactionType === 'DEPOSIT'
+                                    className={`flex-1 px-4 py-2 text-white rounded-xl disabled:opacity-50 ${transactionType === 'DEPOSIT'
                                         ? 'bg-green-600 hover:bg-green-700'
                                         : 'bg-red-600 hover:bg-red-700'
                                         }`}
@@ -1018,10 +1029,10 @@ export default function TreasuryPage() {
             {/* Transfer Modal */}
             {showTransferModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4">
-                        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">تحويل بين الخزائن</h3>
-                            <button onClick={() => setShowTransferModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                    <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl w-full max-w-md mx-4">
+                        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-border-primary dark:border-border-primary">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-text-primary dark:text-white">تحويل بين الخزائن</h3>
+                            <button onClick={() => setShowTransferModal(false)} className="p-2 hover:bg-slate-100 dark:bg-surface-hover rounded-xl">
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -1033,7 +1044,7 @@ export default function TreasuryPage() {
                                 <select
                                     value={transferForm.fromTreasuryId}
                                     onChange={(e) => setTransferForm({ ...transferForm, fromTreasuryId: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 >
                                     <option value="">اختر الخزينة</option>
@@ -1049,7 +1060,7 @@ export default function TreasuryPage() {
                                 <select
                                     value={transferForm.toTreasuryId}
                                     onChange={(e) => setTransferForm({ ...transferForm, toTreasuryId: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 >
                                     <option value="">اختر الخزينة</option>
@@ -1068,7 +1079,7 @@ export default function TreasuryPage() {
                                     min="0.01"
                                     value={transferForm.amount}
                                     onChange={(e) => setTransferForm({ ...transferForm, amount: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     required
                                 />
                             </div>
@@ -1079,7 +1090,7 @@ export default function TreasuryPage() {
                                 <textarea
                                     value={transferForm.description}
                                     onChange={(e) => setTransferForm({ ...transferForm, description: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                    className="w-full px-3 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     rows={3}
                                 />
                             </div>
@@ -1087,14 +1098,14 @@ export default function TreasuryPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowTransferModal(false)}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                    className="flex-1 px-4 py-2 border border-slate-200 dark:border-border-primary text-gray-700 dark:text-text-secondary rounded-xl hover:bg-gray-50 dark:hover:bg-surface-hover outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 >
                                     إلغاء
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isTransferring}
-                                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                                    className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-xl hover:bg-purple-700 disabled:opacity-50"
                                 >
                                     {isTransferring ? 'جاري التحويل...' : 'تحويل'}
                                 </button>

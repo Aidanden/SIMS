@@ -47,8 +47,8 @@ import {
     CircleDollarSign,
     CreditCard,
     TrendingUp,
-    Printer,
-    BarChart3 as LucideBarChart // Renamed to avoid confusion with BarChart from recharts
+    FileText as PrinterIcon,
+    BarChart3 as LucideBarChart
 } from 'lucide-react';
 import {
     BarChart,
@@ -74,12 +74,12 @@ interface MainStatCardProps {
 
 const MainStatCard = ({ title, value, subtitle, icon: Icon, iconBgColor }: MainStatCardProps) => {
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-blue-100 p-6 hover:shadow-md hover:border-blue-200 transition-all duration-300">
+        <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-blue-100 dark:border-border-primary p-6 hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800/30 transition-all duration-300">
             <div className="flex items-start justify-between">
                 <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-                    <p className="text-2xl font-bold text-slate-800">{value}</p>
-                    {subtitle && <p className="text-xs text-slate-400 mt-1">{subtitle}</p>}
+                    <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary mb-1">{title}</p>
+                    <p className="text-2xl font-bold text-slate-800 dark:text-text-primary">{value}</p>
+                    {subtitle && <p className="text-xs text-slate-400 dark:text-text-muted mt-1">{subtitle}</p>}
                 </div>
                 <div className={`w-14 h-14 ${iconBgColor} rounded-xl flex items-center justify-center shadow-sm`}>
                     <Icon className="w-7 h-7 text-white" />
@@ -125,7 +125,7 @@ export default function PayrollPage() {
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
     const [selectedEmployees, setSelectedEmployees] = useState<number[]>([]);
-    
+
     // Print state
     const printRef = useRef<HTMLDivElement>(null);
     const bonusesPrintRef = useRef<HTMLDivElement>(null);
@@ -140,6 +140,17 @@ export default function PayrollPage() {
     const [bonusEmployeeFilter, setBonusEmployeeFilter] = useState<number | undefined>();
     const [statementEmployeeFilter, setStatementEmployeeFilter] = useState<number | undefined>();
     const [statsYear, setStatsYear] = useState(currentDate.getFullYear());
+
+    // Pagination state
+    const itemsPerPage = 10;
+    const [employeesPage, setEmployeesPage] = useState(1);
+    const [salariesPage, setSalariesPage] = useState(1);
+    const [bonusesPage, setBonusesPage] = useState(1);
+
+    // Reset pages when filters change
+    React.useEffect(() => setEmployeesPage(1), [searchTerm, selectedCompanyId]);
+    React.useEffect(() => setSalariesPage(1), [salaryMonth, salaryYear, statementEmployeeFilter]);
+    React.useEffect(() => setBonusesPage(1), [bonusMonth, bonusYear, bonusTypeFilter, bonusEmployeeFilter]);
 
     // Form state
     const [employeeForm, setEmployeeForm] = useState({
@@ -212,6 +223,18 @@ export default function PayrollPage() {
     const employees = employeesData?.data || [];
     const allSalaryPayments = salaryData?.data || [];
     const bonuses = bonusesData?.data || [];
+
+    // Paginated Data
+    const paginatedEmployees = React.useMemo(() => {
+        const start = (employeesPage - 1) * itemsPerPage;
+        return employees.slice(start, start + itemsPerPage);
+    }, [employees, employeesPage]);
+
+    const paginatedBonuses = React.useMemo(() => {
+        const start = (bonusesPage - 1) * itemsPerPage;
+        return bonuses.slice(start, start + itemsPerPage);
+    }, [bonuses, bonusesPage]);
+
     const treasuries = treasuriesData || [];
     const companies = companiesData?.data?.companies || [];
     const stats = statsData?.data;
@@ -222,6 +245,11 @@ export default function PayrollPage() {
         if (!statementEmployeeFilter) return allSalaryPayments;
         return allSalaryPayments.filter(payment => payment.employeeId === statementEmployeeFilter);
     }, [allSalaryPayments, statementEmployeeFilter]);
+
+    const paginatedSalaries = React.useMemo(() => {
+        const start = (salariesPage - 1) * itemsPerPage;
+        return salaryPayments.slice(start, start + itemsPerPage);
+    }, [salaryPayments, salariesPage]);
 
     // تحديد اسم الشركة/الشركات واسم المستخدم للطباعة
     const getCompanyInfo = () => {
@@ -453,7 +481,7 @@ export default function PayrollPage() {
             setSelectedEmployees([]);
             resetPayForm();
             refetchEmployees();
-            alert(`تم صرف ${result.data.totalPaid} مرتب${result.data.totalFailed > 0 ? ` وفشل ${result.data.totalFailed}` : ''}`);
+            alert(`تم صرف ${result.data.totalPaid} مرتب${result.data.totalFailed> 0 ? ` وفشل ${result.data.totalFailed}` : ''}`);
         } catch (error: any) {
             alert(error.data?.message || 'حدث خطأ أثناء صرف المرتبات');
         }
@@ -582,85 +610,87 @@ export default function PayrollPage() {
     };
 
     return (
-        <div className="p-6 bg-gray-50 min-h-screen" dir="rtl">
+        <div className="p-6 bg-slate-50 dark:bg-surface-secondary min-h-screen" dir="rtl">
             {/* Header */}
             <div className="mb-6">
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">💰 إدارة المرتبات</h1>
-                <p className="text-gray-600">إدارة الموظفين وصرف المرتبات والمكافآت</p>
+                <h1 className="text-3xl font-bold text-gray-800 dark:text-text-primary mb-2">💰 إدارة المرتبات</h1>
+                <p className="text-slate-600 dark:text-text-secondary">إدارة الموظفين وصرف المرتبات والمكافآت</p>
             </div>
 
             {/* Company Filter */}
-            <div className="mb-6 flex flex-wrap gap-4 items-center">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">الشركة</label>
-                    <select
-                        value={selectedCompanyId || ''}
-                        onChange={(e) => setSelectedCompanyId(e.target.value ? parseInt(e.target.value) : undefined)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="">جميع الشركات</option>
-                        {companies.map(company => (
-                            <option key={company.id} value={company.id}>{company.name}</option>
-                        ))}
-                    </select>
+            <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary p-6 mb-6">
+                <div className="flex flex-wrap gap-4 items-center">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2 mr-3 ">الشركة</label>
+                        <select
+                            value={selectedCompanyId || ''}
+                            onChange={(e) => setSelectedCompanyId(e.target.value ? parseInt(e.target.value) : undefined)}
+                            className="px-4 py-2.5 bg-white dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl text-slate-800 dark:text-text-primary font-medium outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                        >
+                            <option value="">جميع الشركات</option>
+                            {companies.map(company => (
+                                <option key={company.id} value={company.id}>{company.name}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
 
             {/* Stats Cards */}
-            {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <MainStatCard
-                        title="الموظفين النشطين"
-                        value={stats.totalActiveEmployees.toString()}
-                        icon={Users}
-                        iconBgColor="bg-blue-500"
-                    />
-                    <MainStatCard
-                        title="مرتبات هذا الشهر"
-                        value={formatCurrency(stats.thisMonth.totalAmount)}
-                        subtitle={`${stats.thisMonth.salariesPaid} موظف`}
-                        icon={Calendar}
-                        iconBgColor="bg-green-500"
-                    />
-                    <MainStatCard
-                        title="إجمالي هذا العام"
-                        value={formatCurrency(stats.thisYear.grandTotal)}
-                        icon={BarChart3}
-                        iconBgColor="bg-purple-500"
-                    />
-                    <MainStatCard
-                        title="مكافآت هذا العام"
-                        value={formatCurrency(stats.thisYear.totalBonuses)}
-                        subtitle={`${stats.thisYear.bonusesPaid} مكافأة`}
-                        icon={Calendar} // Replaced Gift
-                        iconBgColor="bg-orange-500"
-                    />
-                </div>
-            )}
+            {
+                stats && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <MainStatCard
+                            title="الموظفين النشطين"
+                            value={stats.totalActiveEmployees.toString()}
+                            icon={Users}
+                            iconBgColor="bg-blue-500"
+                        />
+                        <MainStatCard
+                            title="مرتبات هذا الشهر"
+                            value={formatCurrency(stats.thisMonth.totalAmount)}
+                            subtitle={`${stats.thisMonth.salariesPaid} موظف`}
+                            icon={Calendar}
+                            iconBgColor="bg-green-500"
+                        />
+                        <MainStatCard
+                            title="إجمالي هذا العام"
+                            value={formatCurrency(stats.thisYear.grandTotal)}
+                            icon={BarChart3}
+                            iconBgColor="bg-purple-500"
+                        />
+                        <MainStatCard
+                            title="مكافآت هذا العام"
+                            value={formatCurrency(stats.thisYear.totalBonuses)}
+                            subtitle={`${stats.thisYear.bonusesPaid} مكافأة`}
+                            icon={Calendar} // Replaced Gift
+                            iconBgColor="bg-orange-500"
+                        />
+                    </div>
+                )
+            }
 
             {/* Tabs */}
-            <div className="bg-white rounded-xl shadow-md mb-6">
-                <div className="border-b border-gray-200">
-                    <div className="flex">
-                        {[
-                            { key: 'employees', label: '👥 الموظفين', icon: '👥' },
-                            { key: 'salaries', label: '💵 سجل المرتبات', icon: '💵' },
-                            { key: 'bonuses', label: '🎁 المكافآت', icon: '🎁' },
-                            { key: 'stats', label: '📊 الإحصائيات', icon: '📊' }
-                        ].map(tab => (
-                            <button
-                                key={tab.key}
-                                onClick={() => setActiveTab(tab.key as any)}
-                                className={`px-6 py-4 font-medium transition-colors ${activeTab === tab.key
-                                    ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                    }`}
-                            >
-                                {tab.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
+            <div className="bg-white dark:bg-surface-primary rounded-3xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+                <nav className="flex gap-2 p-2 border-b border-slate-100 dark:border-border-primary">
+                    {[
+                        { key: 'employees', label: '👥 الموظفين', icon: '👥' },
+                        { key: 'salaries', label: '💵 سجل المرتبات', icon: '💵' },
+                        { key: 'bonuses', label: '🎁 المكافآت', icon: '🎁' },
+                        { key: 'stats', label: '📊 الإحصائيات', icon: '📊' }
+                    ].map(tab => (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key as any)}
+                            className={`flex-1 py-3 px-6 rounded-xl font-bold text-sm transition-all ${activeTab === tab.key
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none'
+                                : 'text-slate-600 dark:text-text-secondary hover:bg-slate-50 dark:hover:bg-surface-hover hover:text-blue-600 dark:hover:text-blue-400'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </nav>
 
                 {/* Tab Content */}
                 <div className="p-6">
@@ -675,14 +705,14 @@ export default function PayrollPage() {
                                         placeholder="🔍 بحث عن موظف..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="px-4 py-2 border border-gray-300 rounded-lg w-64"
+                                        className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl w-64 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                     />
                                 </div>
                                 <div className="flex gap-3">
-                                    {selectedEmployees.length > 0 && (
+                                    {selectedEmployees.length> 0 && (
                                         <button
                                             onClick={() => setShowBatchPayModal(true)}
-                                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2"
+                                            className="px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 flex items-center gap-2"
                                         >
                                             💰 صرف مرتبات ({selectedEmployees.length})
                                         </button>
@@ -693,7 +723,7 @@ export default function PayrollPage() {
                                             setEditingEmployee(null);
                                             setShowEmployeeModal(true);
                                         }}
-                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 flex items-center gap-2"
                                     >
                                         ➕ إضافة موظف
                                     </button>
@@ -704,30 +734,30 @@ export default function PayrollPage() {
                             {employeesLoading ? (
                                 <div className="text-center py-10">جاري التحميل...</div>
                             ) : employees.length === 0 ? (
-                                <div className="text-center py-10 text-gray-500">لا يوجد موظفين</div>
+                                <div className="text-center py-10 text-slate-500 dark:text-text-tertiary">لا يوجد موظفين</div>
                             ) : (
                                 <div className="overflow-x-auto">
                                     <table className="w-full">
-                                        <thead className="bg-gray-50">
+                                        <thead className="bg-slate-50 dark:bg-surface-secondary">
                                             <tr>
                                                 <th className="px-4 py-3 text-right">
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedEmployees.length === employees.length}
                                                         onChange={selectAllEmployees}
-                                                        className="w-4 h-4"
+                                                        className="w-4 h-4 rounded border-slate-300 dark:border-border-primary"
                                                     />
                                                 </th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الاسم</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">المسمى الوظيفي</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الراتب الأساسي</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الشركة</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الإجراءات</th>
+                                                <th className="px-4 py-3 text-right text-sm font-black text-slate-600 dark:text-text-secondary uppercase tracking-wide">الاسم</th>
+                                                <th className="px-4 py-3 text-right text-sm font-black text-slate-600 dark:text-text-secondary uppercase tracking-wide">المسمى الوظيفي</th>
+                                                <th className="px-4 py-3 text-right text-sm font-black text-slate-600 dark:text-text-secondary uppercase tracking-wide">الراتب الأساسي</th>
+                                                <th className="px-4 py-3 text-right text-sm font-black text-slate-600 dark:text-text-secondary uppercase tracking-wide">الشركة</th>
+                                                <th className="px-4 py-3 text-right text-sm font-black text-slate-600 dark:text-text-secondary uppercase tracking-wide">الإجراءات</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {employees.map(employee => (
-                                                <tr key={employee.id} className="hover:bg-gray-50">
+                                        <tbody className="divide-y divide-slate-100 dark:divide-border-primary">
+                                            {paginatedEmployees.map(employee => (
+                                                <tr key={employee.id} className="hover:bg-slate-50 dark:hover:bg-surface-hover transition-colors">
                                                     <td className="px-4 py-3">
                                                         <input
                                                             type="checkbox"
@@ -738,13 +768,13 @@ export default function PayrollPage() {
                                                     </td>
                                                     <td className="px-4 py-3">
                                                         <div>
-                                                            <p className="font-medium text-gray-900">{employee.name}</p>
-                                                            {employee.phone && <p className="text-xs text-gray-500">{employee.phone}</p>}
+                                                            <p className="font-medium text-gray-900 dark:text-text-primary">{employee.name}</p>
+                                                            {employee.phone && <p className="text-xs text-slate-500 dark:text-text-tertiary">{employee.phone}</p>}
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-3 text-gray-600">{employee.jobTitle || '-'}</td>
-                                                    <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(employee.baseSalary)}</td>
-                                                    <td className="px-4 py-3 text-gray-600">{employee.company?.name}</td>
+                                                    <td className="px-4 py-3 text-slate-600 dark:text-text-secondary">{employee.jobTitle || '-'}</td>
+                                                    <td className="px-4 py-3 font-semibold text-green-600 dark:text-green-400">{formatCurrency(employee.baseSalary)}</td>
+                                                    <td className="px-4 py-3 text-slate-600 dark:text-text-secondary">{employee.company?.name}</td>
                                                     <td className="px-4 py-3">
                                                         <div className="flex gap-2">
                                                             <button
@@ -797,6 +827,50 @@ export default function PayrollPage() {
                                     </table>
                                 </div>
                             )}
+
+                            {/* Pagination for Employees */}
+                            {employees.length> itemsPerPage && (
+                                <div className="bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-border-primary mt-6 rounded-xl">
+                                    <div className="flex-1 flex justify-between sm:hidden">
+                                        <button
+                                            onClick={() => setEmployeesPage(p => Math.max(1, p - 1))}
+                                            disabled={employeesPage === 1}
+                                            className="relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                        >
+                                            السابق
+                                        </button>
+                                        <button
+                                            onClick={() => setEmployeesPage(p => Math.min(Math.ceil(employees.length / itemsPerPage), p + 1))}
+                                            disabled={employeesPage === Math.ceil(employees.length / itemsPerPage)}
+                                            className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                        >
+                                            التالي
+                                        </button>
+                                    </div>
+                                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                        <div>
+                                            <p className="text-sm text-slate-500 dark:text-text-tertiary">
+                                                عرض صفحة <span className="font-bold text-slate-900 dark:text-text-primary">{employeesPage}</span> من <span className="font-bold text-slate-900 dark:text-text-primary">{Math.ceil(employees.length / itemsPerPage)}</span>
+                                            </p>
+                                        </div>
+                                        <nav className="relative z-0 inline-flex rounded-xl shadow-sm space-x-1 rtl:space-x-reverse" aria-label="Pagination">
+                                            {Array.from({ length: Math.ceil(employees.length / itemsPerPage) }, (_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setEmployeesPage(i + 1)}
+                                                    className={`relative inline-flex items-center px-4 py-2 text-sm font-black rounded-xl transition-all ${employeesPage === i + 1
+                                                        ? 'z-10 bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none'
+                                                        : 'bg-white dark:bg-surface-primary border-2 border-slate-100 dark:border-border-primary text-slate-500 dark:text-text-tertiary hover:bg-slate-50 dark:hover:bg-surface-hover'
+                                                        }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     )}
 
@@ -804,14 +878,14 @@ export default function PayrollPage() {
                     {activeTab === 'salaries' && (
                         <div>
                             {/* Filters and Print Button */}
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                            <div className="bg-white dark:bg-surface-primary p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary mb-6">
                                 <div className="flex flex-wrap gap-4 items-end">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشهر</label>
                                         <select
                                             value={salaryMonth}
                                             onChange={(e) => setSalaryMonth(parseInt(e.target.value))}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             {arabicMonths.slice(1).map((month, idx) => (
                                                 <option key={idx + 1} value={idx + 1}>{month}</option>
@@ -819,11 +893,11 @@ export default function PayrollPage() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">السنة</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السنة</label>
                                         <select
                                             value={salaryYear}
                                             onChange={(e) => setSalaryYear(parseInt(e.target.value))}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             {[2022, 2023, 2024, 2025, 2026, 2027].map(year => (
                                                 <option key={year} value={year}>{year}</option>
@@ -831,11 +905,11 @@ export default function PayrollPage() {
                                         </select>
                                     </div>
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الموظف</label>
                                         <select
                                             value={statementEmployeeFilter || ''}
                                             onChange={(e) => setStatementEmployeeFilter(e.target.value ? parseInt(e.target.value) : undefined)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             <option value="">جميع الموظفين</option>
                                             {employees.map(emp => (
@@ -846,10 +920,10 @@ export default function PayrollPage() {
                                     <button
                                         onClick={handlePrintMonthlyReport}
                                         disabled={salaryPayments.length === 0}
-                                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="طباعة التقرير الشهري"
                                     >
-                                        <Printer className="w-4 h-4" />
+                                        <PrinterIcon className="w-4 h-4" />
                                         طباعة التقرير
                                     </button>
                                 </div>
@@ -857,44 +931,93 @@ export default function PayrollPage() {
 
                             {/* Salary Payments Table */}
                             {salaryLoading ? (
-                                <div className="text-center py-10">جاري التحميل...</div>
+                                <div className="text-center py-10 bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary text-slate-600 dark:text-text-secondary">جاري التحميل...</div>
                             ) : salaryPayments.length === 0 ? (
-                                <div className="text-center py-10 text-gray-500">لا يوجد مرتبات مصروفة لهذا الشهر</div>
+                                <div className="text-center py-10 text-slate-500 dark:text-text-tertiary bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary">
+                                    <p className="text-lg font-medium mb-2">لا يوجد مرتبات مصروفة لهذا الشهر</p>
+                                    <p className="text-sm">اختر الفترة المطلوبة لعرض البيانات</p>
+                                </div>
                             ) : (
-                                <div className="overflow-x-auto">
-                                    <table className="w-full">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">رقم الإيصال</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الموظف</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">المبلغ</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">تاريخ الصرف</th>
-                                                <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">ملاحظات</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200">
-                                            {salaryPayments.map(payment => (
-                                                <tr key={payment.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-3 font-mono text-sm text-gray-600">{payment.receiptNumber}</td>
-                                                    <td className="px-4 py-3">
-                                                        <div>
-                                                            <p className="font-medium text-gray-900">{payment.employee?.name}</p>
-                                                            {payment.employee?.jobTitle && (
-                                                                <p className="text-xs text-gray-500">{payment.employee.jobTitle}</p>
-                                                            )}
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(payment.amount)}</td>
-                                                    <td className="px-4 py-3 text-gray-600">
-                                                        {new Date(payment.paymentDate).toLocaleDateString('ar-LY')}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-500 text-sm">{payment.notes || '-'}</td>
+                                <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead className="bg-gray-50 dark:bg-surface-secondary">
+                                                <tr>
+                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">رقم الإيصال</th>
+                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">الموظف</th>
+                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">المبلغ</th>
+                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">تاريخ الصرف</th>
+                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">ملاحظات</th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-200 dark:divide-border-primary">
+                                                {paginatedSalaries.map(payment => (
+                                                    <tr key={payment.id} className="hover:bg-gray-50 dark:hover:bg-surface-hover">
+                                                        <td className="px-4 py-3 font-mono text-sm text-slate-600 dark:text-text-secondary">{payment.receiptNumber}</td>
+                                                        <td className="px-4 py-3">
+                                                            <div>
+                                                                <p className="font-medium text-gray-900 dark:text-text-primary">{payment.employee?.name}</p>
+                                                                {payment.employee?.jobTitle && (
+                                                                    <p className="text-xs text-slate-500 dark:text-text-tertiary">{payment.employee.jobTitle}</p>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-4 py-3 font-semibold text-green-600 dark:text-green-400">{formatCurrency(payment.amount)}</td>
+                                                        <td className="px-4 py-3 text-slate-600 dark:text-text-secondary">
+                                                            {new Date(payment.paymentDate).toLocaleDateString('ar-LY')}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">{payment.notes || '-'}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {/* Summary for Salaries */}
                                 </div>
                             )}
+                            {/* Pagination for Salaries */}
+                            {salaryPayments.length> itemsPerPage && (
+                                <div className="bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-border-primary mt-6 rounded-xl">
+                                    <div className="flex-1 flex justify-between sm:hidden">
+                                        <button
+                                            onClick={() => setSalariesPage(p => Math.max(1, p - 1))}
+                                            disabled={salariesPage === 1}
+                                            className="relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                        >
+                                            السابق
+                                        </button>
+                                        <button
+                                            onClick={() => setSalariesPage(p => Math.min(Math.ceil(salaryPayments.length / itemsPerPage), p + 1))}
+                                            disabled={salariesPage === Math.ceil(salaryPayments.length / itemsPerPage)}
+                                            className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                        >
+                                            التالي
+                                        </button>
+                                    </div>
+                                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                        <div>
+                                            <p className="text-sm text-slate-500 dark:text-text-tertiary">
+                                                عرض صفحة <span className="font-bold text-slate-900 dark:text-text-primary">{salariesPage}</span> من <span className="font-bold text-slate-900 dark:text-text-primary">{Math.ceil(salaryPayments.length / itemsPerPage)}</span>
+                                            </p>
+                                        </div>
+                                        <nav className="relative z-0 inline-flex rounded-xl shadow-sm space-x-1 rtl:space-x-reverse" aria-label="Pagination">
+                                            {Array.from({ length: Math.ceil(salaryPayments.length / itemsPerPage) }, (_, i) => (
+                                                <button
+                                                    key={i + 1}
+                                                    onClick={() => setSalariesPage(i + 1)}
+                                                    className={`relative inline-flex items-center px-4 py-2 text-sm font-black rounded-xl transition-all ${salariesPage === i + 1
+                                                        ? 'z-10 bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none'
+                                                        : 'bg-white dark:bg-surface-primary border-2 border-slate-100 dark:border-border-primary text-slate-500 dark:text-text-tertiary hover:bg-slate-50 dark:hover:bg-surface-hover'
+                                                        }`}
+                                                >
+                                                    {i + 1}
+                                                </button>
+                                            ))}
+                                        </nav>
+                                    </div>
+                                </div>
+                            )}
+
                         </div>
                     )}
 
@@ -902,14 +1025,14 @@ export default function PayrollPage() {
                     {activeTab === 'bonuses' && (
                         <div>
                             {/* Filters for Bonuses */}
-                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
+                            <div className="bg-white dark:bg-surface-primary p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary mb-6">
                                 <div className="flex flex-wrap gap-4 items-end">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشهر</label>
                                         <select
                                             value={bonusMonth}
                                             onChange={(e) => setBonusMonth(parseInt(e.target.value))}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             {arabicMonths.slice(1).map((month, idx) => (
                                                 <option key={idx + 1} value={idx + 1}>{month}</option>
@@ -917,11 +1040,11 @@ export default function PayrollPage() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">السنة</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السنة</label>
                                         <select
                                             value={bonusYear}
                                             onChange={(e) => setBonusYear(parseInt(e.target.value))}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             {[2022, 2023, 2024, 2025, 2026, 2027].map(year => (
                                                 <option key={year} value={year}>{year}</option>
@@ -929,11 +1052,11 @@ export default function PayrollPage() {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">نوع المكافأة</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">نوع المكافأة</label>
                                         <select
                                             value={bonusTypeFilter}
                                             onChange={(e) => setBonusTypeFilter(e.target.value)}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             <option value="">جميع الأنواع</option>
                                             {bonusTypes.map(type => (
@@ -942,11 +1065,11 @@ export default function PayrollPage() {
                                         </select>
                                     </div>
                                     <div className="flex-1 min-w-[200px]">
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">الموظف</label>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الموظف</label>
                                         <select
                                             value={bonusEmployeeFilter || ''}
                                             onChange={(e) => setBonusEmployeeFilter(e.target.value ? parseInt(e.target.value) : undefined)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         >
                                             <option value="">جميع الموظفين</option>
                                             {employees.map(emp => (
@@ -957,93 +1080,139 @@ export default function PayrollPage() {
                                     <button
                                         onClick={handlePrintBonusesReport}
                                         disabled={bonuses.length === 0}
-                                        className="flex items-center gap-2 px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex items-center gap-2 px-6 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                         title="طباعة تقرير المكافآت"
                                     >
-                                        <Printer className="w-4 h-4" />
+                                        <PrinterIcon className="w-4 h-4" />
                                         طباعة التقرير
                                     </button>
                                 </div>
                             </div>
-                            
+
                             {/* Bonuses Table */}
                             {bonusesLoading ? (
-                                <div className="text-center py-10 bg-white rounded-lg shadow-sm border border-gray-200">جاري التحميل...</div>
+                                <div className="text-center py-10 bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary text-slate-600 dark:text-text-secondary">جاري التحميل...</div>
                             ) : bonuses.length === 0 ? (
-                                <div className="text-center py-10 text-gray-500 bg-white rounded-lg shadow-sm border border-gray-200">
+                                <div className="text-center py-10 text-slate-500 dark:text-text-tertiary bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary">
                                     <p className="text-lg font-medium mb-2">لا توجد مكافآت مسجلة</p>
                                     <p className="text-sm">اختر الفترة والفلاتر المطلوبة لعرض البيانات</p>
                                 </div>
                             ) : (
-                                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full">
-                                            <thead className="bg-orange-50">
-                                                <tr>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">رقم الإيصال</th>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">الموظف</th>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">النوع</th>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">المبلغ</th>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">التاريخ</th>
-                                                    <th className="px-4 py-3 text-right text-sm font-semibold text-gray-600">السبب</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-gray-200">
-                                                {bonuses.map(bonus => (
-                                                    <tr key={bonus.id} className="hover:bg-orange-50/30">
-                                                        <td className="px-4 py-3 font-mono text-sm text-gray-600">{bonus.receiptNumber}</td>
-                                                        <td className="px-4 py-3">
-                                                            <div>
-                                                                <p className="font-medium text-gray-900">{bonus.employee?.name}</p>
-                                                                {bonus.employee?.jobTitle && (
-                                                                    <p className="text-xs text-gray-500">{bonus.employee.jobTitle}</p>
-                                                                )}
-                                                            </div>
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                                                                bonus.type === 'BONUS' ? 'bg-green-100 text-green-800' :
-                                                                bonus.type === 'RAISE' ? 'bg-blue-100 text-blue-800' :
-                                                                bonus.type === 'INCENTIVE' ? 'bg-purple-100 text-purple-800' :
-                                                                'bg-amber-100 text-amber-800'
-                                                            }`}>
-                                                                {bonus.typeName}
-                                                            </span>
-                                                        </td>
-                                                        <td className="px-4 py-3 font-semibold text-orange-600">{formatCurrency(bonus.amount)}</td>
-                                                        <td className="px-4 py-3 text-gray-600">
-                                                            {new Date(bonus.paymentDate).toLocaleDateString('ar-LY')}
-                                                        </td>
-                                                        <td className="px-4 py-3 text-gray-500 text-sm">{bonus.reason || '-'}</td>
+                                <>
+                                    <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+                                        <div className="overflow-x-auto">
+                                            <table className="w-full">
+                                                <thead className="bg-orange-50 dark:bg-orange-900/20">
+                                                    <tr>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">رقم الإيصال</th>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">الموظف</th>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">النوع</th>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">المبلغ</th>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">التاريخ</th>
+                                                        <th className="px-4 py-3 text-right text-sm font-semibold text-slate-600 dark:text-text-secondary">السبب</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    {/* Summary */}
-                                    <div className="bg-orange-50 px-6 py-4 border-t border-gray-200">
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-sm font-medium text-gray-700">الإجمالي الكلي:</span>
-                                            <span className="text-lg font-bold text-orange-600">
-                                                {formatCurrency(bonuses.reduce((sum, b) => sum + Number(b.amount), 0))}
-                                            </span>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200 dark:divide-border-primary">
+                                                    {paginatedBonuses.map(bonus => (
+                                                        <tr key={bonus.id} className="hover:bg-orange-50/30 dark:hover:bg-orange-900/10">
+                                                            <td className="px-4 py-3 font-mono text-sm text-slate-600 dark:text-text-secondary">{bonus.receiptNumber}</td>
+                                                            <td className="px-4 py-3">
+                                                                <div>
+                                                                    <p className="font-medium text-gray-900 dark:text-text-primary">{bonus.employee?.name}</p>
+                                                                    {bonus.employee?.jobTitle && (
+                                                                        <p className="text-xs text-slate-500 dark:text-text-tertiary">{bonus.employee.jobTitle}</p>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-3">
+                                                                <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${bonus.type === 'BONUS' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400' :
+                                                                    bonus.type === 'RAISE' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-400' :
+                                                                        bonus.type === 'INCENTIVE' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-400' :
+                                                                            'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-400'
+                                                                    }`}>
+                                                                    {bonus.typeName}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-4 py-3 font-semibold text-orange-600 dark:text-orange-400">{formatCurrency(bonus.amount)}</td>
+                                                            <td className="px-4 py-3 text-slate-600 dark:text-text-secondary">
+                                                                {new Date(bonus.paymentDate).toLocaleDateString('ar-LY')}
+                                                            </td>
+                                                            <td className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">{bonus.reason || '-'}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+
+                                        </div>
+                                        {/* Summary */}
+                                        <div className="bg-orange-50 dark:bg-orange-900/20 px-6 py-4 border-t border-slate-200 dark:border-border-primary">
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-sm font-medium text-gray-700 dark:text-text-secondary">الإجمالي الكلي:</span>
+                                                <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                                                    {formatCurrency(bonuses.reduce((sum, b) => sum + Number(b.amount), 0))}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+
+                                    {/* Pagination for Bonuses */}
+                                    {bonuses.length> itemsPerPage && (
+                                        <div className="bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-border-primary mt-6 rounded-xl">
+                                            <div className="flex-1 flex justify-between sm:hidden">
+                                                <button
+                                                    onClick={() => setBonusesPage(p => Math.max(1, p - 1))}
+                                                    disabled={bonusesPage === 1}
+                                                    className="relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                                >
+                                                    السابق
+                                                </button>
+                                                <button
+                                                    onClick={() => setBonusesPage(p => Math.min(Math.ceil(bonuses.length / itemsPerPage), p + 1))}
+                                                    disabled={bonusesPage === Math.ceil(bonuses.length / itemsPerPage)}
+                                                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                                                >
+                                                    التالي
+                                                </button>
+                                            </div>
+                                            <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                                                <div>
+                                                    <p className="text-sm text-slate-500 dark:text-text-tertiary">
+                                                        عرض صفحة <span className="font-bold text-slate-900 dark:text-text-primary">{bonusesPage}</span> من <span className="font-bold text-slate-900 dark:text-text-primary">{Math.ceil(bonuses.length / itemsPerPage)}</span>
+                                                    </p>
+                                                </div>
+                                                <nav className="relative z-0 inline-flex rounded-xl shadow-sm space-x-1 rtl:space-x-reverse" aria-label="Pagination">
+                                                    {Array.from({ length: Math.ceil(bonuses.length / itemsPerPage) }, (_, i) => (
+                                                        <button
+                                                            key={i + 1}
+                                                            onClick={() => setBonusesPage(i + 1)}
+                                                            className={`relative inline-flex items-center px-4 py-2 text-sm font-black rounded-xl transition-all ${bonusesPage === i + 1
+                                                                ? 'z-10 bg-orange-600 text-white shadow-md shadow-orange-200 dark:shadow-none'
+                                                                : 'bg-white dark:bg-surface-primary border-2 border-slate-100 dark:border-border-primary text-slate-500 dark:text-text-tertiary hover:bg-slate-50 dark:hover:bg-surface-hover'
+                                                                }`}
+                                                        >
+                                                            {i + 1}
+                                                        </button>
+                                                    ))}
+                                                </nav>
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             )}
                         </div>
                     )}
+
 
                     {/* Stats Tab */}
                     {activeTab === 'stats' && (
                         <div className="space-y-8 animate-fadeIn">
                             {/* Filters for Stats */}
-                            <div className="flex gap-4 items-center bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                                <label className="text-sm font-medium text-gray-700">السنة:</label>
+                            <div className="flex gap-4 items-center bg-white dark:bg-surface-primary p-4 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary">
+                                <label className="text-sm font-medium text-gray-700 dark:text-text-secondary">السنة:</label>
                                 <select
                                     value={statsYear}
                                     onChange={(e) => setStatsYear(parseInt(e.target.value))}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                 >
                                     {[2022, 2023, 2024, 2025, 2026, 2027].map(year => (
                                         <option key={year} value={year}>{year}</option>
@@ -1052,13 +1221,13 @@ export default function PayrollPage() {
                                 {selectedCompanyId && (
                                     <button
                                         onClick={() => setSelectedCompanyId(undefined)}
-                                        className="text-sm text-blue-600 hover:text-blue-800 underline"
+                                        className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 underline"
                                     >
                                         عرض جميع الشركات
                                     </button>
                                 )}
                             </div>
-                            
+
                             {/* Summary Stats Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-6 text-white shadow-lg">
@@ -1074,51 +1243,51 @@ export default function PayrollPage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                                <div className="bg-white dark:bg-surface-primary border border-slate-100 dark:border-border-primary rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <div className="bg-green-100 p-2 rounded-lg">
-                                            <LucideBarChart className="w-5 h-5 text-green-600" />
+                                        <div className="bg-green-100 dark:bg-green-900/30 p-2 rounded-xl">
+                                            <LucideBarChart className="w-5 h-5 text-green-600 dark:text-green-400" />
                                         </div>
-                                        <h4 className="font-bold text-slate-800">توزيع المصروفات</h4>
+                                        <h4 className="font-bold text-slate-800 dark:text-text-primary">توزيع المصروفات</h4>
                                     </div>
                                     <div className="space-y-4">
                                         <div>
                                             <div className="flex justify-between text-sm mb-1">
-                                                <span className="text-slate-500">المرتبات الأساسية</span>
-                                                <span className="font-bold text-slate-700">{Math.round((stats?.thisYear.totalSalaries || 0) / (stats?.thisYear.grandTotal || 1) * 100)}%</span>
+                                                <span className="text-slate-500 dark:text-text-tertiary">المرتبات الأساسية</span>
+                                                <span className="font-bold text-slate-700 dark:text-text-primary">{Math.round((stats?.thisYear.totalSalaries || 0) / (stats?.thisYear.grandTotal || 1) * 100)}%</span>
                                             </div>
-                                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-slate-100 dark:bg-surface-elevated rounded-full overflow-hidden">
                                                 <div className="h-full bg-blue-500 rounded-full" style={{ width: `${(stats?.thisYear.totalSalaries || 0) / (stats?.thisYear.grandTotal || 1) * 100}%` }}></div>
                                             </div>
                                         </div>
                                         <div>
                                             <div className="flex justify-between text-sm mb-1">
-                                                <span className="text-slate-500">المكافآت والزيادات</span>
-                                                <span className="font-bold text-slate-700">{Math.round((stats?.thisYear.totalBonuses || 0) / (stats?.thisYear.grandTotal || 1) * 100)}%</span>
+                                                <span className="text-slate-500 dark:text-text-tertiary">المكافآت والزيادات</span>
+                                                <span className="font-bold text-slate-700 dark:text-text-primary">{Math.round((stats?.thisYear.totalBonuses || 0) / (stats?.thisYear.grandTotal || 1) * 100)}%</span>
                                             </div>
-                                            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-2 bg-slate-100 dark:bg-surface-elevated rounded-full overflow-hidden">
                                                 <div className="h-full bg-orange-500 rounded-full" style={{ width: `${(stats?.thisYear.totalBonuses || 0) / (stats?.thisYear.grandTotal || 1) * 100}%` }}></div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
+                                <div className="bg-white dark:bg-surface-primary border border-slate-100 dark:border-border-primary rounded-2xl p-6 shadow-sm">
                                     <div className="flex items-center gap-3 mb-4">
-                                        <div className="bg-purple-100 p-2 rounded-lg">
-                                            <Layout className="w-5 h-5 text-purple-600" />
+                                        <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-xl">
+                                            <Layout className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                         </div>
-                                        <h4 className="font-bold text-slate-800">التوزيع حسب الخزينة</h4>
+                                        <h4 className="font-bold text-slate-800 dark:text-text-primary">التوزيع حسب الخزينة</h4>
                                     </div>
                                     <div className="space-y-3">
                                         {stats?.treasuryDistribution.map((t, idx) => (
                                             <div key={idx} className="flex justify-between items-center text-sm">
-                                                <span className="text-slate-600">{t.name}</span>
-                                                <span className="font-bold text-slate-800">{formatCurrency(t.amount)}</span>
+                                                <span className="text-slate-600 dark:text-text-secondary">{t.name}</span>
+                                                <span className="font-bold text-slate-800 dark:text-text-primary">{formatCurrency(t.amount)}</span>
                                             </div>
                                         ))}
                                         {(!stats?.treasuryDistribution || stats.treasuryDistribution.length === 0) && (
-                                            <p className="text-slate-400 text-xs text-center py-4 italic">لا توجد بيانات توزيع</p>
+                                            <p className="text-slate-400 dark:text-text-muted text-xs text-center py-4 italic">لا توجد بيانات توزيع</p>
                                         )}
                                     </div>
                                 </div>
@@ -1126,18 +1295,18 @@ export default function PayrollPage() {
 
                             {/* Charts Section */}
                             <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
-                                <div className="bg-white border border-slate-100 rounded-2xl p-8 shadow-sm">
+                                <div className="bg-white dark:bg-surface-primary border border-slate-100 dark:border-border-primary rounded-2xl p-8 shadow-sm">
                                     <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
                                         <div>
-                                            <h4 className="text-xl font-bold text-slate-800">التحليل الشهري للمصروفات</h4>
-                                            <p className="text-sm text-slate-500">عرض إجمالي المرتبات والمكافآت لكل شهر من السنة الحالية</p>
+                                            <h4 className="text-xl font-bold text-slate-800 dark:text-text-primary">التحليل الشهري للمصروفات</h4>
+                                            <p className="text-sm text-slate-500 dark:text-text-tertiary">عرض إجمالي المرتبات والمكافآت لكل شهر من السنة الحالية</p>
                                         </div>
                                         <div className="flex gap-4">
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-text-tertiary">
                                                 <span className="w-3 h-3 bg-blue-500 rounded-full"></span>
                                                 مرتبات
                                             </div>
-                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                                            <div className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-text-tertiary">
                                                 <span className="w-3 h-3 bg-orange-500 rounded-full"></span>
                                                 مكافآت
                                             </div>
@@ -1146,23 +1315,31 @@ export default function PayrollPage() {
                                     <div className="h-[400px] w-full" dir="ltr">
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={stats?.monthlyBreakdown} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-slate-200 dark:stroke-slate-700" />
                                                 <XAxis
                                                     dataKey="monthName"
                                                     axisLine={false}
                                                     tickLine={false}
                                                     tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                                                    className="dark:[&_text]:fill-slate-400"
                                                     dy={10}
                                                 />
                                                 <YAxis
                                                     axisLine={false}
                                                     tickLine={false}
                                                     tick={{ fill: '#64748b', fontSize: 12, fontWeight: 600 }}
+                                                    className="dark:[&_text]:fill-slate-400"
                                                     tickFormatter={(value) => `${value}`}
                                                 />
                                                 <Tooltip
-                                                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', padding: '12px' }}
-                                                    cursor={{ fill: '#f8fafc' }}
+                                                    contentStyle={{
+                                                        borderRadius: '12px',
+                                                        border: 'none',
+                                                        boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
+                                                        padding: '12px',
+                                                        backgroundColor: 'white'
+                                                    }}
+                                                    cursor={{ fill: 'rgba(0, 0, 0, 0.05)' }}
                                                 />
                                                 <Bar dataKey="salaries" stackId="a" fill="#3b82f6" radius={[0, 0, 0, 0]} barSize={40} />
                                                 <Bar dataKey="bonuses" stackId="a" fill="#f97316" radius={[6, 6, 0, 0]} barSize={40} />
@@ -1177,406 +1354,416 @@ export default function PayrollPage() {
             </div>
 
             {/* Employee Modal */}
-            {showEmployeeModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-                        <div className="bg-blue-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
-                            <h3 className="text-lg font-bold">{editingEmployee ? 'تعديل موظف' : 'إضافة موظف جديد'}</h3>
-                            <button onClick={() => { setShowEmployeeModal(false); setEditingEmployee(null); }} className="text-white hover:text-gray-200">✕</button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            {!selectedCompanyId && !editingEmployee && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">الشركة *</label>
-                                    <select
-                                        value={employeeForm.companyId}
-                                        onChange={(e) => setEmployeeForm({ ...employeeForm, companyId: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                        required
-                                    >
-                                        <option value="">اختر الشركة</option>
-                                        {companies.map(company => (
-                                            <option key={company.id} value={company.id}>{company.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            )}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">الاسم *</label>
-                                <input
-                                    type="text"
-                                    value={employeeForm.name}
-                                    onChange={(e) => setEmployeeForm({ ...employeeForm, name: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
-                                />
+            {
+                showEmployeeModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl max-w-md w-full">
+                            <div className="bg-blue-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                                <h3 className="text-lg font-bold">{editingEmployee ? 'تعديل موظف' : 'إضافة موظف جديد'}</h3>
+                                <button onClick={() => { setShowEmployeeModal(false); setEditingEmployee(null); }} className="text-white hover:text-gray-200 dark:hover:text-gray-300">✕</button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">المسمى الوظيفي</label>
-                                <input
-                                    type="text"
-                                    value={employeeForm.jobTitle}
-                                    onChange={(e) => setEmployeeForm({ ...employeeForm, jobTitle: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="p-6 space-y-4">
+                                {!selectedCompanyId && !editingEmployee && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشركة *</label>
+                                        <select
+                                            value={employeeForm.companyId}
+                                            onChange={(e) => setEmployeeForm({ ...employeeForm, companyId: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                            required
+                                        >
+                                            <option value="">اختر الشركة</option>
+                                            {companies.map(company => (
+                                                <option key={company.id} value={company.id}>{company.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                )}
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">الهاتف</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الاسم *</label>
                                     <input
-                                        type="tel"
-                                        value={employeeForm.phone}
-                                        onChange={(e) => setEmployeeForm({ ...employeeForm, phone: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
-                                    <input
-                                        type="email"
-                                        value={employeeForm.email}
-                                        onChange={(e) => setEmployeeForm({ ...employeeForm, email: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">الراتب الأساسي *</label>
-                                    <input
-                                        type="number"
-                                        value={employeeForm.baseSalary}
-                                        onChange={(e) => setEmployeeForm({ ...employeeForm, baseSalary: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                        type="text"
+                                        value={employeeForm.name}
+                                        onChange={(e) => setEmployeeForm({ ...employeeForm, name: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
                                         required
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">تاريخ التعيين</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">المسمى الوظيفي</label>
                                     <input
-                                        type="date"
-                                        value={employeeForm.hireDate}
-                                        onChange={(e) => setEmployeeForm({ ...employeeForm, hireDate: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                        type="text"
+                                        value={employeeForm.jobTitle}
+                                        onChange={(e) => setEmployeeForm({ ...employeeForm, jobTitle: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الهاتف</label>
+                                        <input
+                                            type="tel"
+                                            value={employeeForm.phone}
+                                            onChange={(e) => setEmployeeForm({ ...employeeForm, phone: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">البريد الإلكتروني</label>
+                                        <input
+                                            type="email"
+                                            value={employeeForm.email}
+                                            onChange={(e) => setEmployeeForm({ ...employeeForm, email: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الراتب الأساسي *</label>
+                                        <input
+                                            type="number"
+                                            value={employeeForm.baseSalary}
+                                            onChange={(e) => setEmployeeForm({ ...employeeForm, baseSalary: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">تاريخ التعيين</label>
+                                        <input
+                                            type="date"
+                                            value={employeeForm.hireDate}
+                                            onChange={(e) => setEmployeeForm({ ...employeeForm, hireDate: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">ملاحظات</label>
+                                    <textarea
+                                        value={employeeForm.notes}
+                                        onChange={(e) => setEmployeeForm({ ...employeeForm, notes: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        rows={2}
                                     />
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-                                <textarea
-                                    value={employeeForm.notes}
-                                    onChange={(e) => setEmployeeForm({ ...employeeForm, notes: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    rows={2}
-                                />
+                            <div className="px-6 py-4 bg-slate-50 dark:bg-surface-secondary rounded-b-xl flex justify-end gap-3">
+                                <button
+                                    onClick={() => { setShowEmployeeModal(false); setEditingEmployee(null); }}
+                                    className="px-4 py-2 text-slate-600 dark:text-text-secondary hover:text-gray-800 dark:hover:text-text-primary"
+                                >
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={editingEmployee ? handleUpdateEmployee : handleCreateEmployee}
+                                    disabled={creating || updating}
+                                    className="px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50"
+                                >
+                                    {editingEmployee ? 'تحديث' : 'إضافة'}
+                                </button>
                             </div>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                            <button
-                                onClick={() => { setShowEmployeeModal(false); setEditingEmployee(null); }}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                إلغاء
-                            </button>
-                            <button
-                                onClick={editingEmployee ? handleUpdateEmployee : handleCreateEmployee}
-                                disabled={creating || updating}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                            >
-                                {editingEmployee ? 'تحديث' : 'إضافة'}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Pay Salary Modal */}
-            {showPayModal && selectedEmployee && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-                        <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
-                            <h3 className="text-lg font-bold">💵 صرف مرتب - {selectedEmployee.name}</h3>
-                            <button onClick={() => { setShowPayModal(false); setSelectedEmployee(null); }} className="text-white hover:text-gray-200">✕</button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="bg-blue-50 p-4 rounded-lg flex justify-between items-center mb-4">
-                                <div>
-                                    <p className="text-xs text-blue-600">الراتب الأساسي</p>
-                                    <p className="text-lg font-bold text-blue-800">{formatCurrency(selectedEmployee.baseSalary)}</p>
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-xs text-blue-600">توع الصرف</p>
-                                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${payForm.type === 'FINAL' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                                        {payForm.type === 'FINAL' ? 'تسوية نهائية' : 'دفعة / سلفة'}
-                                    </span>
-                                </div>
+            {
+                showPayModal && selectedEmployee && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl max-w-md w-full">
+                            <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                                <h3 className="text-lg font-bold">💵 صرف مرتب - {selectedEmployee.name}</h3>
+                                <button onClick={() => { setShowPayModal(false); setSelectedEmployee(null); }} className="text-white hover:text-gray-200 dark:hover:text-gray-300">✕</button>
                             </div>
+                            <div className="p-6 space-y-4">
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl flex justify-between items-center mb-4">
+                                    <div>
+                                        <p className="text-xs text-blue-600 dark:text-blue-400">الراتب الأساسي</p>
+                                        <p className="text-lg font-bold text-blue-800 dark:text-blue-300">{formatCurrency(selectedEmployee.baseSalary)}</p>
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-xs text-blue-600 dark:text-blue-400">توع الصرف</p>
+                                        <span className={`px-2 py-1 rounded-md text-xs font-bold ${payForm.type === 'FINAL' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'}`}>
+                                            {payForm.type === 'FINAL' ? 'تسوية نهائية' : 'دفعة / سلفة'}
+                                        </span>
+                                    </div>
+                                </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشهر</label>
+                                        <select
+                                            value={payForm.month}
+                                            onChange={(e) => setPayForm({ ...payForm, month: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        >
+                                            {arabicMonths.slice(1).map((month, idx) => (
+                                                <option key={idx + 1} value={idx + 1}>{month}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السنة</label>
+                                        <select
+                                            value={payForm.year}
+                                            onChange={(e) => setPayForm({ ...payForm, year: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        >
+                                            {[2024, 2025, 2026].map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">نوع العملية</label>
+                                        <select
+                                            value={payForm.type}
+                                            onChange={(e) => setPayForm({ ...payForm, type: e.target.value as any, amount: e.target.value === 'FINAL' ? selectedEmployee.baseSalary.toString() : payForm.amount })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        >
+                                            <option value="PARTIAL">دفعة جزئية / سلفة</option>
+                                            <option value="FINAL">تسوية نهائية (الراتب)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">المبلغ</label>
+                                        <input
+                                            type="number"
+                                            value={payForm.amount}
+                                            onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                            placeholder={payForm.type === 'FINAL' ? selectedEmployee.baseSalary.toString() : "أدخل المبلغ..."}
+                                        />
+                                    </div>
+                                </div>
+
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الخزينة *</label>
                                     <select
-                                        value={payForm.month}
-                                        onChange={(e) => setPayForm({ ...payForm, month: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                        value={payForm.treasuryId}
+                                        onChange={(e) => setPayForm({ ...payForm, treasuryId: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        required
                                     >
-                                        {arabicMonths.slice(1).map((month, idx) => (
-                                            <option key={idx + 1} value={idx + 1}>{month}</option>
+                                        <option value="">اختر الخزينة</option>
+                                        {treasuries.map(treasury => (
+                                            <option key={treasury.id} value={treasury.id}>
+                                                {treasury.name} ({formatCurrency(treasury.balance)})
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">السنة</label>
-                                    <select
-                                        value={payForm.year}
-                                        onChange={(e) => setPayForm({ ...payForm, year: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    >
-                                        {[2024, 2025, 2026].map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">نوع العملية</label>
-                                    <select
-                                        value={payForm.type}
-                                        onChange={(e) => setPayForm({ ...payForm, type: e.target.value as any, amount: e.target.value === 'FINAL' ? selectedEmployee.baseSalary.toString() : payForm.amount })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="PARTIAL">دفعة جزئية / سلفة</option>
-                                        <option value="FINAL">تسوية نهائية (الراتب)</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ</label>
-                                    <input
-                                        type="number"
-                                        value={payForm.amount}
-                                        onChange={(e) => setPayForm({ ...payForm, amount: e.target.value })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                        placeholder={payForm.type === 'FINAL' ? selectedEmployee.baseSalary.toString() : "أدخل المبلغ..."}
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">ملاحظات</label>
+                                    <textarea
+                                        value={payForm.notes}
+                                        onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        rows={2}
                                     />
                                 </div>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">الخزينة *</label>
-                                <select
-                                    value={payForm.treasuryId}
-                                    onChange={(e) => setPayForm({ ...payForm, treasuryId: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    required
+                            <div className="px-6 py-4 bg-slate-50 dark:bg-surface-secondary rounded-b-xl flex justify-end gap-3">
+                                <button
+                                    onClick={() => { setShowPayModal(false); setSelectedEmployee(null); }}
+                                    className="px-4 py-2 text-slate-600 dark:text-text-secondary hover:text-gray-800 dark:hover:text-text-primary"
                                 >
-                                    <option value="">اختر الخزينة</option>
-                                    {treasuries.map(treasury => (
-                                        <option key={treasury.id} value={treasury.id}>
-                                            {treasury.name} ({formatCurrency(treasury.balance)})
-                                        </option>
-                                    ))}
-                                </select>
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handlePaySalary}
+                                    disabled={payingOne}
+                                    className={`px-6 py-2 text-white rounded-xl transition-colors shadow-sm disabled:opacity-50 ${payForm.type === 'FINAL' ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}
+                                >
+                                    {payForm.type === 'FINAL' ? 'إتمام التسوية النهائية' : 'صرف الدفعة / السلفة'}
+                                </button>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-                                <textarea
-                                    value={payForm.notes}
-                                    onChange={(e) => setPayForm({ ...payForm, notes: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                                    rows={2}
-                                />
-                            </div>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                            <button
-                                onClick={() => { setShowPayModal(false); setSelectedEmployee(null); }}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                إلغاء
-                            </button>
-                            <button
-                                onClick={handlePaySalary}
-                                disabled={payingOne}
-                                className={`px-6 py-2 text-white rounded-lg transition-colors shadow-sm disabled:opacity-50 ${payForm.type === 'FINAL' ? 'bg-green-600 hover:bg-green-700' : 'bg-amber-600 hover:bg-amber-700'}`}
-                            >
-                                {payForm.type === 'FINAL' ? 'إتمام التسوية النهائية' : 'صرف الدفعة / السلفة'}
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Bonus Modal */}
-            {showBonusModal && selectedEmployee && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-                        <div className="bg-orange-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
-                            <h3 className="text-lg font-bold">🎁 صرف مكافأة - {selectedEmployee.name}</h3>
-                            <button onClick={() => { setShowBonusModal(false); setSelectedEmployee(null); }} className="text-white hover:text-gray-200">✕</button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">نوع المكافأة</label>
-                                <select
-                                    value={bonusForm.type}
-                                    onChange={(e) => setBonusForm({ ...bonusForm, type: e.target.value as any })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+            {
+                showBonusModal && selectedEmployee && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl max-w-md w-full">
+                            <div className="bg-orange-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                                <h3 className="text-lg font-bold">🎁 صرف مكافأة - {selectedEmployee.name}</h3>
+                                <button onClick={() => { setShowBonusModal(false); setSelectedEmployee(null); }} className="text-white hover:text-gray-200 dark:hover:text-gray-300">✕</button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">نوع المكافأة</label>
+                                    <select
+                                        value={bonusForm.type}
+                                        onChange={(e) => setBonusForm({ ...bonusForm, type: e.target.value as any })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                    >
+                                        {bonusTypes.map(type => (
+                                            <option key={type.value} value={type.value}>{type.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">المبلغ *</label>
+                                    <input
+                                        type="number"
+                                        value={bonusForm.amount}
+                                        onChange={(e) => setBonusForm({ ...bonusForm, amount: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السبب</label>
+                                    <input
+                                        type="text"
+                                        value={bonusForm.reason}
+                                        onChange={(e) => setBonusForm({ ...bonusForm, reason: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الخزينة *</label>
+                                    <select
+                                        value={bonusForm.treasuryId}
+                                        onChange={(e) => setBonusForm({ ...bonusForm, treasuryId: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        required
+                                    >
+                                        <option value="">اختر الخزينة</option>
+                                        {treasuries.map(treasury => (
+                                            <option key={treasury.id} value={treasury.id}>
+                                                {treasury.name} ({formatCurrency(treasury.balance)})
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <div className="px-6 py-4 bg-slate-50 dark:bg-surface-secondary rounded-b-xl flex justify-end gap-3">
+                                <button
+                                    onClick={() => { setShowBonusModal(false); setSelectedEmployee(null); }}
+                                    className="px-4 py-2 text-slate-600 dark:text-text-secondary hover:text-gray-800 dark:hover:text-text-primary"
                                 >
-                                    {bonusTypes.map(type => (
-                                        <option key={type.value} value={type.value}>{type.label}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">المبلغ *</label>
-                                <input
-                                    type="number"
-                                    value={bonusForm.amount}
-                                    onChange={(e) => setBonusForm({ ...bonusForm, amount: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">السبب</label>
-                                <input
-                                    type="text"
-                                    value={bonusForm.reason}
-                                    onChange={(e) => setBonusForm({ ...bonusForm, reason: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">الخزينة *</label>
-                                <select
-                                    value={bonusForm.treasuryId}
-                                    onChange={(e) => setBonusForm({ ...bonusForm, treasuryId: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handlePayBonus}
+                                    disabled={payingBonus}
+                                    className="px-6 py-2 bg-orange-600 text-white rounded-xl hover:bg-orange-700 disabled:opacity-50"
                                 >
-                                    <option value="">اختر الخزينة</option>
-                                    {treasuries.map(treasury => (
-                                        <option key={treasury.id} value={treasury.id}>
-                                            {treasury.name} ({formatCurrency(treasury.balance)})
-                                        </option>
-                                    ))}
-                                </select>
+                                    صرف المكافأة
+                                </button>
                             </div>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                            <button
-                                onClick={() => { setShowBonusModal(false); setSelectedEmployee(null); }}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                إلغاء
-                            </button>
-                            <button
-                                onClick={handlePayBonus}
-                                disabled={payingBonus}
-                                className="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
-                            >
-                                صرف المكافأة
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Batch Pay Modal */}
-            {showBatchPayModal && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-                        <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
-                            <h3 className="text-lg font-bold">💰 صرف مرتبات جماعي ({selectedEmployees.length} موظف)</h3>
-                            <button onClick={() => setShowBatchPayModal(false)} className="text-white hover:text-gray-200">✕</button>
-                        </div>
-                        <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
+            {
+                showBatchPayModal && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                        <div className="bg-white dark:bg-surface-primary rounded-xl shadow-xl max-w-md w-full">
+                            <div className="bg-green-600 text-white px-6 py-4 rounded-t-xl flex justify-between items-center">
+                                <h3 className="text-lg font-bold">💰 صرف مرتبات جماعي ({selectedEmployees.length} موظف)</h3>
+                                <button onClick={() => setShowBatchPayModal(false)} className="text-white hover:text-gray-200 dark:hover:text-gray-300">✕</button>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشهر</label>
+                                        <select
+                                            value={payForm.month}
+                                            onChange={(e) => setPayForm({ ...payForm, month: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        >
+                                            {arabicMonths.slice(1).map((month, idx) => (
+                                                <option key={idx + 1} value={idx + 1}>{month}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السنة</label>
+                                        <select
+                                            value={payForm.year}
+                                            onChange={(e) => setPayForm({ ...payForm, year: parseInt(e.target.value) })}
+                                            className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        >
+                                            {[2024, 2025, 2026].map(year => (
+                                                <option key={year} value={year}>{year}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الخزينة *</label>
                                     <select
-                                        value={payForm.month}
-                                        onChange={(e) => setPayForm({ ...payForm, month: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                                        value={payForm.treasuryId}
+                                        onChange={(e) => setPayForm({ ...payForm, treasuryId: e.target.value })}
+                                        className="w-full px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 transition-all"
+                                        required
                                     >
-                                        {arabicMonths.slice(1).map((month, idx) => (
-                                            <option key={idx + 1} value={idx + 1}>{month}</option>
+                                        <option value="">اختر الخزينة</option>
+                                        {treasuries.map(treasury => (
+                                            <option key={treasury.id} value={treasury.id}>
+                                                {treasury.name} ({formatCurrency(treasury.balance)})
+                                            </option>
                                         ))}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">السنة</label>
-                                    <select
-                                        value={payForm.year}
-                                        onChange={(e) => setPayForm({ ...payForm, year: parseInt(e.target.value) })}
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    >
-                                        {[2024, 2025, 2026].map(year => (
-                                            <option key={year} value={year}>{year}</option>
-                                        ))}
-                                    </select>
+                                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl">
+                                    <p className="text-blue-800 dark:text-blue-300 text-sm">
+                                        سيتم صرف الراتب الأساسي لكل موظف من الخزينة المختارة.
+                                    </p>
                                 </div>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">الخزينة *</label>
-                                <select
-                                    value={payForm.treasuryId}
-                                    onChange={(e) => setPayForm({ ...payForm, treasuryId: e.target.value })}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
+                            <div className="px-6 py-4 bg-slate-50 dark:bg-surface-secondary rounded-b-xl flex justify-end gap-3">
+                                <button
+                                    onClick={() => setShowBatchPayModal(false)}
+                                    className="px-4 py-2 text-slate-600 dark:text-text-secondary hover:text-gray-800 dark:hover:text-text-primary"
                                 >
-                                    <option value="">اختر الخزينة</option>
-                                    {treasuries.map(treasury => (
-                                        <option key={treasury.id} value={treasury.id}>
-                                            {treasury.name} ({formatCurrency(treasury.balance)})
-                                        </option>
-                                    ))}
-                                </select>
+                                    إلغاء
+                                </button>
+                                <button
+                                    onClick={handlePayMultiple}
+                                    disabled={payingMultiple}
+                                    className="px-6 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 disabled:opacity-50"
+                                >
+                                    صرف المرتبات
+                                </button>
                             </div>
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                                <p className="text-blue-800 text-sm">
-                                    سيتم صرف الراتب الأساسي لكل موظف من الخزينة المختارة.
-                                </p>
-                            </div>
-                        </div>
-                        <div className="px-6 py-4 bg-gray-50 rounded-b-xl flex justify-end gap-3">
-                            <button
-                                onClick={() => setShowBatchPayModal(false)}
-                                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-                            >
-                                إلغاء
-                            </button>
-                            <button
-                                onClick={handlePayMultiple}
-                                disabled={payingMultiple}
-                                className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
-                            >
-                                صرف المرتبات
-                            </button>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
             {/* Salary Statement Modal */}
-            {showStatementModal && selectedEmployee && (
-                <SalaryStatementModal
-                    employeeId={selectedEmployee.id}
-                    month={payForm.month}
-                    year={payForm.year}
-                    onClose={() => setShowStatementModal(false)}
-                />
-            )}
+            {
+                showStatementModal && selectedEmployee && (
+                    <SalaryStatementModal
+                        employeeId={selectedEmployee.id}
+                        month={payForm.month}
+                        year={payForm.year}
+                        onClose={() => setShowStatementModal(false)}
+                    />
+                )
+            }
 
 
             {/* Hidden div for printing - للطباعة فقط (مخفي) */}
             <div ref={printRef} style={{ display: 'none' }}>
-                <PayrollMonthlyReport 
+                <PayrollMonthlyReport
                     month={salaryMonth}
                     year={salaryYear}
-                    payments={salaryPayments}
-                    bonuses={[]}
+                    payments={salaryPayments as any}
+                    bonuses={[] as any}
                     companyName={getCompanyInfo().name}
                     userName={getCompanyInfo().userName}
                 />
@@ -1584,8 +1771,8 @@ export default function PayrollPage() {
 
             {/* Hidden div for bonuses printing - للطباعة المكافآت (مخفي) */}
             <div ref={bonusesPrintRef} style={{ display: 'none' }}>
-                <BonusesReport 
-                    bonuses={bonuses}
+                <BonusesReport
+                    bonuses={bonuses as any}
                     month={bonusMonth}
                     year={bonusYear}
                     type={bonusTypeFilter}
@@ -1601,14 +1788,14 @@ export default function PayrollPage() {
 function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYear, onClose }: { employeeId: number; month: number; year: number; onClose: () => void }) {
     const [filterMonth, setFilterMonth] = React.useState(initialMonth);
     const [filterYear, setFilterYear] = React.useState(initialYear);
-    
+
     const { data, isLoading } = useGetSalaryStatementQuery({ employeeId, month: filterMonth, year: filterYear });
     const statement = data?.data;
     const printRef = React.useRef<HTMLDivElement>(null);
 
     const handlePrint = () => {
         if (!printRef.current) return;
-        
+
         const printWindow = window.open('', '_blank', 'width=1000,height=800');
         if (!printWindow) {
             alert('تم حظر النافذة المنبثقة. الرجاء السماح بالنوافذ المنبثقة.');
@@ -1616,104 +1803,104 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
         }
 
         const htmlContent = `
-            <!DOCTYPE html>
-            <html lang="ar" dir="rtl">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>كشف حركة المرتب - ${statement?.employee.name}</title>
-                <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
+                <!DOCTYPE html>
+                <html lang="ar" dir="rtl">
+                    <head>
+                        <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>كشف حركة المرتب - ${statement?.employee.name}</title>
+                                <style>
+                                    * {
+                                        margin: 0;
+                                    padding: 0;
+                                    box-sizing: border-box;
                     }
-                    
-                    body {
-                        font-family: 'Arial', 'Segoe UI', sans-serif;
-                        direction: rtl;
-                        background: white;
-                        padding: 20px;
+
+                                    body {
+                                        font - family: 'Arial', 'Segoe UI', sans-serif;
+                                    direction: rtl;
+                                    background: white;
+                                    padding: 20px;
                     }
-                    
-                    @media print {
-                        body {
-                            padding: 0;
+
+                                    @media print {
+                                        body {
+                                        padding: 0;
                         }
-                        
-                        @page {
-                            size: A4;
-                            margin: 15mm;
+
+                                    @page {
+                                        size: A4;
+                                    margin: 15mm;
                         }
                     }
-                    
-                    .print-content {
-                        max-width: 210mm;
-                        margin: 0 auto;
-                        background: white;
+
+                                    .print-content {
+                                        max - width: 210mm;
+                                    margin: 0 auto;
+                                    background: white;
                     }
-                    
-                    table {
-                        width: 100%;
-                        border-collapse: collapse;
+
+                                    table {
+                                        width: 100%;
+                                    border-collapse: collapse;
                     }
-                    
-                    th, td {
-                        border: 1px solid #e2e8f0;
-                        padding: 12px 8px;
-                        text-align: right;
+
+                                    th, td {
+                                        border: 1px solid #e2e8f0;
+                                    padding: 12px 8px;
+                                    text-align: right;
                     }
-                    
-                    th {
-                        background-color: #f8fafc;
-                        font-weight: bold;
-                        color: #475569;
-                        font-size: 12px;
+
+                                    th {
+                                        background - color: #f8fafc;
+                                    font-weight: bold;
+                                    color: #475569;
+                                    font-size: 12px;
                     }
-                    
-                    .badge {
-                        display: inline-block;
-                        padding: 4px 8px;
-                        border-radius: 12px;
-                        font-size: 11px;
-                        font-weight: bold;
+
+                                    .badge {
+                                        display: inline-block;
+                                    padding: 4px 8px;
+                                    border-radius: 12px;
+                                    font-size: 11px;
+                                    font-weight: bold;
                     }
-                    
-                    .badge-green {
-                        background-color: #dcfce7;
-                        color: #166534;
-                        border: 1px solid #86efac;
+
+                                    .badge-green {
+                                        background - color: #dcfce7;
+                                    color: #166534;
+                                    border: 1px solid #86efac;
                     }
-                    
-                    .badge-amber {
-                        background-color: #fef3c7;
-                        color: #92400e;
-                        border: 1px solid #fbbf24;
+
+                                    .badge-amber {
+                                        background - color: #fef3c7;
+                                    color: #92400e;
+                                    border: 1px solid #fbbf24;
                     }
-                    
-                    -webkit-print-color-adjust: exact;
-                    print-color-adjust: exact;
-                </style>
-            </head>
-            <body>
-                <div class="print-content">
-                    ${printRef.current.innerHTML}
-                </div>
-                <script>
-                    window.onload = function() {
-                        setTimeout(() => {
-                            window.print();
-                        }, 500);
+
+                                    -webkit-print-color-adjust: exact;
+                                    print-color-adjust: exact;
+                                </style>
+                            </head>
+                            <body>
+                                <div class="print-content">
+                                    ${printRef.current.innerHTML}
+                                </div>
+                                <script>
+                                    window.onload = function() {
+                                        setTimeout(() => {
+                                            window.print();
+                                        }, 500);
                     };
-                    window.onafterprint = function() {
-                        setTimeout(() => {
-                            window.close();
-                        }, 100);
+                                    window.onafterprint = function() {
+                                        setTimeout(() => {
+                                            window.close();
+                                        }, 100);
                     };
-                </script>
-            </body>
-            </html>
-        `;
+                                </script>
+                            </body>
+                        </html>
+                        `;
 
         printWindow.document.write(htmlContent);
         printWindow.document.close();
@@ -1721,44 +1908,44 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
 
     if (isLoading) return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl">جاري تحميل كشف الحركة...</div>
+            <div className="bg-white dark:bg-surface-primary p-6 rounded-xl text-slate-900 dark:text-text-primary">جاري تحميل كشف الحركة...</div>
         </div>
     );
 
     if (!statement) return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-            <div className="bg-white p-6 rounded-xl">حدث خطأ في تحميل البيانات</div>
+            <div className="bg-white dark:bg-surface-primary p-6 rounded-xl text-slate-900 dark:text-text-primary">حدث خطأ في تحميل البيانات</div>
         </div>
     );
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 no-print">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col print-root">
+            <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col print-root">
                 <div className="bg-purple-600 text-white px-8 py-5 flex justify-between items-center no-print">
                     <h3 className="text-xl font-bold flex items-center gap-2 font-cairo">
                         <FileText className="w-6 h-6" />
                         كشف حركة المرتب التفصيلي
                     </h3>
                     <div className="flex gap-4">
-                        <button onClick={handlePrint} className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-200 font-medium border border-white/30">
+                        <button onClick={handlePrint} className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl flex items-center gap-2 transition-all duration-200 font-medium border border-white/30">
                             <Plus className="w-4 h-4 rotate-45" /> {/* Just to use an icon if Printer fails */}
                             طباعة الكشف
                         </button>
-                        <button onClick={onClose} className="text-white hover:text-gray-200 transition-colors">
+                        <button onClick={onClose} className="text-white hover:text-gray-200 dark:hover:text-gray-300 transition-colors">
                             <X className="w-8 h-8" />
                         </button>
                     </div>
                 </div>
 
                 {/* Filters Section - داخل المودال */}
-                <div className="px-8 pt-4 pb-0 no-print bg-gray-50 border-b border-gray-200">
+                <div className="px-8 pt-4 pb-0 no-print bg-slate-50 dark:bg-surface-secondary border-b border-slate-200 dark:border-border-primary">
                     <div className="flex gap-4 items-end">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">الشهر</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">الشهر</label>
                             <select
                                 value={filterMonth}
                                 onChange={(e) => setFilterMonth(parseInt(e.target.value))}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-primary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900/50 transition-all"
                             >
                                 {arabicMonths.slice(1).map((month, idx) => (
                                     <option key={idx + 1} value={idx + 1}>{month}</option>
@@ -1766,18 +1953,18 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">السنة</label>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-text-secondary mb-1">السنة</label>
                             <select
                                 value={filterYear}
                                 onChange={(e) => setFilterYear(parseInt(e.target.value))}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                                className="px-4 py-2 border border-slate-200 dark:border-border-primary rounded-xl bg-white dark:bg-surface-primary text-slate-800 dark:text-text-primary outline-none focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900/50 transition-all"
                             >
                                 {[2022, 2023, 2024, 2025, 2026, 2027].map(year => (
                                     <option key={year} value={year}>{year}</option>
                                 ))}
                             </select>
                         </div>
-                        <div className="text-sm text-gray-600 px-4 py-2">
+                        <div className="text-sm text-slate-600 dark:text-text-secondary px-4 py-2">
                             يتم تحديث الكشف تلقائياً عند تغيير الفلاتر
                         </div>
                     </div>
@@ -1785,36 +1972,36 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
 
                 <div className="p-8 overflow-y-auto flex-1 print:overflow-visible print:max-h-none" id="print-section" dir="rtl">
                     {/* Header for Print */}
-                    <div className="text-center mb-8 border-b-2 border-purple-100 pb-6 print:border-slate-300">
-                        <h2 className="text-2xl font-bold text-slate-800 mb-2">كشف حركة المرتب الشهرية</h2>
-                        <div className="flex justify-center gap-8 text-slate-600 font-medium mb-2">
-                            <p>الشهر: <span className="text-purple-700">{statement.monthName}</span></p>
-                            <p>السنة: <span className="text-purple-700">{statement.year}</span></p>
+                    <div className="text-center mb-8 border-b-2 border-purple-100 dark:border-purple-900/30 pb-6 print:border-slate-300">
+                        <h2 className="text-2xl font-bold text-slate-800 dark:text-text-primary mb-2">كشف حركة المرتب الشهرية</h2>
+                        <div className="flex justify-center gap-8 text-slate-600 dark:text-text-secondary font-medium mb-2">
+                            <p>الشهر: <span className="text-purple-700 dark:text-purple-400">{statement.monthName}</span></p>
+                            <p>السنة: <span className="text-purple-700 dark:text-purple-400">{statement.year}</span></p>
                         </div>
-                        <div className="hidden print:block text-xs text-slate-500 mt-3">
+                        <div className="hidden print:block text-xs text-slate-500 dark:text-text-tertiary mt-3">
                             <p>تاريخ الطباعة: {new Date().toLocaleDateString('ar-LY')} - {new Date().toLocaleTimeString('ar-LY')}</p>
                         </div>
                     </div>
 
                     {/* Employee Info Card */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 text-right">
-                            <h4 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">بيانات الموظف</h4>
-                            <p className="text-xl font-bold text-slate-800 mb-1">{statement.employee.name}</p>
-                            <p className="text-slate-500">{statement.employee.jobTitle || 'موظف'}</p>
+                        <div className="bg-slate-50 dark:bg-surface-secondary p-6 rounded-2xl border border-slate-100 dark:border-border-primary text-right">
+                            <h4 className="text-sm font-bold text-slate-400 dark:text-text-tertiary uppercase tracking-wider mb-4">بيانات الموظف</h4>
+                            <p className="text-xl font-bold text-slate-800 dark:text-text-primary mb-1">{statement.employee.name}</p>
+                            <p className="text-slate-500 dark:text-text-tertiary">{statement.employee.jobTitle || 'موظف'}</p>
                         </div>
-                        <div className="bg-purple-50 p-6 rounded-2xl border border-purple-100 grid grid-cols-3 gap-4 text-right">
+                        <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-2xl border border-purple-100 dark:border-purple-900/30 grid grid-cols-3 gap-4 text-right">
                             <div className="text-center">
-                                <p className="text-xs text-purple-600 mb-1">الراتب الأساسي</p>
-                                <p className="text-lg font-bold text-slate-800">{new Intl.NumberFormat('ar-LY').format(statement.summary.baseSalary)}</p>
+                                <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">الراتب الأساسي</p>
+                                <p className="text-lg font-bold text-slate-800 dark:text-text-primary">{new Intl.NumberFormat('ar-LY').format(statement.summary.baseSalary)}</p>
                             </div>
-                            <div className="text-center border-x border-purple-200">
-                                <p className="text-xs text-purple-600 mb-1">إجمالي المنصرف</p>
-                                <p className="text-lg font-bold text-green-600">{new Intl.NumberFormat('ar-LY').format(statement.summary.totalPaid)}</p>
+                            <div className="text-center border-x border-purple-200 dark:border-purple-800/30">
+                                <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">إجمالي المنصرف</p>
+                                <p className="text-lg font-bold text-green-600 dark:text-green-400">{new Intl.NumberFormat('ar-LY').format(statement.summary.totalPaid)}</p>
                             </div>
                             <div className="text-center">
-                                <p className="text-xs text-purple-600 mb-1">المتبقي</p>
-                                <p className={`text-lg font-bold ${statement.summary.remaining > 0 ? 'text-amber-600' : 'text-slate-800'}`}>
+                                <p className="text-xs text-purple-600 dark:text-purple-400 mb-1">المتبقي</p>
+                                <p className={`text-lg font-bold ${statement.summary.remaining> 0 ? 'text-amber-600 dark:text-amber-400' : 'text-slate-800 dark:text-text-primary'}`}>
                                     {new Intl.NumberFormat('ar-LY').format(statement.summary.remaining)}
                                 </p>
                             </div>
@@ -1823,54 +2010,54 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
 
                     {/* Movements Table */}
                     <div className="mb-6">
-                        <h4 className="text-lg font-bold text-slate-700 mb-4 flex items-center gap-2">
+                        <h4 className="text-lg font-bold text-slate-700 dark:text-text-primary mb-4 flex items-center gap-2">
                             📊 سجل الحركات المالية
                         </h4>
-                        <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm print:border-0 print:shadow-none">
+                        <div className="border border-slate-200 dark:border-border-primary rounded-xl overflow-hidden shadow-sm print:border-0 print:shadow-none">
                             <table className="w-full text-right border-collapse print:border print:border-slate-300">
-                                <thead className="bg-slate-50">
+                                <thead className="bg-slate-50 dark:bg-surface-secondary">
                                     <tr>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">تاريخ الحركة</th>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">نوع الحركة</th>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">المبلغ</th>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">الخزينة</th>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">الإيصال</th>
-                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 border-b">ملاحظات</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">تاريخ الحركة</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">نوع الحركة</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">المبلغ</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">الخزينة</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">الإيصال</th>
+                                        <th className="px-4 py-4 text-xs font-bold text-slate-500 dark:text-text-tertiary border-b dark:border-border-primary">ملاحظات</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {statement.movements.length === 0 ? (
                                         <tr>
-                                            <td colSpan={6} className="px-4 py-10 text-center text-slate-400 italic">لاتوجد حركات مسجلة لهذا الشهر</td>
+                                            <td colSpan={6} className="px-4 py-10 text-center text-slate-400 dark:text-text-muted italic">لاتوجد حركات مسجلة لهذا الشهر</td>
                                         </tr>
                                     ) : (
                                         statement.movements.map((move, idx) => (
-                                            <tr key={move.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                                                <td className="px-4 py-4 text-sm text-slate-600 font-medium whitespace-nowrap">
+                                            <tr key={move.id} className={idx % 2 === 0 ? 'bg-white dark:bg-surface-primary' : 'bg-slate-50/50 dark:bg-surface-secondary'}>
+                                                <td className="px-4 py-4 text-sm text-slate-600 dark:text-text-secondary font-medium whitespace-nowrap">
                                                     {new Date(move.date).toLocaleDateString('ar-LY')}
                                                 </td>
                                                 <td className="px-4 py-4">
                                                     <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${move.type === 'تسوية نهائية'
-                                                        ? 'bg-green-100 text-green-700 border border-green-200'
-                                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
+                                                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/30'
+                                                        : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30'
                                                         }`}>
                                                         {move.type}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-4 text-sm font-bold text-slate-800">
+                                                <td className="px-4 py-4 text-sm font-bold text-slate-800 dark:text-text-primary">
                                                     {new Intl.NumberFormat('ar-LY').format(move.amount)} د.ل
                                                 </td>
-                                                <td className="px-4 py-4 text-sm text-slate-600">{move.treasury}</td>
-                                                <td className="px-4 py-4 text-xs font-mono text-slate-500">{move.receiptNumber || '-'}</td>
-                                                <td className="px-4 py-4 text-xs text-slate-500">{move.notes || '-'}</td>
+                                                <td className="px-4 py-4 text-sm text-slate-600 dark:text-text-secondary">{move.treasury}</td>
+                                                <td className="px-4 py-4 text-xs font-mono text-slate-500 dark:text-text-tertiary">{move.receiptNumber || '-'}</td>
+                                                <td className="px-4 py-4 text-xs text-slate-500 dark:text-text-tertiary">{move.notes || '-'}</td>
                                             </tr>
                                         ))
                                     )}
                                 </tbody>
-                                <tfoot className="bg-slate-100/50 font-bold border-t-2 border-slate-200">
+                                <tfoot className="bg-slate-100/50 dark:bg-surface-elevated font-bold border-t-2 border-slate-200 dark:border-border-primary">
                                     <tr>
-                                        <td colSpan={2} className="px-4 py-4 text-slate-700">إجمالي مدفوعات الشهر</td>
-                                        <td className="px-4 py-4 text-green-700 text-lg">
+                                        <td colSpan={2} className="px-4 py-4 text-slate-700 dark:text-text-primary">إجمالي مدفوعات الشهر</td>
+                                        <td className="px-4 py-4 text-green-700 dark:text-green-400 text-lg">
                                             {new Intl.NumberFormat('ar-LY').format(statement.summary.totalPaid)} د.ل
                                         </td>
                                         <td colSpan={3}></td>
@@ -1893,13 +2080,13 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
                     </div>
                 </div>
 
-                <div className="px-8 py-4 bg-slate-50 border-t border-slate-200 flex justify-end no-print">
-                    <button onClick={onClose} className="px-6 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium">
+                <div className="px-8 py-4 bg-slate-50 dark:bg-surface-secondary border-t border-slate-200 dark:border-border-primary flex justify-end no-print">
+                    <button onClick={onClose} className="px-6 py-2 bg-slate-200 dark:bg-surface-elevated text-slate-700 dark:text-text-primary rounded-xl hover:bg-slate-300 dark:hover:bg-surface-hover transition-colors font-medium">
                         إغلاق الكشف
                     </button>
                 </div>
             </div>
-            
+
             {/* Hidden div for printing */}
             <div ref={printRef} style={{ display: 'none' }}>
                 <div style={{ padding: '20px', textAlign: 'center' }}>
@@ -1936,7 +2123,7 @@ function SalaryStatementModal({ employeeId, month: initialMonth, year: initialYe
                                 </div>
                                 <div>
                                     <p style={{ fontSize: '11px', color: '#7c3aed', marginBottom: '5px' }}>المتبقي</p>
-                                    <p style={{ fontSize: '16px', fontWeight: 'bold', color: statement.summary.remaining > 0 ? '#f59e0b' : '#1e293b' }}>
+                                    <p style={{ fontSize: '16px', fontWeight: 'bold', color: statement.summary.remaining> 0 ? '#f59e0b' : '#1e293b' }}>
                                         {new Intl.NumberFormat('ar-LY').format(statement.summary.remaining)}
                                     </p>
                                 </div>

@@ -23,6 +23,7 @@ export const SCREEN_PERMISSIONS = {
 
   // المخزون
   WAREHOUSE_DISPATCH: 'screen.warehouse_dispatch',
+  WAREHOUSE_RETURNS: 'screen.warehouse_returns',
   DAMAGE_REPORTS: 'screen.damage_reports',
 
   // المحاسبة
@@ -34,6 +35,10 @@ export const SCREEN_PERMISSIONS = {
   BAD_DEBTS: 'screen.bad_debts',
   GENERAL_RECEIPTS: 'screen.general_receipts',
 
+  // التكاليف
+  PRODUCT_COST: 'screen.product_cost',
+  INVOICE_COST: 'screen.invoice_cost',
+
   // التقارير
   REPORTS: 'screen.reports',
 
@@ -41,6 +46,10 @@ export const SCREEN_PERMISSIONS = {
   USERS: 'screen.users',
   PERMISSION_GROUPS: 'screen.permission_groups',
   NOTIFICATIONS: 'screen.notifications',
+
+  // إدارة النظام
+  SYSTEM_SETTINGS: 'screen.system_settings',
+  EXPENSE_CATEGORIES: 'screen.expense_categories',
 
   // المحلات الخارجية
   EXTERNAL_STORES: 'screen.external_stores',
@@ -61,7 +70,7 @@ export interface ScreenMetadata {
   name: string;
   route: string;
   permission: ScreenPermissionValue;
-  category: 'main' | 'sales' | 'purchases' | 'inventory' | 'accounting' | 'reports' | 'settings';
+  category: 'main' | 'sales' | 'purchases' | 'inventory' | 'accounting' | 'reports' | 'settings' | 'system_management';
   description?: string;
   icon?: string;
 }
@@ -101,7 +110,7 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
   {
     id: 'product-groups',
     name: 'مجموعات الأصناف',
-    route: '/products/groups',
+    route: '/product-groups',
     permission: SCREEN_PERMISSIONS.PRODUCT_GROUPS,
     category: 'inventory',
     description: 'إدارة مجموعات الأصناف والخصومات المسموح بها',
@@ -175,6 +184,15 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     category: 'inventory',
     description: 'إدارة أوامر صرف المخزن',
     icon: 'Layout'
+  },
+  {
+    id: 'warehouse_returns',
+    name: 'استلام المردودات',
+    route: '/warehouse-returns',
+    permission: SCREEN_PERMISSIONS.WAREHOUSE_RETURNS,
+    category: 'inventory',
+    description: 'إدارة استلام مردودات المبيعات للمخزن',
+    icon: 'TrendingDown'
   },
   {
     id: 'damage_reports',
@@ -271,6 +289,26 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     icon: 'FileText'
   },
 
+  // التكاليف
+  {
+    id: 'product_cost',
+    name: 'تكلفة الأصناف',
+    route: '/product-cost',
+    permission: SCREEN_PERMISSIONS.PRODUCT_COST,
+    category: 'accounting',
+    description: 'إدارة وتعديل تكلفة الأصناف يدوياً',
+    icon: 'BarChart3'
+  },
+  {
+    id: 'invoice_cost',
+    name: 'تكلفة الفاتورة',
+    route: '/invoice-cost',
+    permission: SCREEN_PERMISSIONS.INVOICE_COST,
+    category: 'accounting',
+    description: 'عرض تكلفة فاتورة الشراء وتوزيع المصروفات',
+    icon: 'FileText'
+  },
+
   // التقارير
   {
     id: 'reports',
@@ -282,13 +320,22 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     icon: 'BarChart3'
   },
 
-  // الإعدادات
+  // إدارة النظام
+  {
+    id: 'system_settings',
+    name: 'إعدادات النظام',
+    route: '/settings',
+    permission: SCREEN_PERMISSIONS.SYSTEM_SETTINGS,
+    category: 'system_management',
+    description: 'إعدادات النظام العامة',
+    icon: 'Settings'
+  },
   {
     id: 'users',
     name: 'إدارة المستخدمين',
     route: '/users',
     permission: SCREEN_PERMISSIONS.USERS,
-    category: 'settings',
+    category: 'system_management',
     description: 'إدارة المستخدمين والصلاحيات',
     icon: 'UsersRound'
   },
@@ -297,7 +344,7 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     name: 'مجموعات الصلاحيات',
     route: '/permission-groups',
     permission: SCREEN_PERMISSIONS.PERMISSION_GROUPS,
-    category: 'settings',
+    category: 'system_management',
     description: 'إدارة مجموعات الصلاحيات',
     icon: 'Shield'
   },
@@ -306,9 +353,18 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     name: 'الإشعارات',
     route: '/notifications',
     permission: SCREEN_PERMISSIONS.NOTIFICATIONS,
-    category: 'settings',
+    category: 'system_management',
     description: 'عرض الإشعارات',
     icon: 'Bell'
+  },
+  {
+    id: 'expense_categories',
+    name: 'إدارة فئات المصروفات',
+    route: '/settings/expense-categories',
+    permission: SCREEN_PERMISSIONS.EXPENSE_CATEGORIES,
+    category: 'system_management',
+    description: 'إدارة فئات المصروفات',
+    icon: 'FolderTree'
   }
 ];
 
@@ -322,7 +378,8 @@ export const CATEGORY_NAMES: Record<string, string> = {
   inventory: 'المخزون',
   accounting: 'المحاسبة',
   reports: 'التقارير',
-  settings: 'الإعدادات'
+  settings: 'الإعدادات',
+  system_management: 'إدارة النظام'
 };
 
 /**

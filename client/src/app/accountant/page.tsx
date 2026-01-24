@@ -21,7 +21,7 @@ import {
   useDeletePaymentMutation,
   SalePayment
 } from '@/state/salePaymentApi';
-import { Search, Filter, X, DollarSign, FileText } from 'lucide-react';
+import { Search, Filter, X, DollarSign, FileText, Edit, Plus, Package, Trash2, AlertCircle, Check } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import html2canvas from 'html2canvas';
 import { useEffect } from 'react';
@@ -54,6 +54,9 @@ export default function AccountantWorkspace() {
     qty: number;
     unitPrice: number;
   }>>([]);
+
+  const [approvalSaleType, setApprovalSaleType] = useState<"CASH" | "CREDIT">("CREDIT");
+  const [approvalPaymentMethod, setApprovalPaymentMethod] = useState<"CASH" | "BANK" | "CARD">("CASH");
 
   // تعيين تاريخ اليوم كـ default
   const getTodayDate = () => {
@@ -745,7 +748,7 @@ ${itemsText}
       return;
     }
 
-    if (amount > remainingAmount) {
+    if (amount> remainingAmount) {
       showError(
         `❌ لا يمكن قبض مبلغ أكبر من المبلغ المتبقي!\n` +
         `المبلغ المتبقي: ${formatArabicCurrency(remainingAmount)}\n` +
@@ -947,7 +950,7 @@ ${itemsText}
 
   // Debug: عرض البيانات المحملة
   React.useEffect(() => {
-    if (sales.length > 0) {
+    if (sales.length> 0) {
       console.log('📊 الفواتير المحملة في المحاسب:', sales.length);
       console.log('🔍 أول فاتورة:', {
         id: sales[0].id,
@@ -991,1475 +994,1312 @@ ${itemsText}
   }, [sales, activeCompanyId]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-          <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          مساحة عمل المحاسب
-        </h1>
-        <p className="text-gray-600 mt-2">إدارة شاملة لفواتير المبيعات الآجلة - مصنفة حسب الشركة</p>
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8 font-sans transition-colors duration-300">
+      <div className="max-w-7xl mx-auto space-y-8">
 
-      {/* Tabs حسب الشركة */}
-      <div className="mb-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-1">
-          <nav className="flex gap-2" aria-label="Tabs">
-            {companiesData?.data?.companies?.map((company: any) => {
-              // حساب عدد الفواتير المبدئية للشركة النشطة فقط
-              const companyPendingCount = company.id === activeCompanyId ? pendingCount : 0;
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-black text-slate-900 dark:text-text-primary tracking-tight">منصة المحاسب</h1>
+            <p className="text-slate-500 dark:text-text-secondary font-medium flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+              إدارة الفواتير والتحصيلات والمستندات المالية
+            </p>
+          </div>
 
-              return (
-                <button
-                  key={company.id}
-                  onClick={() => {
-                    setActiveCompanyId(company.id);
-                    setCurrentPage(1);
-                  }}
-                  className={`${activeCompanyId === company.id
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-gray-600 hover:bg-gray-100'
-                    } flex-1 py-3 px-4 rounded-md font-medium text-sm flex items-center justify-center gap-2 transition-all duration-200`}
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  <span>{company.name}</span>
-                  {companyPendingCount > 0 && (
-                    <span className={`${activeCompanyId === company.id ? 'bg-white text-blue-600' : 'bg-orange-100 text-orange-600'} px-2 py-0.5 rounded-full text-xs font-bold`}>
-                      {companyPendingCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+          <div className="flex items-center gap-2 bg-white dark:bg-surface-primary p-1.5 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+            {companiesData?.data?.companies?.map((company: any) => (
+              <button
+                key={company.id}
+                onClick={() => setActiveCompanyId(company.id)}
+                className={`
+                  px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-200 flex items-center gap-2
+                  ${activeCompanyId === company.id
+                    ? 'bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none translate-y-[-1px]'
+                    : 'text-slate-600 dark:text-text-secondary hover:bg-slate-50 dark:hover:bg-surface-hover hover:text-blue-600 dark:hover:text-blue-400'}
+                `}
+              >
+                <div className={`w-2 h-2 rounded-full ${activeCompanyId === company.id ? 'bg-white' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                {company.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Company Sales Content */}
-      {(
-        <>
-          {/* Filters */}
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              {/* Search */}
-              <div className="relative md:col-span-3">
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                  <Search className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  placeholder="بحث برقم الفاتورة، اسم العميل، أو رقم الهاتف..."
-                  className="block w-full pr-10 pl-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+        {/* Dashboard/Stats Summary */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white dark:bg-surface-primary p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <FileText className="w-6 h-6" />
               </div>
-
-              {/* Date Filters */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">من تاريخ</label>
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">إلى تاريخ</label>
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md leading-5 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setStartDate('');
-                    setEndDate('');
-                    setCurrentPage(1);
-                  }}
-                  className="w-full px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                >
-                  جميع التواريخ
-                </button>
+                <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary">الفواتير الكلية</p>
+                <p className="text-xl font-black text-slate-900 dark:text-text-primary">{formatArabicNumber(salesData?.data?.pagination?.total || 0)}</p>
               </div>
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white dark:bg-surface-primary p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary">إجمالي المحصل اليوم</p>
+                <p className="text-xl font-black text-slate-900 dark:text-text-primary">{formatArabicCurrency(creditStatsData?.data?.todayPayments || 0)}</p>
+              </div>
+            </div>
+          </div>
 
-              {/* Receipt Status Filter */}
-              <div className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-gray-400" />
-                <div className="flex gap-2 flex-1">
+          <div className="bg-white dark:bg-surface-primary p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                <Filter className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary">فواتير قيد الانتظار</p>
+                <p className="text-xl font-black text-slate-900 dark:text-text-primary">
+                  {(salesData?.data?.pagination as any)?.totalPending || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-surface-primary p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                <Search className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500 dark:text-text-tertiary">المبيعات الآجلة اليوم</p>
+                <p className="text-xl font-black text-slate-900 dark:text-text-primary">{formatArabicCurrency(creditStatsData?.data?.todayCreditSales || 0)}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters and Actions */}
+        <div className="bg-white dark:bg-surface-primary rounded-3xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+          <div className="p-6 md:p-8 space-y-6">
+            <div className="flex flex-col lg:flex-row gap-6">
+              <div className="flex-1 relative group">
+                <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-text-tertiary group-focus-within:text-blue-500 transition-colors" />
+                <input
+                  type="text"
+                  placeholder="ابحث برقم الفاتورة، اسم العميل، أو رقم الهاتف..."
+                  className="w-full pr-12 pl-4 py-4 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-2xl outline-none focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 focus:border-blue-500 dark:focus:border-blue-400 text-slate-900 dark:text-text-primary font-medium transition-all"
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-border-primary">
+                  <button
+                    onClick={() => handleFilterChange('all')}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${receiptFilter === 'all' ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'}`}
+                  >
+                    الكل
+                  </button>
                   <button
                     onClick={() => handleFilterChange('pending')}
-                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${receiptFilter === 'pending'
-                      ? 'bg-orange-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${receiptFilter === 'pending' ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'}`}
                   >
-                    معلقة ({pendingCount})
+                    بانتظار الإيصال
                   </button>
                   <button
                     onClick={() => handleFilterChange('issued')}
-                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${receiptFilter === 'issued'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
+                    className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${receiptFilter === 'issued' ? 'bg-white dark:bg-surface-selected shadow-sm text-blue-600 dark:text-blue-400' : 'text-slate-500 dark:text-text-tertiary hover:text-slate-700 dark:hover:text-text-secondary'}`}
                   >
-                    مصدرة ({issuedCount})
-                  </button>
-                  <button
-                    onClick={() => handleFilterChange('all')}
-                    className={`flex-1 px-4 py-2 text-sm font-medium rounded-md transition-colors ${receiptFilter === 'all'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                  >
-                    الكل ({totalCount})
+                    تم الإصدار
                   </button>
                 </div>
-                {(searchTerm || receiptFilter !== 'pending' || startDate !== getTodayDate() || endDate !== getTodayDate()) && (
-                  <button
-                    onClick={clearFilters}
-                    className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                    title="مسح الفلاتر"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">فواتير معلقة</p>
-                  <p className="text-2xl font-bold text-orange-600">{pendingCount}</p>
-                  <p className="text-xs text-gray-500 mt-1">{pendingTotal.toFixed(2)} د.ل</p>
-                </div>
-                <svg className="h-10 w-10 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">فواتير مصدرة</p>
-                  <p className="text-2xl font-bold text-green-600">{issuedCount}</p>
-                  <p className="text-xs text-gray-500 mt-1">{issuedTotal.toFixed(2)} د.ل</p>
-                </div>
-                <svg className="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">إجمالي المبالغ</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {grandTotal.toFixed(2)} د.ل
-                  </p>
-                </div>
-                <svg className="h-10 w-10 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-600">المحاسب</p>
-                  <p className="text-lg font-bold text-gray-900">{user?.fullName || 'غير معروف'}</p>
-                </div>
-                <svg className="h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-
-          {/* Sales Table */}
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      رقم الفاتورة
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      العميل / الهاتف
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      الإجمالي
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      المدفوع
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      الباقي
-                    </th>
-                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-                      التاريخ
-                    </th>
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                      الإجراءات
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {isLoading || isFetching ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                        جاري التحميل...
-                      </td>
-                    </tr>
-                  ) : sales.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
-                        {searchTerm ? 'لا توجد نتائج للبحث' :
-                          receiptFilter === 'pending' ? 'لا توجد فواتير معلقة' :
-                            receiptFilter === 'issued' ? 'لا توجد فواتير مصدرة' :
-                              'لا توجد فواتير'}
-                      </td>
-                    </tr>
-                  ) : (
-                    sales.map((sale: any) => (
-                      <tr key={sale.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {sale.invoiceNumber || `#${sale.id}`}
-                          {sale.status === 'DRAFT' && (
-                            <span className="mr-2 text-xs text-yellow-600">(مبدئية)</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          <div>
-                            <div className="font-medium">{sale.customer?.name || 'عميل نقدي'}</div>
-                            {sale.customer?.phone && (
-                              <div className="text-gray-500 text-xs">{sale.customer.phone}</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                          {formatArabicCurrency(sale.total || 0)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-600">
-                          {formatArabicCurrency(sale.paidAmount || 0)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-orange-600">
-                          {formatArabicCurrency(sale.remainingAmount || 0)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          <div>
-                            <div>{new Date(sale.createdAt).toLocaleDateString('ar-LY')}</div>
-                            <div className="text-xs">{new Date(sale.createdAt).toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' })}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <div className="flex items-center gap-1">
-                            {/* للفواتير المبدئية: فقط زر اعتماد */}
-                            {sale.status === 'DRAFT' ? (
-                              <button
-                                onClick={() => {
-                                  setSaleToApprove(sale);
-                                  setShowApprovalModal(true);
-                                }}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors flex items-center gap-2"
-                                title="اعتماد الفاتورة"
-                              >
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                اعتماد
-                              </button>
-                            ) : (
-                              <>
-                                {/* قبض مبلغ - للفواتير المعتمدة فقط */}
-                                {(sale.remainingAmount || 0) > 0 && (
-                                  <button
-                                    onClick={() => {
-                                      setSelectedCreditSale(sale);
-                                      setShowPaymentModal(true);
-                                    }}
-                                    className="text-green-600 hover:text-green-900 p-1.5 rounded-md hover:bg-green-50 transition-colors"
-                                    title="قبض مبلغ"
-                                  >
-                                    <DollarSign className="w-4 h-4" />
-                                  </button>
-                                )}
-
-                                {/* الإيصالات */}
-                                {sale.payments && sale.payments.length > 0 && (
-                                  <button
-                                    onClick={() => {
-                                      setSelectedCreditSale(sale);
-                                      setShowPrintHistoryModal(true);
-                                    }}
-                                    className="text-purple-600 hover:text-purple-900 p-1.5 rounded-md hover:bg-purple-50 transition-colors relative"
-                                    title="عرض الإيصالات"
-                                  >
-                                    <FileText className="w-4 h-4" />
-                                    <span className="absolute -top-1 -right-1 bg-purple-600 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                      {sale.payments.length}
-                                    </span>
-                                  </button>
-                                )}
-
-                                {/* أمر صرف المخزن - لا يظهر للفواتير التلقائية */}
-                                {!sale.isAutoGenerated && (
-                                  sale.dispatchOrders && sale.dispatchOrders.length > 0 ? (
-                                    <button
-                                      disabled
-                                      className="text-gray-400 p-1.5 rounded-md cursor-not-allowed"
-                                      title="تم إصدار أمر الصرف"
-                                    >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                      </svg>
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => handleCreateDispatchOrder(sale)}
-                                      disabled={isCreatingDispatch}
-                                      className="text-orange-600 hover:text-orange-900 p-1.5 rounded-md hover:bg-orange-50 transition-colors disabled:opacity-50"
-                                      title="أمر صرف المخزن"
-                                    >
-                                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                      </svg>
-                                    </button>
-                                  )
-                                )}
-
-                                {/* طباعة الفاتورة */}
-                                <button
-                                  onClick={() => printInvoice(sale)}
-                                  className="text-gray-600 hover:text-gray-900 p-1.5 rounded-md hover:bg-gray-50 transition-colors"
-                                  title="طباعة الفاتورة"
-                                >
-                                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                  </svg>
-                                </button>
-
-                                {/* إعادة طباعة إيصال القبض - للفواتير النقدية المعتمدة */}
-                                {sale.saleType === 'CASH' && (
-                                  <button
-                                    onClick={() => printReceipt(sale)}
-                                    className="text-blue-600 hover:text-blue-900 p-1.5 rounded-md hover:bg-blue-50 transition-colors"
-                                    title="إعادة طباعة إيصال القبض"
-                                  >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                  </button>
-                                )}
-
-                                {/* إعادة طباعة آخر إيصال قبض - للفواتير الآجلة التي بها دفعات */}
-                                {sale.saleType !== 'CASH' && sale.payments && sale.payments.length > 0 && (
-                                  <button
-                                    onClick={() => {
-                                      const lastPayment = sale.payments![sale.payments!.length - 1];
-                                      setSelectedPayment(lastPayment as any);
-                                      setSelectedCreditSale(sale);
-                                      setShowPrintReceiptModal(true);
-                                    }}
-                                    className="text-blue-600 hover:text-blue-900 p-1.5 rounded-md hover:bg-blue-50 transition-colors"
-                                    title="إعادة طباعة آخر إيصال قبض"
-                                  >
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                                    </svg>
-                                  </button>
-                                )}
-
-                                {/* واتساب */}
-                                <button
-                                  onClick={() => handleSendWhatsApp(sale)}
-                                  className="text-green-600 hover:text-green-900 p-1.5 rounded-md hover:bg-green-50 transition-colors"
-                                  title="إرسال على واتساب"
-                                >
-                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                  </svg>
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {pagination && pagination.pages > 1 && (
-              <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-                <div className="flex-1 flex justify-between sm:hidden">
-                  <button
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    السابق
-                  </button>
-                  <button
-                    onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
-                    disabled={currentPage === pagination.pages}
-                    className="mr-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                  >
-                    التالي
-                  </button>
-                </div>
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm text-gray-700">
-                      عرض <span className="font-medium">{(currentPage - 1) * pagination.limit + 1}</span> إلى{' '}
-                      <span className="font-medium">
-                        {Math.min(currentPage * pagination.limit, pagination.total)}
-                      </span>{' '}
-                      من <span className="font-medium">{pagination.total}</span> نتيجة
-                    </p>
-                  </div>
-                  <div>
-                    <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                      <button
-                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                        disabled={currentPage === 1}
-                        className="relative inline-flex items-center px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
-                        <span className="mr-1">السابق</span>
-                      </button>
-
-                      {/* أرقام الصفحات */}
-                      {(() => {
-                        const pages = [];
-                        const totalPages = pagination.pages;
-                        const maxVisible = 5;
-
-                        let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-                        let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
-                        if (endPage - startPage < maxVisible - 1) {
-                          startPage = Math.max(1, endPage - maxVisible + 1);
-                        }
-
-                        // الصفحة الأولى
-                        if (startPage > 1) {
-                          pages.push(
-                            <button
-                              key={1}
-                              onClick={() => setCurrentPage(1)}
-                              className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                            >
-                              {formatArabicNumber(1)}
-                            </button>
-                          );
-                          if (startPage > 2) {
-                            pages.push(
-                              <span key="dots1" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                                ...
-                              </span>
-                            );
-                          }
-                        }
-
-                        // الصفحات المرئية
-                        for (let i = startPage; i <= endPage; i++) {
-                          pages.push(
-                            <button
-                              key={i}
-                              onClick={() => setCurrentPage(i)}
-                              className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === i
-                                ? 'z-10 bg-blue-600 border-blue-600 text-white'
-                                : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                                }`}
-                            >
-                              {formatArabicNumber(i)}
-                            </button>
-                          );
-                        }
-
-                        // الصفحة الأخيرة
-                        if (endPage < totalPages) {
-                          if (endPage < totalPages - 1) {
-                            pages.push(
-                              <span key="dots2" className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                                ...
-                              </span>
-                            );
-                          }
-                          pages.push(
-                            <button
-                              key={totalPages}
-                              onClick={() => setCurrentPage(totalPages)}
-                              className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50"
-                            >
-                              {formatArabicNumber(totalPages)}
-                            </button>
-                          );
-                        }
-
-                        return pages;
-                      })()}
-
-                      <button
-                        onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
-                        disabled={currentPage === pagination.pages}
-                        className="relative inline-flex items-center px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <span className="ml-1">التالي</span>
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </nav>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Hidden print container for invoices - positioned off-screen but visible for html2canvas */}
-          <div
-            ref={printRef}
-            className="fixed"
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: '0',
-              visibility: currentSaleToPrint ? 'visible' : 'hidden',
-              pointerEvents: 'none'
-            }}
-          >
-            {currentSaleToPrint && <ReceiptPrint sale={currentSaleToPrint} />}
-          </div>
-
-          <div
-            ref={invoicePrintRef}
-            className="fixed"
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: '0',
-              visibility: currentInvoiceToPrint ? 'visible' : 'hidden',
-              pointerEvents: 'none'
-            }}
-          >
-            {currentInvoiceToPrint && <InvoicePrint sale={currentInvoiceToPrint} />}
-          </div>
-
-          {/* Hidden print container for payments history */}
-          <div
-            ref={historyPrintRef}
-            className="fixed"
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: '0',
-              visibility: selectedCreditSale && selectedCreditSale.payments && selectedCreditSale.payments.length > 0 ? 'visible' : 'hidden',
-              pointerEvents: 'none'
-            }}
-          >
-            {selectedCreditSale && selectedCreditSale.payments && selectedCreditSale.payments.length > 0 && (
-              <PaymentsHistoryPrint
-                sale={selectedCreditSale as any}
-                payments={selectedCreditSale.payments as any}
-              />
-            )}
-          </div>
-
-          {/* Hidden container for WhatsApp invoice - positioned off-screen but visible for html2canvas */}
-          <div
-            ref={whatsappRef}
-            className="fixed"
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: '0',
-              visibility: currentSaleForWhatsApp ? 'visible' : 'hidden',
-              pointerEvents: 'none',
-              width: '210mm',
-              backgroundColor: 'white'
-            }}
-          >
-            {currentSaleForWhatsApp && <InvoicePrint sale={currentSaleForWhatsApp} />}
-          </div>
-
-          {/* Hidden container for credit payment receipt printing */}
-          <div
-            ref={creditReceiptRef}
-            className="fixed"
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: '0',
-              visibility: selectedPayment && selectedCreditSale ? 'visible' : 'hidden',
-              pointerEvents: 'none',
-              width: '210mm',
-              backgroundColor: 'white'
-            }}
-          >
-            {selectedPayment && selectedCreditSale && (
-              <CreditPaymentReceiptPrint payment={selectedPayment} sale={selectedCreditSale as any} />
-            )}
-          </div>
-        </>
-      )}
-
-
-      {/* Payment Modal */}
-      {showPaymentModal && selectedCreditSale && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
-          <div className="relative w-full max-w-lg bg-white rounded-xl shadow-2xl">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-xl">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold flex items-center gap-2">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  قبض مبلغ من العميل
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setSelectedCreditSale(null);
-                    setPaymentMethodForReceipt('CASH');
-                    setBankAccountIdForReceipt('');
-                  }}
-                  className="text-white hover:text-gray-200 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className="p-6">
-              {/* معلومات الفاتورة */}
-              <div className="mb-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-                <h4 className="text-sm font-semibold text-blue-900 mb-3 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  معلومات الفاتورة
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">رقم الفاتورة:</span>
-                    <span className="font-bold text-gray-900">{selectedCreditSale.invoiceNumber}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">العميل:</span>
-                    <span className="font-semibold text-gray-900">{selectedCreditSale.customer?.name || 'غير محدد'}</span>
-                  </div>
-                  <div className="h-px bg-blue-200 my-2"></div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">صافي الفاتورة:</span>
-                    <span className="font-bold text-lg text-gray-900">{formatArabicCurrency(selectedCreditSale.total)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">المدفوع سابقاً:</span>
-                    <span className="font-bold text-blue-600">{formatArabicCurrency(selectedCreditSale.paidAmount || 0)}</span>
-                  </div>
-                  <div className="flex justify-between items-center bg-blue-100 -mx-4 px-4 py-2 rounded">
-                    <span className="text-gray-700 font-semibold">المبلغ المتبقي:</span>
-                    <span className="font-bold text-xl text-blue-600">{formatArabicCurrency(selectedCreditSale.remainingAmount || 0)}</span>
-                  </div>
-                </div>
-              </div>
-
-              <form onSubmit={handleCreatePayment} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    المبلغ المدفوع *
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      name="amount"
-                      step="0.01"
-                      min="0.01"
-                      max={selectedCreditSale.remainingAmount}
-                      required
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="أدخل المبلغ"
-                      onInput={(e) => {
-                        const input = e.target as HTMLInputElement;
-                        const value = Number(input.value);
-                        const remaining = selectedCreditSale.remainingAmount || 0;
-
-                        if (value > remaining) {
-                          input.setCustomValidity(`المبلغ لا يمكن أن يتجاوز ${formatArabicCurrency(remaining)}`);
-                        } else if (value <= 0) {
-                          input.setCustomValidity('المبلغ يجب أن يكون أكبر من صفر');
-                        } else {
-                          input.setCustomValidity('');
-                        }
-                      }}
-                    />
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    الحد الأقصى: {formatArabicCurrency(selectedCreditSale.remainingAmount || 0)}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    طريقة الدفع *
-                  </label>
-                  <select
-                    name="paymentMethod"
-                    required
-                    value={paymentMethodForReceipt}
-                    onChange={(e) => {
-                      const next = e.target.value as "CASH" | "BANK" | "CARD";
-                      setPaymentMethodForReceipt(next);
-                      if (next === 'CASH') {
-                        setBankAccountIdForReceipt('');
-                      }
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="CASH">كاش</option>
-                    <option value="BANK">حوالة مصرفية</option>
-                    <option value="CARD">بطاقة</option>
-                  </select>
-                </div>
-
-                {(paymentMethodForReceipt === 'BANK' || paymentMethodForReceipt === 'CARD') && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      الحساب المصرفي (الخزينة) *
-                    </label>
-                    <select
-                      name="bankAccountId"
-                      required
-                      value={bankAccountIdForReceipt}
-                      onChange={(e) => setBankAccountIdForReceipt(e.target.value ? Number(e.target.value) : '')}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      disabled={isTreasuriesLoading}
-                    >
-                      <option value="">اختر الحساب المصرفي</option>
-                      {bankAccounts.map((account: any) => (
-                        <option key={account.id} value={account.id}>
-                          {account.name} {account.bankName ? `- ${account.bankName}` : ''}
-                        </option>
-                      ))}
-                    </select>
-                    {treasuriesError && (
-                      <p className="mt-1 text-xs text-red-600">تعذر تحميل الحسابات المصرفية</p>
-                    )}
-                    {!isTreasuriesLoading && !treasuriesError && bankAccounts.length === 0 && (
-                      <p className="mt-1 text-xs text-gray-500">لا توجد حسابات مصرفية فعّالة في الخزينة</p>
-                    )}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    ملاحظات
-                  </label>
-                  <textarea
-                    name="notes"
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="ملاحظات إضافية (اختياري)"
+                <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl">
+                  <Filter className="w-4 h-4 text-slate-400 dark:text-text-tertiary" />
+                  <input
+                    type="date"
+                    className="bg-transparent text-sm font-bold text-slate-700 dark:text-text-primary outline-none"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                  <span className="text-slate-300 dark:text-slate-700">|</span>
+                  <input
+                    type="date"
+                    className="bg-transparent text-sm font-bold text-slate-700 dark:text-text-primary outline-none"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                   />
                 </div>
 
-                <div className="flex gap-3 mt-6">
+                <button
+                  onClick={clearFilters}
+                  className="p-3 text-slate-400 dark:text-text-tertiary hover:text-red-500 dark:hover:text-red-400 transition-colors bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl"
+                  title="مسح الفلاتر"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sales Table */}
+        <div className="bg-white dark:bg-surface-primary rounded-2xl shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden transition-all duration-300">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-100 dark:divide-border-primary">
+              <thead className="bg-slate-50 dark:bg-surface-secondary">
+                <tr>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    رقم الفاتورة
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    العميل / الهاتف
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    الإجمالي
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    المدفوع
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    الباقي
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    التاريخ
+                  </th>
+                  <th className="px-6 py-4 text-center text-xs font-bold text-slate-500 dark:text-text-secondary uppercase tracking-wider">
+                    الإجراءات
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-surface-primary divide-y divide-slate-100 dark:divide-border-primary">
+                {isLoading || isFetching ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 dark:text-text-tertiary">
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="font-bold">جاري التحميل...</span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : sales.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="px-6 py-12 text-center text-slate-400 dark:text-text-tertiary">
+                      <div className="flex flex-col items-center gap-2">
+                        <Search className="w-10 h-10 mb-2 opacity-20" />
+                        <span className="font-bold">
+                          {searchTerm ? 'لا توجد نتائج للبحث' :
+                            receiptFilter === 'pending' ? 'لا توجد فواتير معلقة' :
+                              receiptFilter === 'issued' ? 'لا توجد فواتير مصدرة' :
+                                'لا توجد فواتير'}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  sales.map((sale: any) => (
+                    <tr key={sale.id} className="hover:bg-slate-50/80 dark:hover:bg-surface-hover transition-colors group">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-black text-slate-900 dark:text-text-primary">
+                            {sale.invoiceNumber || `#${sale.id}`}
+                          </span>
+                          {sale.status === 'DRAFT' && (
+                            <span className="px-2 py-0.5 rounded-md bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-black uppercase">
+                              مبدئية
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700 dark:text-text-secondary transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                            {sale.customer?.name || 'عميل نقدي'}
+                          </span>
+                          {sale.customer?.phone && (
+                            <span className="text-xs text-slate-400 dark:text-text-tertiary flex items-center gap-1">
+                              {sale.customer.phone}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-black text-slate-900 dark:text-text-primary">
+                          {formatArabicCurrency(sale.total || 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-black text-green-600 dark:text-green-400">
+                          {formatArabicCurrency(sale.paidAmount || 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="text-sm font-black text-orange-600 dark:text-orange-400">
+                          {formatArabicCurrency(sale.remainingAmount || 0)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-bold text-slate-700 dark:text-text-secondary">
+                            {new Date(sale.createdAt).toLocaleDateString('ar-LY')}
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-text-tertiary font-bold">
+                            {new Date(sale.createdAt).toLocaleTimeString('ar-LY', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          {sale.status === 'DRAFT' ? (
+                            <button
+                              onClick={() => {
+                                setSaleToApprove(sale);
+                                setShowApprovalModal(true);
+                              }}
+                              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black shadow-sm transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98]"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              اعتماد
+                            </button>
+                          ) : (
+                            <>
+                              {(sale.remainingAmount || 0) > 0 && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedCreditSale(sale);
+                                    setShowPaymentModal(true);
+                                  }}
+                                  className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-xl transition-all"
+                                  title="قبض مبلغ"
+                                >
+                                  <DollarSign className="w-5 h-5" />
+                                </button>
+                              )}
+
+                              {sale.payments && sale.payments.length> 0 && (
+                                <button
+                                  onClick={() => {
+                                    setSelectedCreditSale(sale);
+                                    setShowPrintHistoryModal(true);
+                                  }}
+                                  className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-xl transition-all relative"
+                                  title="عرض الإيصالات"
+                                >
+                                  <FileText className="w-5 h-5" />
+                                  <span className="absolute -top-1 -right-1 bg-purple-600 dark:bg-purple-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                                    {sale.payments.length}
+                                  </span>
+                                </button>
+                              )}
+
+                              {!sale.isAutoGenerated && (
+                                sale.dispatchOrders && sale.dispatchOrders.length> 0 ? (
+                                  <div className="p-2 text-slate-300 dark:text-slate-700 cursor-not-allowed" title="تم إصدار أمر الصرف">
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleCreateDispatchOrder(sale)}
+                                    disabled={isCreatingDispatch}
+                                    className="p-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/30 rounded-xl transition-all disabled:opacity-50"
+                                    title="أمر صرف المخزن"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                    </svg>
+                                  </button>
+                                )
+                              )}
+
+                              <button
+                                onClick={() => printInvoice(sale)}
+                                className="p-2 text-slate-600 dark:text-text-secondary hover:bg-slate-100 dark:hover:bg-surface-hover rounded-xl transition-all"
+                                title="طباعة الفاتورة"
+                              >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </button>
+
+                              {sale.saleType === 'CASH' && (
+                                <button
+                                  onClick={() => printReceipt(sale)}
+                                  className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
+                                  title="إعادة طباعة إيصال القبض"
+                                >
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                  </svg>
+                                </button>
+                              )}
+
+                              {sale.saleType !== 'CASH' && sale.payments && sale.payments.length> 0 && (
+                                <button
+                                  onClick={() => {
+                                    const lastPayment = sale.payments![sale.payments!.length - 1];
+                                    setSelectedPayment(lastPayment as any);
+                                    setSelectedCreditSale(sale);
+                                    setShowPrintReceiptModal(true);
+                                  }}
+                                  className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-xl transition-all"
+                                  title="إعادة طباعة آخر إيصال قبض"
+                                >
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                  </svg>
+                                </button>
+                              )}
+
+                              <button
+                                onClick={() => handleSendWhatsApp(sale)}
+                                className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/30 rounded-xl transition-all"
+                                title="إرسال على واتساب"
+                              >
+                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                                </svg>
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          {pagination && pagination.pages> 1 && (
+            <div className="bg-slate-50/50 dark:bg-slate-900/20 px-6 py-4 flex items-center justify-between border-t border-slate-100 dark:border-border-primary mt-6 rounded-xl">
+              <div className="flex-1 flex justify-between sm:hidden">
+                <button
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                >
+                  السابق
+                </button>
+                <button
+                  onClick={() => setCurrentPage(p => Math.min(pagination.pages, p + 1))}
+                  disabled={currentPage === pagination.pages}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-200 dark:border-border-primary text-sm font-bold rounded-xl text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 transition-all disabled:opacity-50"
+                >
+                  التالي
+                </button>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm text-slate-500 dark:text-text-tertiary">
+                    عرض صفحة <span className="font-bold text-slate-900 dark:text-text-primary">{currentPage}</span> من <span className="font-bold text-slate-900 dark:text-text-primary">{pagination.pages}</span>
+                  </p>
+                </div>
+                <nav className="relative z-0 inline-flex rounded-xl shadow-sm space-x-1 rtl:space-x-reverse" aria-label="Pagination">
+                  {Array.from({ length: Math.min(pagination!.pages, 10) }, (_, i) => {
+                    const pageNumber = i + 1;
+                    return (
+                      <button
+                        key={pageNumber}
+                        onClick={() => setCurrentPage(pageNumber)}
+                        className={`relative inline-flex items-center px-4 py-2 text-sm font-black rounded-xl transition-all ${currentPage === pageNumber
+                          ? 'z-10 bg-blue-600 text-white shadow-md shadow-blue-200 dark:shadow-none'
+                          : 'bg-white dark:bg-surface-primary border-2 border-slate-100 dark:border-border-primary text-slate-500 dark:text-text-tertiary hover:bg-slate-50 dark:hover:bg-surface-hover'
+                          }`}
+                      >
+                        {pageNumber}
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
+            </div>
+          )}
+
+
+        </div>
+
+      </div>
+
+      {/* Hidden print containers */}
+      <div
+        ref={printRef}
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          visibility: currentSaleToPrint ? 'visible' : 'hidden'
+        }}
+      >
+        {currentSaleToPrint && <ReceiptPrint sale={currentSaleToPrint} />}
+      </div>
+
+      <div
+        ref={invoicePrintRef}
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          visibility: currentInvoiceToPrint ? 'visible' : 'hidden'
+        }}
+      >
+        {currentInvoiceToPrint && <InvoicePrint sale={currentInvoiceToPrint} />}
+      </div>
+
+      <div
+        ref={historyPrintRef}
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          visibility: selectedCreditSale && selectedCreditSale.payments && selectedCreditSale.payments.length> 0 ? 'visible' : 'hidden'
+        }}
+      >
+        {selectedCreditSale && selectedCreditSale.payments && selectedCreditSale.payments.length> 0 && (
+          <PaymentsHistoryPrint
+            sale={selectedCreditSale as any}
+            payments={selectedCreditSale.payments as any}
+          />
+        )}
+      </div>
+
+      <div
+        ref={whatsappRef}
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          visibility: currentSaleForWhatsApp ? 'visible' : 'hidden',
+          width: '210mm',
+          backgroundColor: 'white'
+        }}
+      >
+        {currentSaleForWhatsApp && <InvoicePrint sale={currentSaleForWhatsApp} />}
+      </div>
+
+      <div
+        ref={creditReceiptRef}
+        className="fixed opacity-0 pointer-events-none"
+        style={{
+          position: 'fixed',
+          left: '-9999px',
+          top: '0',
+          visibility: selectedPayment && selectedCreditSale ? 'visible' : 'hidden',
+          width: '210mm',
+          backgroundColor: 'white'
+        }}
+      >
+        {selectedPayment && selectedCreditSale && (
+          <CreditPaymentReceiptPrint payment={selectedPayment} sale={selectedCreditSale as any} />
+        )}
+      </div>
+
+
+      {/* Approval Modal */}
+      {
+        showApprovalModal && saleToApprove && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300">
+            <div className="relative w-full max-w-lg bg-white dark:bg-surface-primary rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-border-primary">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-600 dark:to-indigo-600 text-white px-6 py-4 text-right">
+                <div className="flex items-center justify-between flex-row-reverse">
+                  <div className="flex items-center gap-2.5 flex-row-reverse">
+                    <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-md">
+                      <Package className="w-5 h-5" />
+                    </div>
+                    <div className="text-right">
+                      <h3 className="text-lg font-black tracking-tight">اعتماد الفاتورة</h3>
+                      <p className="text-blue-100 text-[10px] font-bold opacity-80 uppercase tracking-wider">تأكيد عملية البيع وخصم المخزون</p>
+                    </div>
+                  </div>
                   <button
-                    type="submit"
-                    disabled={isCreatingPayment}
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg disabled:opacity-50 font-semibold transition-all shadow-md flex items-center justify-center gap-2"
+                    onClick={() => {
+                      setShowApprovalModal(false);
+                      setSaleToApprove(null);
+                    }}
+                    className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                   >
-                    {isCreatingPayment ? (
-                      <>
-                        <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        جاري الحفظ...
-                      </>
-                    ) : (
-                      <>
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                        تأكيد وإصدار إيصال
-                      </>
-                    )}
+                    <X className="w-5 h-5" />
                   </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Sale Info */}
+                <div className="mb-5 bg-slate-50 dark:bg-surface-secondary rounded-xl p-4 border border-slate-100 dark:border-border-primary">
+                  <div className="grid grid-cols-2 gap-3 text-right">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 dark:text-text-tertiary text-[10px] font-black uppercase">رقم الفاتورة</span>
+                      <span className="text-slate-900 dark:text-text-primary text-sm font-black">{saleToApprove.invoiceNumber || `#${saleToApprove.id}`}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 dark:text-text-tertiary text-[10px] font-black uppercase">إجمالي القيمة</span>
+                      <span className="text-blue-600 dark:text-blue-400 text-base font-black">{formatArabicCurrency(saleToApprove.total)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <form onSubmit={handleApprovalSubmit} className="space-y-5">
+                  <div className="space-y-2.5">
+                    <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">نوع البيع</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className={`
+                        flex items-center justify-center py-3 px-4 rounded-xl border-2 cursor-pointer transition-all
+                        ${approvalSaleType === 'CREDIT'
+                          ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                          : 'border-slate-100 dark:border-border-primary bg-slate-50 dark:bg-surface-secondary text-slate-500 dark:text-text-tertiary hover:border-slate-200'}
+                      `}>
+                        <input
+                          type="radio"
+                          name="saleType"
+                          value="CREDIT"
+                          checked={approvalSaleType === 'CREDIT'}
+                          onChange={() => setApprovalSaleType('CREDIT')}
+                          className="hidden"
+                        />
+                        <span className="text-sm font-black">بيع آجل</span>
+                      </label>
+                      <label className={`
+                        flex items-center justify-center py-3 px-4 rounded-xl border-2 cursor-pointer transition-all
+                        ${approvalSaleType === 'CASH'
+                          ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
+                          : 'border-slate-100 dark:border-border-primary bg-slate-50 dark:bg-surface-secondary text-slate-500 dark:text-text-tertiary hover:border-slate-200'}
+                      `}>
+                        <input
+                          type="radio"
+                          name="saleType"
+                          value="CASH"
+                          checked={approvalSaleType === 'CASH'}
+                          onChange={() => setApprovalSaleType('CASH')}
+                          className="hidden"
+                        />
+                        <span className="text-sm font-black">بيع نقدي</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {approvalSaleType === 'CASH' && (
+                    <div className="space-y-4 animate-in fade-in slide-in-from-top-3 duration-300">
+                      <div className="space-y-1.5">
+                        <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">طريقة الدفع</label>
+                        <select
+                          name="paymentMethod"
+                          required={approvalSaleType === 'CASH'}
+                          value={approvalPaymentMethod}
+                          onChange={(e) => setApprovalPaymentMethod(e.target.value as any)}
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 dark:text-text-primary appearance-none transition-all text-right text-sm"
+                        >
+                          <option value="CASH">💵 نقداً (كاش)</option>
+                          <option value="BANK">🏦 تحويل بنكي</option>
+                          <option value="CARD">💳 بطاقة مصرفية</option>
+                        </select>
+                      </div>
+
+                      {(approvalPaymentMethod === 'BANK' || approvalPaymentMethod === 'CARD') && (
+                        <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                          <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">الحساب المصرفي</label>
+                          <select
+                            name="bankAccountId"
+                            required={(approvalPaymentMethod === 'BANK' || approvalPaymentMethod === 'CARD')}
+                            className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-blue-500/20 font-bold text-slate-900 dark:text-text-primary appearance-none transition-all text-right text-sm"
+                          >
+                            <option value="">اختر الحساب...</option>
+                            {bankAccounts.map((account: any) => (
+                              <option key={account.id} value={account.id}>
+                                {account.name} {account.bankName ? `- ${account.bankName}` : ''}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isApproving}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3.5 rounded-xl font-black text-sm transition-all shadow-md shadow-blue-100 dark:shadow-none flex items-center justify-center gap-2 hover:translate-y-[-1px] active:translate-y-[0px] disabled:opacity-50"
+                    >
+                      {isApproving ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          تأكيد الاعتماد والخصم
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowApprovalModal(false);
+                        setSaleToApprove(null);
+                      }}
+                      className="px-6 py-3.5 bg-slate-100 dark:bg-surface-secondary text-slate-600 dark:text-text-secondary rounded-xl hover:bg-slate-200 dark:hover:bg-surface-hover font-black text-sm transition-all"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+
+      {/* Payment Modal */}
+      {
+        showPaymentModal && selectedCreditSale && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4 transition-all duration-300">
+            <div className="relative w-full max-w-lg bg-white dark:bg-surface-primary rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-border-primary">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 dark:from-emerald-600 dark:to-teal-600 text-white px-6 py-4">
+                <div className="flex items-center justify-between flex-row-reverse">
+                  <div className="flex items-center gap-2.5 flex-row-reverse">
+                    <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-md">
+                      <DollarSign className="w-5 h-5" />
+                    </div>
+                    <div className="text-right">
+                      <h3 className="text-lg font-black tracking-tight">قبض دفعة من عميل</h3>
+                      <p className="text-emerald-50 text-[10px] font-bold opacity-80 uppercase tracking-wider">تسجيل متحصلات نقدية للفاتورة</p>
+                    </div>
+                  </div>
                   <button
-                    type="button"
                     onClick={() => {
                       setShowPaymentModal(false);
                       setSelectedCreditSale(null);
                       setPaymentMethodForReceipt('CASH');
                       setBankAccountIdForReceipt('');
                     }}
-                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors"
+                    className="p-1.5 hover:bg-white/20 rounded-lg transition-colors"
                   >
-                    إلغاء
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Details Modal */}
-      {showDetailsModal && selectedCreditSale && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-5 border w-11/12 max-w-4xl shadow-lg rounded-md bg-white">
-            <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">تفاصيل الفاتورة</h3>
-
-              {/* Invoice Info */}
-              <div className="grid grid-cols-2 gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
-                <div>
-                  <span className="text-sm text-gray-600">رقم الفاتورة:</span>
-                  <div className="font-semibold">{selectedCreditSale.invoiceNumber}</div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">العميل:</span>
-                  <div className="font-semibold">{selectedCreditSale.customer?.name || 'غير محدد'}</div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">المبلغ الإجمالي:</span>
-                  <div className="font-semibold">{formatArabicCurrency(selectedCreditSale.total)}</div>
-                </div>
-                <div>
-                  <span className="text-sm text-gray-600">المبلغ المتبقي:</span>
-                  <div className="font-semibold text-red-600">{formatArabicCurrency(selectedCreditSale.remainingAmount || 0)}</div>
-                </div>
               </div>
 
-              {/* Payments History */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <h4 className="font-semibold">سجل الدفعات ({formatArabicNumber(selectedCreditSale.payments?.length || 0)})</h4>
-                  {selectedCreditSale.payments && selectedCreditSale.payments.length > 0 && (
-                    <button
-                      onClick={() => printPaymentsHistory(selectedCreditSale as any)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2"
-                    >
-                      🖨️ طباعة سجل الدفعات
-                    </button>
-                  )}
-                </div>
-                {selectedCreditSale.payments && selectedCreditSale.payments.length > 0 ? (
-                  <div className="space-y-2">
-                    {selectedCreditSale.payments.map((payment: any) => (
-                      <div key={payment.id} className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                        <div>
-                          <div className="font-semibold">{formatArabicCurrency(payment.amount)}</div>
-                          <div className="text-sm text-gray-600">
-                            {payment.receiptNumber} - {new Date(payment.paymentDate).toLocaleDateString('ar-LY')}
-                          </div>
-                          {payment.notes && <div className="text-xs text-gray-500">{payment.notes}</div>}
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => printCreditReceipt(payment, selectedCreditSale)}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="طباعة إيصال القبض"
-                          >
-                            🖨️
-                          </button>
-                          <button
-                            onClick={() => handleDeletePayment(payment)}
-                            className="text-red-600 hover:text-red-900"
-                            title="حذف"
-                          >
-                            🗑️
-                          </button>
-                        </div>
+              <div className="p-6">
+                {/* معلومات الفاتورة */}
+                <div className="mb-6 bg-slate-50 dark:bg-surface-secondary rounded-xl p-4 border border-slate-100 dark:border-border-primary text-slate-900 dark:text-text-primary">
+                  <h4 className="text-[10px] font-black text-slate-400 dark:text-text-tertiary uppercase tracking-wider mb-3 flex items-center gap-1.5 flex-row-reverse text-right">
+                    <FileText className="w-3.5 h-3.5" />
+                    بيانات الفاتورة المستهدفة
+                  </h4>
+                  <div className="grid grid-cols-2 gap-3 text-xs font-bold text-right">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-slate-500 dark:text-text-tertiary text-[10px]">رقم الفاتورة</span>
+                      <span className="text-slate-900 dark:text-text-primary">{selectedCreditSale.invoiceNumber || `#${selectedCreditSale.id}`}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5 text-left">
+                      <span className="text-slate-500 dark:text-text-tertiary text-[10px]">اسم العميل</span>
+                      <span className="text-slate-900 dark:text-text-primary truncate">{selectedCreditSale.customer?.name || 'عميل نقدي'}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5 col-span-2 pt-2.5 border-t border-slate-200 dark:border-border-primary/50 mt-1.5">
+                      <div className="flex justify-between items-center bg-blue-50/50 dark:bg-blue-900/10 p-2.5 rounded-lg border border-blue-100/50 dark:border-blue-900/20">
+                        <span className="text-blue-800 dark:text-blue-300 text-[11px] font-black">المتبقي للتحصيل:</span>
+                        <span className="text-blue-600 dark:text-blue-400 text-sm font-black">{formatArabicCurrency(selectedCreditSale.remainingAmount || 0)}</span>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-gray-500 text-center py-4">لا توجد دفعات</p>
-                )}
-              </div>
+                </div>
 
-              <button
-                onClick={() => {
-                  setShowDetailsModal(false);
-                  setSelectedCreditSale(null);
-                }}
-                className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg"
-              >
-                إغلاق
-              </button>
+                <form onSubmit={handleCreatePayment} className="space-y-5">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">
+                      المبلغ المراد قبضه <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative group">
+                      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 dark:text-text-tertiary font-black text-xs">د.ل</div>
+                      <input
+                        type="number"
+                        name="amount"
+                        step="0.01"
+                        min="0.01"
+                        max={selectedCreditSale.remainingAmount}
+                        required
+                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-text-primary font-black text-base transition-all text-right"
+                        placeholder="0.00"
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement;
+                          const value = Number(input.value);
+                          const remaining = selectedCreditSale.remainingAmount || 0;
+                          if (value> remaining) {
+                            input.setCustomValidity(`المبلغ لا يمكن أن يتجاوز المتبقي (${formatArabicCurrency(remaining)})`);
+                          } else if (value <= 0) {
+                            input.setCustomValidity('المبلغ يجب أن يكون أكبر من صفر');
+                          } else {
+                            input.setCustomValidity('');
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">طريقة القبض</label>
+                      <select
+                        name="paymentMethod"
+                        required
+                        value={paymentMethodForReceipt}
+                        onChange={(e) => {
+                          const next = e.target.value as "CASH" | "BANK" | "CARD";
+                          setPaymentMethodForReceipt(next);
+                          if (next === 'CASH') setBankAccountIdForReceipt('');
+                        }}
+                        className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-text-primary font-bold transition-all appearance-none text-right text-sm"
+                      >
+                        <option value="CASH">💵 نقداً (كاش)</option>
+                        <option value="BANK">🏦 تحويل بنكي</option>
+                        <option value="CARD">💳 بطاقة مصرفية</option>
+                      </select>
+                    </div>
+
+                    {(paymentMethodForReceipt === 'BANK' || paymentMethodForReceipt === 'CARD') && (
+                      <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">الحساب المودع فيه</label>
+                        <select
+                          name="bankAccountId"
+                          required
+                          value={bankAccountIdForReceipt}
+                          onChange={(e) => setBankAccountIdForReceipt(e.target.value ? Number(e.target.value) : '')}
+                          className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-text-primary font-bold transition-all appearance-none text-right text-sm"
+                          disabled={isTreasuriesLoading}
+                        >
+                          <option value="">اختر الحساب...</option>
+                          {bankAccounts.map((account: any) => (
+                            <option key={account.id} value={account.id}>
+                              {account.name} {account.bankName ? `- ${account.bankName}` : ''}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-black text-slate-700 dark:text-text-secondary pr-1 block text-right uppercase">ملاحظات إضافية</label>
+                    <textarea
+                      name="notes"
+                      rows={2}
+                      className="w-full px-4 py-2.5 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 text-slate-900 dark:text-text-primary font-medium transition-all resize-none text-right text-sm"
+                      placeholder="أدخل أي ملاحظات هنا..."
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={isCreatingPayment}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3.5 rounded-xl font-black text-sm transition-all shadow-md shadow-emerald-100 dark:shadow-none flex items-center justify-center gap-2 hover:translate-y-[-1px] active:translate-y-[0px] disabled:opacity-50"
+                    >
+                      {isCreatingPayment ? (
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          تأكيد القبض وإصدار إيصال
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowPaymentModal(false);
+                        setSelectedCreditSale(null);
+                        setPaymentMethodForReceipt('CASH');
+                        setBankAccountIdForReceipt('');
+                      }}
+                      className="px-6 py-3.5 bg-slate-100 dark:bg-surface-secondary text-slate-600 dark:text-text-secondary rounded-xl hover:bg-slate-200 dark:hover:bg-surface-hover font-black text-sm transition-all"
+                    >
+                      إلغاء
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
+
 
       {/* Print Receipt Modal */}
-      {showPrintReceiptModal && selectedPayment && selectedCreditSale && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[95vh] overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold">🖨️ معاينة إيصال القبض</h2>
-              <button onClick={() => setShowPrintReceiptModal(false)} className="text-white hover:text-gray-200">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-4 overflow-y-auto max-h-[calc(95vh-140px)] bg-gray-100">
-              <div id="credit-receipt-print-content" className="bg-white rounded shadow-lg max-w-[210mm] mx-auto" style={{ transform: 'scale(0.85)', transformOrigin: 'top center' }}>
-                <CreditPaymentReceiptPrint payment={selectedPayment} sale={selectedCreditSale as any} />
+      {
+        showPrintReceiptModal && selectedPayment && selectedCreditSale && (
+          <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-surface-primary rounded-3xl shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden border border-slate-200 dark:border-border-primary flex flex-col">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-600 dark:to-indigo-600 text-white px-8 py-5 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl backdrop-blur-md">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-xl font-black">معاينة إيصال القبض قبل الطباعة</h2>
+                </div>
+                <button onClick={() => setShowPrintReceiptModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto flex-1 bg-slate-100 dark:bg-surface-secondary flex items-start justify-center">
+                <div id="credit-receipt-print-content" className="bg-white rounded-lg shadow-2xl max-w-[210mm] w-full min-h-[297mm] origin-top scale-[0.85] md:scale-100">
+                  <CreditPaymentReceiptPrint payment={selectedPayment} sale={selectedCreditSale as any} />
+                </div>
+              </div>
+              <div className="bg-white dark:bg-surface-primary px-8 py-5 flex justify-end gap-4 border-t border-slate-100 dark:border-border-primary shadow-2xl">
+                <button
+                  onClick={() => setShowPrintReceiptModal(false)}
+                  className="px-8 py-3 bg-slate-100 dark:bg-surface-hover text-slate-600 dark:text-text-secondary rounded-xl font-black transition-all hover:bg-slate-200 dark:hover:bg-surface-selected"
+                >
+                  إلغاء
+                </button>
+                <button
+                  onClick={() => selectedPayment && selectedCreditSale && printCreditReceipt(selectedPayment, selectedCreditSale)}
+                  className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-200 dark:shadow-none flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  تأكيد وطباعة الإيصال
+                </button>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-3 flex justify-end gap-3 border-t">
-              <button
-                onClick={() => setShowPrintReceiptModal(false)}
-                className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={() => selectedPayment && selectedCreditSale && printCreditReceipt(selectedPayment, selectedCreditSale)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                طباعة الإيصال
-              </button>
-            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Print History Modal */}
-      {showPrintHistoryModal && selectedCreditSale && selectedCreditSale.payments && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="bg-blue-600 text-white px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold">إيصالات القبض للفاتورة: {selectedCreditSale.invoiceNumber}</h2>
-              <button onClick={() => setShowPrintHistoryModal(false)} className="text-white hover:text-gray-200">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-180px)]">
-              {/* قائمة الإيصالات */}
-              <div className="space-y-4">
-                {selectedCreditSale.payments.map((payment: any, index: number) => (
-                  <div key={payment.id} className="border-2 border-gray-200 rounded-lg p-4 bg-white hover:bg-gray-50">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">إيصال قبض #{payment.receiptNumber}</h3>
-                        <p className="text-sm text-gray-600">التاريخ: {new Date(payment.paymentDate).toLocaleDateString('ar-LY')}</p>
-                      </div>
-                      <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                        {formatArabicCurrency(payment.amount)}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 mb-3">
-                      <div>
-                        <p className="text-xs text-gray-500">طريقة الدفع</p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {payment.paymentMethod === 'CASH' ? 'نقداً' :
-                            payment.paymentMethod === 'BANK_TRANSFER' ? 'تحويل بنكي' :
-                              payment.paymentMethod === 'CHECK' ? 'شيك' : payment.paymentMethod}
-                        </p>
-                      </div>
-                      {payment.notes && (
+      {
+        showPrintHistoryModal && selectedCreditSale && selectedCreditSale.payments && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-surface-primary rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-slate-200 dark:border-border-primary flex flex-col font-sans">
+              <div className="bg-blue-600 text-white px-8 py-6 flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl shadow-inner">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                  <h2 className="text-xl font-black">إيصالات الفاتورة: {selectedCreditSale.invoiceNumber || `#${selectedCreditSale.id}`}</h2>
+                </div>
+                <button onClick={() => setShowPrintHistoryModal(false)} className="p-2 hover:bg-white/20 rounded-xl transition-colors">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-8 overflow-y-auto flex-1 bg-slate-50 dark:bg-surface-secondary">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {selectedCreditSale.payments.map((payment: any) => (
+                    <div key={payment.id} className="bg-white dark:bg-surface-primary border border-slate-200 dark:border-border-primary rounded-2xl p-6 shadow-sm hover:shadow-md transition-all group">
+                      <div className="flex justify-between items-start mb-4">
                         <div>
-                          <p className="text-xs text-gray-500">ملاحظات</p>
-                          <p className="text-sm font-medium text-gray-900">{payment.notes}</p>
+                          <h3 className="text-lg font-black text-slate-900 dark:text-text-primary">إيصال قبض #{payment.receiptNumber}</h3>
+                          <p className="text-sm font-bold text-slate-400 dark:text-text-tertiary">{new Date(payment.paymentDate).toLocaleDateString('ar-LY')}</p>
                         </div>
-                      )}
-                    </div>
+                        <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl font-black text-sm">
+                          {formatArabicCurrency(payment.amount)}
+                        </div>
+                      </div>
 
-                    <div className="flex justify-end">
+                      <div className="space-y-3 mb-6">
+                        <div className="flex justify-between text-sm font-bold">
+                          <span className="text-slate-500 dark:text-text-tertiary">الطريقة:</span>
+                          <span className="text-slate-700 dark:text-text-secondary">
+                            {payment.paymentMethod === 'CASH' ? 'نقداً' :
+                              payment.paymentMethod === 'BANK' ? 'تحويل بنكي' :
+                                payment.paymentMethod === 'CARD' ? 'بطاقة مصرفية' : payment.paymentMethod}
+                          </span>
+                        </div>
+                        {payment.notes && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-slate-500 dark:text-text-tertiary text-xs">ملاحظات:</span>
+                            <p className="text-slate-700 dark:text-text-secondary text-sm italic">"{payment.notes}"</p>
+                          </div>
+                        )}
+                      </div>
+
                       <button
                         onClick={() => {
                           setSelectedPayment(payment);
                           setShowPrintReceiptModal(true);
                         }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                        className="w-full py-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl font-black text-sm hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 group-hover:bg-blue-600 group-hover:text-white"
                       >
-                        طباعة هذا الإيصال
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        طباعة الإيصال
                       </button>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t">
-              <button onClick={() => setShowPrintHistoryModal(false)} className="px-6 py-2.5 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
-                إغلاق
-              </button>
-              <button onClick={() => selectedCreditSale && printPaymentsHistory(selectedCreditSale as any)} className="px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                طباعة كل الإيصالات
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Sale Approval Modal */}
-      {showApprovalModal && saleToApprove && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 flex justify-between items-center">
-              <h2 className="text-xl font-bold">✅ اعتماد الفاتورة</h2>
-              <button
-                onClick={() => setShowApprovalModal(false)}
-                className="text-white hover:text-gray-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <form onSubmit={handleApprovalSubmit} className="p-6">
-              <div className="mb-4">
-                <p className="text-gray-700 mb-2">
-                  <span className="font-medium">رقم الفاتورة:</span> {saleToApprove.invoiceNumber || saleToApprove.id}
-                </p>
-                <p className="text-gray-700 mb-2">
-                  <span className="font-medium">العميل:</span> {saleToApprove.customer?.name || 'غير محدد'}
-                </p>
-                <p className="text-gray-700 mb-4">
-                  <span className="font-medium">المجموع:</span> {saleToApprove.total.toFixed(2)} د.ل
-                </p>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  نوع البيع *
-                </label>
-                <select
-                  name="saleType"
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">اختر نوع البيع</option>
-                  <option value="CASH">نقدي</option>
-                  <option value="CREDIT">آجل</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  طريقة الدفع (للبيع النقدي)
-                </label>
-                <select
-                  name="paymentMethod"
-                  id="paymentMethodSelect"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onChange={(e) => {
-                    const bankDiv = document.getElementById('bankAccountDiv');
-                    if (bankDiv) {
-                      bankDiv.style.display = (e.target.value === 'BANK' || e.target.value === 'CARD') ? 'block' : 'none';
-                    }
-                  }}
-                >
-                  <option value="">اختر طريقة الدفع</option>
-                  <option value="CASH">كاش</option>
-                  <option value="BANK">حوالة مصرفية</option>
-                  <option value="CARD">بطاقة</option>
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  💡 طريقة الدفع مطلوبة فقط للبيع النقدي
-                </p>
-              </div>
-
-              <div id="bankAccountDiv" className="mb-6" style={{ display: 'none' }}>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  الحساب المصرفي *
-                </label>
-                <select
-                  name="bankAccountId"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">اختر الحساب المصرفي</option>
-                  {bankAccounts.map((account: any) => (
-                    <option key={account.id} value={account.id}>
-                      {account.name} - {account.bankName || ''}
-                    </option>
                   ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-1">
-                  🏦 اختر الحساب المصرفي الذي سيتم إيداع المبلغ فيه
-                </p>
+                </div>
               </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowApprovalModal(false)}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                >
-                  إلغاء
+              <div className="bg-white dark:bg-surface-primary px-8 py-5 flex justify-end gap-4 border-t border-slate-100 dark:border-border-primary">
+                <button onClick={() => setShowPrintHistoryModal(false)} className="px-8 py-3 bg-slate-100 dark:bg-surface-hover text-slate-600 dark:text-text-secondary rounded-xl font-black hover:bg-slate-200 transition-all">
+                  إغلاق
                 </button>
-                <button
-                  type="submit"
-                  disabled={isApproving}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
-                >
-                  {isApproving ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      جاري الاعتماد...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      اعتماد وخصم المخزون
-                    </>
-                  )}
+                <button onClick={() => selectedCreditSale && printPaymentsHistory(selectedCreditSale as any)} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-black flex items-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none hover:scale-[1.02] transition-all">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  طباعة الكل
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Sale Edit Modal */}
-      {showEditModal && saleToEdit && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto">
-            <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-              <h2 className="text-xl font-bold">✏️ تعديل الفاتورة</h2>
-              <button
-                onClick={() => {
-                  setShowEditModal(false);
-                  setEditLines([]);
-                }}
-                className="text-white hover:text-gray-200"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
             </div>
+          </div>
+        )
+      }
 
-            <form onSubmit={handleEditSubmit} className="p-6">
-              {/* معلومات الفاتورة */}
-              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 mb-2">
-                  <span className="font-medium">رقم الفاتورة الحالي:</span> {saleToEdit.invoiceNumber || saleToEdit.id}
-                </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">المجموع القديم:</span> {formatArabicCurrency(saleToEdit.total)}
-                </p>
-              </div>
-
-              {/* رقم الفاتورة */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  رقم الفاتورة
-                </label>
-                <input
-                  type="text"
-                  name="invoiceNumber"
-                  defaultValue={saleToEdit.invoiceNumber || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  placeholder="أدخل رقم الفاتورة"
-                />
-              </div>
-
-              {/* العميل */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  العميل
-                </label>
-                <select
-                  name="customerId"
-                  defaultValue={saleToEdit.customerId || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="">غير محدد</option>
-                  {salesData?.data?.sales
-                    ?.map(s => s.customer)
-                    .filter((customer, index, self) =>
-                      customer && self.findIndex(c => c?.id === customer.id) === index
-                    )
-                    .map(customer => customer && (
-                      <option key={customer.id} value={customer.id}>
-                        {customer.name}
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
-
-              {/* قسم الأصناف */}
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-medium text-gray-700">
-                    الأصناف ({editLines.length})
-                  </label>
-                  <button
-                    type="button"
-                    onClick={addEditLine}
-                    className="inline-flex items-center px-3 py-1 bg-green-600 text-white text-sm rounded-md hover:bg-green-700"
-                  >
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                    إضافة صنف
+      {/* Details Modal */}
+      {
+        showDetailsModal && selectedCreditSale && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm overflow-y-auto h-full w-full z-50 flex items-center justify-center p-4">
+            <div className="relative w-full max-w-4xl bg-white dark:bg-surface-primary rounded-3xl shadow-2xl border border-slate-200 dark:border-border-primary overflow-hidden">
+              <div className="p-8 space-y-8">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-border-primary pb-6">
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-text-primary">تفاصيل وحركة الفاتورة</h3>
+                  <button onClick={() => setShowDetailsModal(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-surface-hover rounded-xl transition-colors text-slate-400">
+                    <X className="w-6 h-6" />
                   </button>
                 </div>
 
-                {editLines.length === 0 ? (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
-                    <p className="text-gray-500">لا توجد أصناف. انقر على "إضافة صنف" لإضافة صنف جديد</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="bg-slate-50 dark:bg-surface-secondary p-5 rounded-2xl border border-slate-100 dark:border-border-primary">
+                    <span className="text-xs font-bold text-slate-500 dark:text-text-tertiary block mb-1">رقم الفاتورة</span>
+                    <span className="text-lg font-black text-slate-900 dark:text-text-primary">{selectedCreditSale.invoiceNumber || `#${selectedCreditSale.id}`}</span>
                   </div>
-                ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {editLines.map((line, index) => {
-                      const product = productsData?.data?.products?.find(p => p.id === line.productId);
-                      const unitsPerBox = product?.unitsPerBox ? Number(product.unitsPerBox) : null;
-                      const totalUnits = unitsPerBox && line.qty ? line.qty * unitsPerBox : null;
-                      const pricePerUnit = unitsPerBox && line.unitPrice ? line.unitPrice / unitsPerBox : null;
-                      const subtotal = line.qty * line.unitPrice;
-
-                      return (
-                        <div key={index} className="bg-white p-4 rounded-lg border-2 border-gray-200 shadow-sm hover:border-orange-300 transition-colors">
-                          <div className="grid grid-cols-12 gap-3 items-start">
-                            {/* اختيار الصنف */}
-                            <div className="col-span-5">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">الصنف</label>
-                              <select
-                                value={line.productId}
-                                onChange={(e) => updateEditLine(index, 'productId', Number(e.target.value))}
-                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                required
-                              >
-                                <option value={0}>اختر صنف...</option>
-                                {productsData?.data?.products?.map(product => (
-                                  <option key={product.id} value={product.id}>
-                                    {product.name} - {product.sku}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-
-                            {/* الكمية */}
-                            <div className="col-span-3">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
-                                الكمية {product?.unit === 'صندوق' && '(صندوق)'}
-                              </label>
-                              <input
-                                type="number"
-                                value={line.qty}
-                                onChange={(e) => updateEditLine(index, 'qty', Number(e.target.value))}
-                                min="0.01"
-                                step="0.01"
-                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                required
-                              />
-                              {totalUnits && (
-                                <p className="text-xs text-blue-600 mt-0.5">
-                                  📏 {formatArabicNumber(totalUnits.toFixed(2))} متر
-                                </p>
-                              )}
-                            </div>
-
-                            {/* السعر */}
-                            <div className="col-span-3">
-                              <label className="block text-xs font-medium text-gray-700 mb-1">
-                                السعر/متر
-                              </label>
-                              <input
-                                type="number"
-                                value={pricePerUnit || 0}
-                                onChange={(e) => updatePriceFromUnitPrice(index, Number(e.target.value))}
-                                min="0.01"
-                                step="0.01"
-                                className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                required
-                              />
-                              {unitsPerBox && line.unitPrice > 0 && (
-                                <p className="text-xs text-blue-600 mt-0.5">
-                                  📦 {formatArabicCurrency(line.unitPrice)}/صندوق
-                                </p>
-                              )}
-                            </div>
-
-                            {/* زر الحذف */}
-                            <div className="col-span-1 flex items-end">
-                              <button
-                                type="button"
-                                onClick={() => removeEditLine(index)}
-                                className="w-full p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                                title="حذف"
-                              >
-                                <svg className="w-4 h-4 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* معلومات تفصيلية */}
-                          <div className="mt-3 pt-3 border-t border-gray-200 bg-gradient-to-r from-blue-50 to-green-50 p-2 rounded">
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              {/* العمود الأيسر */}
-                              <div className="space-y-1">
-                                {product?.unit && (
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">الوحدة:</span> {product.unit}
-                                  </p>
-                                )}
-                                {unitsPerBox && (
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">متر/صندوق:</span> {formatArabicNumber(unitsPerBox.toFixed(2))}
-                                  </p>
-                                )}
-                                {pricePerUnit && (
-                                  <p className="text-green-700 font-medium">
-                                    السعر/متر: {formatArabicCurrency(pricePerUnit)}
-                                  </p>
-                                )}
-                              </div>
-
-                              {/* العمود الأيمن */}
-                              <div className="space-y-1 text-left">
-                                <p className="text-lg font-bold text-blue-700">
-                                  المجموع: {formatArabicCurrency(subtotal)}
-                                </p>
-                                {totalUnits && (
-                                  <p className="text-gray-600">
-                                    <span className="font-medium">إجمالي الأمتار:</span> {formatArabicNumber(totalUnits.toFixed(2))} م
-                                  </p>
-                                )}
-                                {unitsPerBox && line.unitPrice > 0 && (
-                                  <p className="text-blue-600">
-                                    السعر/صندوق: {formatArabicCurrency(line.unitPrice)}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })}
+                  <div className="bg-slate-50 dark:bg-surface-secondary p-5 rounded-2xl border border-slate-100 dark:border-border-primary">
+                    <span className="text-xs font-bold text-slate-500 dark:text-text-tertiary block mb-1">العميل</span>
+                    <span className="text-lg font-black text-slate-900 dark:text-text-primary truncate">{selectedCreditSale.customer?.name || 'عميل نقدي'}</span>
                   </div>
-                )}
-              </div>
-
-              {/* المجموع الجديد */}
-              {editLines.length > 0 && (
-                <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg font-medium text-gray-700">المجموع الجديد:</span>
-                    <span className="text-2xl font-bold text-blue-600">
-                      {formatArabicCurrency(editLines.reduce((sum, line) => sum + (line.qty * line.unitPrice), 0))}
-                    </span>
+                  <div className="bg-slate-50 dark:bg-surface-secondary p-5 rounded-2xl border border-slate-100 dark:border-border-primary">
+                    <span className="text-xs font-bold text-slate-500 dark:text-text-tertiary block mb-1">صافي القيمة</span>
+                    <span className="text-lg font-black text-blue-600 dark:text-blue-400">{formatArabicCurrency(selectedCreditSale.total)}</span>
+                  </div>
+                  <div className="bg-red-50 dark:bg-red-900/10 p-5 rounded-2xl border border-red-100 dark:border-red-900/30">
+                    <span className="text-xs font-bold text-red-500 dark:text-red-400 block mb-1">المتبقي</span>
+                    <span className="text-lg font-black text-red-600 dark:text-red-500">{formatArabicCurrency(selectedCreditSale.remainingAmount || 0)}</span>
                   </div>
                 </div>
-              )}
 
-              {/* ملاحظة تحذيرية */}
-              <div className="bg-amber-50 border-r-4 border-amber-400 p-4 mb-6">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-lg font-black text-slate-900 dark:text-text-primary flex items-center gap-2">
+                      <div className="w-2 h-6 bg-blue-600 rounded-full"></div>
+                      سجل الدفعات والمتحصلات
+                      <span className="text-sm font-bold text-slate-400 dark:text-text-tertiary mr-2">({formatArabicNumber(selectedCreditSale.payments?.length || 0)})</span>
+                    </h4>
+                    {selectedCreditSale.payments && selectedCreditSale.payments.length> 0 && (
+                      <button
+                        onClick={() => printPaymentsHistory(selectedCreditSale as any)}
+                        className="px-4 py-2 bg-slate-900 dark:bg-surface-secondary text-white dark:text-text-primary rounded-xl text-xs font-black hover:bg-slate-800 dark:hover:bg-surface-hover transition-all flex items-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                        </svg>
+                        طباعة كشف الدفعات
+                      </button>
+                    )}
                   </div>
-                  <div className="mr-3">
-                    <p className="text-sm text-amber-700">
-                      <strong>تنبيه:</strong> عند تعديل الأصناف أو الكميات، سيتم إرجاع المخزون القديم وخصم المخزون الجديد. تأكد من توفر المخزون الكافي.
+
+                  {selectedCreditSale.payments && selectedCreditSale.payments.length> 0 ? (
+                    <div className="bg-slate-50 dark:bg-surface-secondary rounded-2xl border border-slate-100 dark:border-border-primary overflow-hidden">
+                      <table className="w-full text-right">
+                        <thead className="bg-slate-100 dark:bg-surface-hover border-b border-slate-200 dark:border-border-primary">
+                          <tr>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 dark:text-text-tertiary uppercase">رقم الإيصال</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 dark:text-text-tertiary uppercase">التاريخ</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 dark:text-text-tertiary uppercase">المبلغ</th>
+                            <th className="px-6 py-4 text-xs font-black text-slate-500 dark:text-text-tertiary uppercase text-center">الإجراءات</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100 dark:divide-border-primary/50 text-sm">
+                          {selectedCreditSale.payments.map((payment: any) => (
+                            <tr key={payment.id} className="hover:bg-white dark:hover:bg-surface-primary transition-colors">
+                              <td className="px-6 py-4 font-black text-slate-900 dark:text-text-primary">{payment.receiptNumber}</td>
+                              <td className="px-6 py-4 font-bold text-slate-600 dark:text-text-secondary">{new Date(payment.paymentDate).toLocaleDateString('ar-LY')}</td>
+                              <td className="px-6 py-4 font-black text-green-600 dark:text-green-400">{formatArabicCurrency(payment.amount)}</td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => printCreditReceipt(payment, selectedCreditSale)}
+                                    className="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-xl transition-all"
+                                    title="طباعة الإيصال"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeletePayment(payment)}
+                                    className="p-2 text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all"
+                                    title="حذف الدفعة"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="py-12 text-center bg-slate-50 dark:bg-surface-secondary rounded-2xl border-2 border-dashed border-slate-200 dark:border-border-primary">
+                      <div className="text-slate-400 mb-2 font-bold">لا توجد دفعات مسجلة لهذه الفاتورة حتى الآن</div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    onClick={() => {
+                      setShowDetailsModal(false);
+                      setSelectedCreditSale(null);
+                    }}
+                    className="w-full py-4 bg-slate-100 dark:bg-surface-secondary text-slate-600 dark:text-text-secondary rounded-2xl hover:bg-slate-200 dark:hover:bg-surface-hover font-black transition-all"
+                  >
+                    إغلاق النافذة
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {/* Sale Edit Modal */}
+      {
+        showEditModal && saleToEdit && (
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white dark:bg-surface-primary rounded-3xl shadow-2xl max-w-5xl w-full my-8 max-h-[90vh] overflow-hidden border border-slate-200 dark:border-border-primary flex flex-col font-sans">
+              <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-6 flex justify-between items-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/20 rounded-xl shadow-inner">
+                    <Edit className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black">تعديل بيانات الفاتورة</h2>
+                    <p className="text-orange-50 text-xs font-bold opacity-80 mt-0.5">تعديل الأصناف، الكميات، أو بيانات العميل</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setEditLines([]);
+                  }}
+                  className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-slate-50 dark:bg-surface-secondary/30">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-white dark:bg-surface-primary p-6 rounded-2xl border border-slate-200 dark:border-border-primary shadow-sm space-y-4">
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-slate-400 dark:text-text-tertiary uppercase pr-1">رقم الفاتورة</label>
+                      <input
+                        type="text"
+                        name="invoiceNumber"
+                        defaultValue={saleToEdit.invoiceNumber || ''}
+                        className="w-full px-5 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:focus:border-orange-400 text-slate-900 dark:text-text-primary font-bold transition-all"
+                        placeholder="أدخل رقم الفاتورة..."
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-black text-slate-400 dark:text-text-tertiary uppercase pr-1">العميل</label>
+                      <select
+                        name="customerId"
+                        defaultValue={saleToEdit.customerId || ''}
+                        className="w-full px-5 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 dark:focus:border-orange-400 text-slate-900 dark:text-text-primary font-bold appearance-none transition-all"
+                      >
+                        <option value="">غير محدد</option>
+                        {salesData?.data?.sales
+                          ?.map(s => s.customer)
+                          .filter((customer, index, self) =>
+                            customer && self.findIndex(c => c?.id === customer.id) === index
+                          )
+                          .map(customer => customer && (
+                            <option key={customer.id} value={customer.id}>{customer.name}</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="bg-orange-50 dark:bg-orange-900/10 p-6 rounded-2xl border border-orange-100 dark:border-orange-900/30 flex flex-col justify-center text-center space-y-2">
+                    <span className="text-orange-600 dark:text-orange-400 font-black text-sm uppercase">إجمالي الفاتورة الحالي</span>
+                    <span className="text-orange-700 dark:text-orange-500 font-black text-3xl">{formatArabicCurrency(saleToEdit.total)}</span>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-black text-slate-900 dark:text-text-primary flex items-center gap-2">
+                      <div className="w-2 h-6 bg-orange-500 rounded-full"></div>
+                      قائمة الأصناف المعدلة
+                      <span className="text-sm font-bold text-slate-400 dark:text-text-tertiary mr-2">({formatArabicNumber(editLines.length)})</span>
+                    </h3>
+                    <button
+                      type="button"
+                      onClick={addEditLine}
+                      className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-black rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-green-100 dark:shadow-none"
+                    >
+                      <Plus className="w-4 h-4" />
+                      إضافة صنف جديد
+                    </button>
+                  </div>
+
+                  {editLines.length === 0 ? (
+                    <div className="py-20 text-center bg-white dark:bg-surface-primary rounded-3xl border-2 border-dashed border-slate-200 dark:border-border-primary flex flex-col items-center">
+                      <Package className="w-12 h-12 text-slate-200 dark:text-border-primary mb-4" />
+                      <p className="text-slate-400 font-bold">لا توجد أصناف في هذه القائمة، قم بإضافة صنف للبدء</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {editLines.map((line, index) => {
+                        const product = productsData?.data?.products?.find(p => p.id === line.productId);
+                        const unitsPerBox = product?.unitsPerBox ? Number(product.unitsPerBox) : 1;
+                        const subtotal = line.qty * line.unitPrice;
+
+                        return (
+                          <div key={index} className="bg-white dark:bg-surface-primary p-6 rounded-2xl border border-slate-200 dark:border-border-primary shadow-sm hover:shadow-md transition-all group">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+                              <div className="lg:col-span-5 space-y-2">
+                                <label className="text-xs font-black text-slate-400 dark:text-text-tertiary uppercase pr-1">الصنف</label>
+                                <select
+                                  value={line.productId}
+                                  onChange={(e) => updateEditLine(index, 'productId', Number(e.target.value))}
+                                  className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 font-bold text-slate-900 dark:text-text-primary transition-all"
+                                  required
+                                >
+                                  <option value={0}>اختر صنف...</option>
+                                  {productsData?.data?.products?.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name} - {p.sku}</option>
+                                  ))}
+                                </select>
+                              </div>
+
+                              <div className="lg:col-span-3 space-y-2">
+                                <label className="text-xs font-black text-slate-400 dark:text-text-tertiary uppercase pr-1">الكمية (صندوق)</label>
+                                <input
+                                  type="number"
+                                  value={line.qty}
+                                  onChange={(e) => updateEditLine(index, 'qty', Number(e.target.value))}
+                                  className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 font-bold text-slate-900 dark:text-text-primary transition-all"
+                                  min="0.01" step="0.01" required
+                                />
+                              </div>
+
+                              <div className="lg:col-span-3 space-y-2">
+                                <label className="text-xs font-black text-slate-400 dark:text-text-tertiary uppercase pr-1">السعر/متر</label>
+                                <input
+                                  type="number"
+                                  value={unitsPerBox> 0 ? (line.unitPrice / unitsPerBox) : 0}
+                                  onChange={(e) => updatePriceFromUnitPrice(index, Number(e.target.value))}
+                                  className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border border-slate-200 dark:border-border-primary rounded-xl outline-none focus:ring-2 focus:ring-orange-500/20 font-bold text-slate-900 dark:text-text-primary transition-all"
+                                  min="0" step="0.01" required
+                                />
+                              </div>
+
+                              <div className="lg:col-span-1">
+                                <button
+                                  type="button"
+                                  onClick={() => removeEditLine(index)}
+                                  className="w-full p-3.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all flex items-center justify-center border border-transparent hover:border-red-100 dark:hover:border-red-900/40"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 pt-4 border-t border-slate-50 dark:border-border-primary/50 flex flex-wrap gap-x-8 gap-y-2 text-xs font-bold items-center justify-between">
+                              <div className="flex gap-6">
+                                <div className="flex items-center gap-2 text-slate-400">
+                                  <span>📏 إجمالي الأمتار:</span>
+                                  <span className="text-slate-900 dark:text-text-primary">{formatArabicNumber((line.qty * unitsPerBox).toFixed(2))} م</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-slate-400">
+                                  <span>📦 السعر/صندوق:</span>
+                                  <span className="text-blue-600 dark:text-blue-400">{formatArabicCurrency(line.unitPrice)}</span>
+                                </div>
+                              </div>
+                              <div className="text-lg font-black text-slate-900 dark:text-text-primary">
+                                {formatArabicCurrency(subtotal)}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-2xl p-6 flex gap-4">
+                  <div className="shrink-0 w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center text-amber-600">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-amber-800 dark:text-amber-400 font-black text-sm mb-1">تنبيه هام حول المخزون</h4>
+                    <p className="text-amber-700/80 dark:text-amber-500/80 text-xs font-bold leading-relaxed">
+                      عند حفظ التعديلات، سيتم إرجاع كميات الأصناف القديمة للمخزون وخصم الكميات الجديدة تلقائياً. يرجى التأكد من توفر الكميات المطلوبة في المخزن لتجنب أي أخطاء في النظام.
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* الأزرار */}
-              <div className="flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setEditLines([]);
-                  }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
-                >
-                  إلغاء
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUpdating || editLines.length === 0}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {isUpdating ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      جار التعديل...
-                    </>
-                  ) : (
-                    <>
-                      <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      حفظ التعديلات
-                    </>
-                  )}
-                </button>
+              <div className="px-8 py-6 bg-white dark:bg-surface-primary border-t border-slate-100 dark:border-border-primary flex items-center justify-between shrink-0">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black text-slate-400 dark:text-text-tertiary uppercase">إجمالي الفاتورة المحدث</span>
+                  <span className="text-2xl font-black text-blue-600 dark:text-blue-400">
+                    {formatArabicCurrency(editLines.reduce((sum, line) => sum + (line.qty * line.unitPrice), 0))}
+                  </span>
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditModal(false);
+                      setEditLines([]);
+                    }}
+                    className="px-8 py-3.5 bg-slate-100 dark:bg-surface-hover text-slate-600 dark:text-text-secondary rounded-2xl font-black transition-all hover:bg-slate-200 dark:hover:bg-surface-selected"
+                  >
+                    إلغاء التعديل
+                  </button>
+                  <button
+                    form="handleEditSubmit"
+                    type="submit"
+                    disabled={isUpdating || editLines.length === 0}
+                    onClick={() => {
+                      // Trigger form submission manually if button is outside form or using onClick
+                      const form = document.querySelector('form');
+                      if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                    }}
+                    className="px-10 py-3.5 bg-orange-600 hover:bg-orange-700 text-white rounded-2xl font-black shadow-lg shadow-orange-100 dark:shadow-none flex items-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {isUpdating ? (
+                      <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <>
+                        <Check className="w-5 h-5" />
+                        حفظ التعديلات النهائية
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   );
 }

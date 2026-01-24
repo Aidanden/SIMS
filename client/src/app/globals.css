@@ -4,34 +4,34 @@
 
 @layer components {
   .card {
-    @apply bg-white rounded-lg border border-slate-200 shadow-sm;
+    @apply bg-white dark:bg-surface-primary rounded-lg border border-slate-200 dark:border-border-primary shadow-sm dark:shadow-lg;
   }
   .card-body {
     @apply p-6;
   }
   .card-header {
-    @apply px-6 pt-6 pb-3 border-b border-slate-200;
+    @apply px-6 pt-6 pb-3 border-b border-slate-200 dark:border-border-primary;
   }
   .card-title {
-    @apply text-lg font-semibold text-slate-800;
+    @apply text-lg font-semibold text-slate-800 dark:text-text-primary;
   }
 
   .input {
-    @apply w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder-slate-400 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 transition;
+    @apply w-full rounded-md border border-slate-300 dark:border-border-primary bg-white dark:bg-surface-secondary px-3 py-2 text-sm text-slate-900 dark:text-text-primary placeholder-slate-400 dark:placeholder-text-tertiary outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 transition;
   }
 
   .btn {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:pointer-events-none;
   }
   .btn-primary {
-    @apply btn bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+    @apply btn bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400;
   }
   .btn-ghost {
-    @apply btn bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-300;
+    @apply btn bg-transparent text-slate-700 dark:text-text-secondary hover:bg-slate-100 dark:hover:bg-surface-hover focus:ring-slate-300 dark:focus:ring-gray-600;
   }
 }
 
-/* Custom Color Variables for Better Contrast */
+/* Custom Color Variables for Better Contrast - Light Mode */
 :root {
   --primary-bg: #e2e8f0;
   --secondary-bg: #ffffff;
@@ -40,8 +40,10 @@
   --primary-text: #0f172a;
   --secondary-text: #334155;
   --muted-text: #64748b;
+  --inverse-text: #ffffff;
   --border-color: #94a3b8;
   --hover-bg: #f1f5f9;
+  --active-bg: #e2e8f0;
   --success-color: #059669;
   --success-bg: #d1fae5;
   --warning-color: #d97706;
@@ -55,6 +57,32 @@
   --shadow-heavy: rgba(0, 0, 0, 0.25);
 }
 
+/* Dark Mode Variables */
+.dark {
+  --primary-bg: #0a0e1a;
+  --secondary-bg: #111827;
+  --card-bg: #1f2937;
+  --accent-bg: #374151;
+  --primary-text: #f9fafb;
+  --secondary-text: #d1d5db;
+  --muted-text: #9ca3af;
+  --inverse-text: #0f172a;
+  --border-color: #374151;
+  --hover-bg: #1f2937;
+  --active-bg: #374151;
+  --success-color: #34d399;
+  --success-bg: #064e3b;
+  --warning-color: #f59e0b;
+  --warning-bg: #451a03;
+  --error-color: #ef4444;
+  --error-bg: #450a0a;
+  --info-color: #3b82f6;
+  --info-bg: #0c1426;
+  --shadow-light: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+  --shadow-heavy: rgba(0, 0, 0, 0.5);
+}
+
 *,
 *::before,
 *::after {
@@ -66,9 +94,10 @@ body,
 #root,
 .app {
   font-size: 16px;
-  font-family: var(--font-tajawal), "Tajawal", sans-serif;
+  font-family: var(--font-cairo), "Cairo", sans-serif;
   background-color: var(--primary-bg);
   color: var(--primary-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Responsive Base Font Size */
@@ -90,13 +119,6 @@ body,
   }
 }
 
-@font-face {
-  font-family: 'Tajawal';
-  src: url('./fonts/Tajawal-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
 @media (min-width:768px) {
   .custom-grid-rows {
     grid-template-rows: repeat(8,20vh);
@@ -111,30 +133,35 @@ body,
 
 /* Enhanced Modal Styles with Better Contrast */
 .modal-overlay {
-  @apply fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[3];
+  @apply fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 flex items-center justify-center z-[3];
+  transition: background-color 0.3s ease;
 }
 
 .modal-container {
   background-color: var(--secondary-bg);
   @apply rounded-lg shadow-2xl w-full mx-4 max-h-[90vh] overflow-y-auto;
   border: 1px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .modal-header {
   @apply flex justify-between items-start p-6;
   border-bottom: 2px solid var(--accent-bg);
   background-color: var(--primary-bg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .modal-content {
   background-color: var(--secondary-bg);
   color: var(--primary-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .modal-footer {
   @apply p-6;
   border-top: 2px solid var(--accent-bg);
   background-color: var(--primary-bg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Enhanced Modal Form Elements */
@@ -284,12 +311,14 @@ body,
   background-color: var(--secondary-bg);
   border-bottom: 2px solid var(--border-color);
   @apply p-6 rounded-t-xl;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .card-body {
   @apply p-6;
   color: var(--primary-text);
   background-color: var(--card-bg);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Enhanced Input Styles */
@@ -317,30 +346,35 @@ body,
   border: 2px solid var(--border-color);
   @apply rounded-xl overflow-hidden;
   box-shadow: 0 4px 12px var(--shadow-light);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .table-header {
   background-color: var(--accent-bg);
   border-bottom: 2px solid var(--border-color);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .table-header th {
   @apply px-6 py-4 text-right text-sm font-semibold uppercase tracking-wider;
   color: var(--primary-text);
+  transition: color 0.3s ease;
 }
 
 .table-row {
   @apply transition-colors duration-150;
   border-bottom: 1px solid var(--border-color);
   background-color: var(--card-bg);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 .table-row:hover {
-  background-color: var(--secondary-bg);
+  background-color: var(--hover-bg);
 }
 
 .table-cell {
   @apply px-6 py-4 text-sm;
   color: var(--primary-text);
+  transition: color 0.3s ease;
 }
 
 /* Print Styles */

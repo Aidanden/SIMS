@@ -29,6 +29,8 @@ import { RootState } from '@/app/redux';
 import useNotifications from '@/hooks/useNotifications';
 import { useToast } from '@/components/ui/Toast';
 import SaleLineItem from './SaleLineItem';
+import { SCREEN_PERMISSIONS } from '@/constants/screenPermissions';
+import { hasScreenAccess } from '@/types/permissions';
 
 // نوع محلي للسطر مع الحقول الإضافية
 interface LocalSaleLine {
@@ -533,6 +535,15 @@ const SalesPage = () => {
       // 2. الشركة الحالية ليست التقازي (targetCompanyId !== 1)
       const isFromParentCompany = product.createdByCompanyId === 1 && targetCompanyId !== 1;
 
+      // التحقق من صلاحية بيع أصناف الشركة الأم
+      const hasParentSellPermission = user?.permissions?.includes(SCREEN_PERMISSIONS.SELL_PARENT_COMPANY_ITEMS) ||
+        user?.permissions?.includes(SCREEN_PERMISSIONS.ALL);
+
+      if (isFromParentCompany && !hasParentSellPermission) {
+        notifications.custom.error('خطأ في الصلاحية', 'ليس لديك صلاحية لبيع أصناف من مخزن الشركة الأم (التقازي)');
+        return;
+      }
+
       console.log('🏢 التحقق من الشركة:', {
         targetCompanyId,
         productCompanyId: product.createdByCompanyId,
@@ -687,9 +698,8 @@ const SalesPage = () => {
   const targetCompanyIdForProducts = user?.isSystemUser ? selectedCompanyId : user?.companyId;
   const { data: productsData, isLoading: productsLoading } = useGetProductsQuery({
     limit: 10000, // زيادة الـ limit لجلب جميع الأصناف (يوجد أكثر من 2600 صنف)
-    // إذا كانت الشركة المختارة هي التقازي (1)، نمرر companyId=1 لجلب أصنافها فقط
-    // إذا كانت شركة أخرى، لا نمرر companyId لجلب جميع الأصناف
-    companyId: targetCompanyIdForProducts === 1 ? 1 : undefined
+    // نمرر الـ targetCompanyIdForProducts دائماً ليقوم الخادم بالفلترة بناءً على صلاحية "بيع أصناف الشركة الأم"
+    companyId: targetCompanyIdForProducts || undefined
   });
 
   const [createSale, { isLoading: isCreating }] = useCreateSaleMutation();
@@ -1328,8 +1338,8 @@ const SalesPage = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-text-primary">إدارة المبيعات</h1>
-              <p className="text-text-secondary">إدارة فواتير المبيعات والعملاء</p>
+              <h1 className="text-3xl font-bold text-slate-800 dark:text-text-primary">إدارة المبيعات</h1>
+              <p className="text-slate-500 dark:text-text-secondary">إدارة فواتير المبيعات والعملاء</p>
             </div>
           </div>
           <button
@@ -1344,7 +1354,7 @@ const SalesPage = () => {
             disabled={user?.isSystemUser ? !selectedCompanyId : !user?.companyId}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${(user?.isSystemUser ? selectedCompanyId : user?.companyId)
               ? 'bg-success-600 hover:bg-success-700 text-white shadow-md hover:shadow-lg'
-              : 'bg-background-tertiary text-text-muted cursor-not-allowed'
+              : 'bg-slate-100 dark:bg-surface-secondary text-slate-400 dark:text-text-tertiary cursor-not-allowed'
               }`}
             title={(user?.isSystemUser ? !selectedCompanyId : !user?.companyId) ? 'يجب اختيار الشركة أولاً' : 'إنشاء فاتورة جديدة'}
           >
@@ -1358,49 +1368,49 @@ const SalesPage = () => {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div className="bg-surface-primary p-6 rounded-lg shadow-sm border border-border-primary hover:shadow-md transition-all duration-200">
+        <div className="bg-white dark:bg-surface-primary p-6 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary text-sm">إجمالي المبيعات</p>
-              <p className="text-2xl font-bold text-text-primary">{formatArabicNumber(salesData?.data?.pagination?.total || 0)}</p>
+              <p className="text-slate-500 dark:text-text-secondary text-sm">إجمالي المبيعات</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-text-primary">{formatArabicNumber(salesData?.data?.pagination?.total || 0)}</p>
             </div>
-            <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-success-600 dark:text-success-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
           </div>
         </div>
 
-        <div className="bg-surface-primary p-6 rounded-lg shadow-sm border border-border-primary hover:shadow-md transition-all duration-200">
+        <div className="bg-white dark:bg-surface-primary p-6 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary text-sm">فواتير مبدئية</p>
-              <p className="text-2xl font-bold text-warning-600">{formatArabicNumber(salesData?.data?.sales?.filter((sale: any) => sale.status === 'DRAFT').length || 0)}</p>
+              <p className="text-slate-500 dark:text-text-secondary text-sm">فواتير مبدئية</p>
+              <p className="text-2xl font-bold text-warning-600 dark:text-warning-400">{formatArabicNumber(salesData?.data?.sales?.filter((sale: any) => sale.status === 'DRAFT').length || 0)}</p>
             </div>
-            <svg className="w-8 h-8 text-warning-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-warning-600 dark:text-warning-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </div>
         </div>
 
-        <div className="bg-surface-primary p-6 rounded-lg shadow-sm border border-border-primary hover:shadow-md transition-all duration-200">
+        <div className="bg-white dark:bg-surface-primary p-6 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary text-sm">فواتير معتمدة</p>
-              <p className="text-2xl font-bold text-success-600">{formatArabicNumber(salesData?.data?.sales?.filter((sale: any) => sale.status === 'APPROVED').length || 0)}</p>
+              <p className="text-slate-500 dark:text-text-secondary text-sm">فواتير معتمدة</p>
+              <p className="text-2xl font-bold text-success-600 dark:text-success-400">{formatArabicNumber(salesData?.data?.sales?.filter((sale: any) => sale.status === 'APPROVED').length || 0)}</p>
             </div>
-            <svg className="w-8 h-8 text-success-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-success-600 dark:text-success-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
         </div>
 
-        <div className="bg-surface-primary p-6 rounded-lg shadow-sm border border-border-primary hover:shadow-md transition-all duration-200">
+        <div className="bg-white dark:bg-surface-primary p-6 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary hover:shadow-md transition-all duration-200">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-text-secondary text-sm">إجمالي القيمة</p>
-              <p className="text-2xl font-bold text-purple-600">{formatArabicCurrency(salesData?.data?.sales?.reduce((sum: number, sale: any) => sum + sale.total, 0) || 0)}</p>
+              <p className="text-slate-500 dark:text-text-secondary text-sm">إجمالي القيمة</p>
+              <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">{formatArabicCurrency(salesData?.data?.sales?.reduce((sum: number, sale: any) => sum + sale.total, 0) || 0)}</p>
             </div>
-            <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
             </svg>
           </div>
@@ -1408,8 +1418,8 @@ const SalesPage = () => {
       </div>
 
       {/* Company Selection */}
-      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-2 border-blue-200 relative z-40">
-        <label className="block text-sm font-bold text-blue-900 mb-2">
+      <div className="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 p-4 rounded-lg border-2 border-blue-200 dark:border-blue-800/30 relative z-40">
+        <label className="block text-sm font-bold text-blue-900 dark:text-blue-300 mb-2">
           🏢 {user?.isSystemUser ? 'اختر الشركة للعمل عليها' : 'الشركة المحددة'} *
         </label>
         <select
@@ -1428,7 +1438,7 @@ const SalesPage = () => {
             setProductNameSearch('');
           }}
           disabled={!user?.isSystemUser}
-          className="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-lg font-medium disabled:bg-gray-100 disabled:cursor-not-allowed relative z-50"
+          className="w-full px-4 py-3 border-2 border-blue-300 dark:border-blue-800/30 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary text-lg font-medium disabled:bg-slate-100 dark:disabled:bg-surface-elevated disabled:cursor-not-allowed relative z-50 outline-none transition-all"
         >
           {user?.isSystemUser && <option value="">-- اختر الشركة أولاً --</option>}
           {companiesLoading ? (
@@ -1488,21 +1498,21 @@ const SalesPage = () => {
       </div>
 
       {shouldSkipSalesQuery && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/30 rounded-lg p-4 mb-6">
           <div className="flex items-start gap-3">
-            <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <div>
-              <p className="text-sm font-medium text-blue-900">اختر شركة لعرض فواتيرها</p>
-              <p className="text-xs text-blue-700 mt-1">سيتم عرض فواتير الشركة المختارة فقط، وبالترتيب من الأحدث إلى الأقدم.</p>
+              <p className="text-sm font-medium text-blue-900 dark:text-blue-300">اختر شركة لعرض فواتيرها</p>
+              <p className="text-xs text-blue-700 dark:text-blue-400 mt-1">سيتم عرض فواتير الشركة المختارة فقط، وبالترتيب من الأحدث إلى الأقدم.</p>
             </div>
           </div>
         </div>
       )}
 
       {/* Filters and Search */}
-      <div className="bg-white p-6 rounded-lg shadow-sm border mb-6">
+      <div className="bg-white dark:bg-surface-primary p-6 rounded-lg shadow-sm border border-slate-200 dark:border-border-primary mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           {/* Invoice Status Filter */}
           <div className="relative">
@@ -1512,7 +1522,7 @@ const SalesPage = () => {
             <select
               value={invoiceStatusFilter}
               onChange={(e) => setInvoiceStatusFilter(e.target.value as 'all' | 'DRAFT' | 'APPROVED')}
-              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full pr-10 pl-4 py-2 border border-slate-300 dark:border-border-primary rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
             >
               <option value="all">حالة الفاتورة: الكل</option>
               <option value="DRAFT">حالة الفاتورة: مبدئية</option>
@@ -1530,7 +1540,7 @@ const SalesPage = () => {
               placeholder="البحث برقم الفاتورة..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pr-10 pl-4 py-2 border border-slate-300 dark:border-border-primary rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
             />
           </div>
 
@@ -1544,7 +1554,7 @@ const SalesPage = () => {
               placeholder="البحث بأسم الزبون..."
               value={customerNameFilter}
               onChange={(e) => setCustomerNameFilter(e.target.value)}
-              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pr-10 pl-4 py-2 border border-slate-300 dark:border-border-primary rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
             />
           </div>
 
@@ -1558,7 +1568,7 @@ const SalesPage = () => {
               placeholder="البحث برقم الهاتف..."
               value={customerPhoneFilter}
               onChange={(e) => setCustomerPhoneFilter(e.target.value)}
-              className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pr-10 pl-4 py-2 border border-slate-300 dark:border-border-primary rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
             />
           </div>
         </div>
@@ -1573,7 +1583,7 @@ const SalesPage = () => {
                 setCustomerPhoneFilter('');
                 setInvoiceStatusFilter('all');
               }}
-              className="flex items-center gap-2 px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors whitespace-nowrap"
+              className="flex items-center gap-2 px-4 py-2 border border-red-300 dark:border-red-800/50 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors whitespace-nowrap"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -1587,10 +1597,10 @@ const SalesPage = () => {
         {(customerNameFilter || customerPhoneFilter) && (
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-3">
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <p className="text-sm text-blue-800">
+              <p className="text-sm text-blue-800 dark:text-blue-300">
                 <span className="font-semibold">النتائج المفلترة: {formatArabicNumber(salesData?.data?.sales?.filter((sale: Sale) => {
                   if (customerNameFilter && sale.customer) {
                     const customerName = sale.customer.name?.toLowerCase() || '';
@@ -1614,41 +1624,41 @@ const SalesPage = () => {
       </div>
 
       {/* Sales Table */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
+      <div className="bg-white dark:bg-surface-primary rounded-lg shadow-sm border border-slate-200 dark:border-border-primary overflow-hidden">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-full">
+            <thead className="bg-slate-50 dark:bg-surface-secondary">
               <tr>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase tracking-wider w-32">
                   رقم الفاتورة
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider w-40">
                   الشركة
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider w-48">
                   العميل
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider w-32">
                   المجموع
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider w-28">
                   الحالة
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider min-w-[200px]">
                   الملاحظات
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-text-secondary uppercase tracking-wider w-32">
                   التاريخ
                 </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 dark:text-text-secondary uppercase tracking-wider w-40">
                   الإجراءات
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-surface-primary divide-y divide-slate-200 dark:divide-border-primary">
               {shouldSkipSalesQuery ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-gray-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-sm text-slate-500 dark:text-text-secondary">
                     يجب اختيار الشركة أولاً لعرض الفواتير
                   </td>
                 </tr>
@@ -1674,39 +1684,39 @@ const SalesPage = () => {
                     return true;
                   })
                   ?.map((sale) => (
-                    <tr key={sale.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <tr key={sale.id} className="hover:bg-slate-50 dark:hover:bg-surface-hover transition-colors">
+                      <td className="px-6 py-4 text-sm font-medium text-slate-800 dark:text-text-primary">
                         {sale.invoiceNumber || `#${sale.id}`}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-slate-800 dark:text-text-primary">
                         <div className="flex flex-col">
-                          <span className="font-medium text-blue-600">{sale.company?.name}</span>
-                          <span className="text-xs text-gray-500">{sale.company?.code}</span>
+                          <span className="font-medium text-blue-600 dark:text-blue-400">{sale.company?.name}</span>
+                          <span className="text-xs text-slate-500 dark:text-text-tertiary">{sale.company?.code}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-slate-800 dark:text-text-primary">
                         {sale.customer?.name || 'غير محدد'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <span className="font-semibold text-green-600">
+                      <td className="px-6 py-4 text-sm text-slate-800 dark:text-text-primary">
+                        <span className="font-semibold text-green-600 dark:text-green-400">
                           {formatArabicCurrency(sale.total)}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${sale.status === 'DRAFT'
-                          ? 'bg-yellow-100 text-yellow-800'
+                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
                           : sale.status === 'APPROVED'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                            : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                           }`}>
                           {sale.status === 'DRAFT' ? 'مبدئية' :
                             sale.status === 'APPROVED' ? 'معتمدة' : 'ملغية'}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {sale.notes || <span className="text-gray-400">-</span>}
+                      <td className="px-6 py-4 text-sm text-slate-800 dark:text-text-primary break-words">
+                        {sale.notes || <span className="text-slate-400 dark:text-text-tertiary">-</span>}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      <td className="px-6 py-4 text-sm text-slate-800 dark:text-text-primary">
                         {new Date(sale.createdAt).toLocaleDateString('en-US')}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1716,7 +1726,7 @@ const SalesPage = () => {
                               setSaleToPrint(sale);
                               setShowPrintModal(true);
                             }}
-                            className="text-green-600 hover:text-green-900 p-1 rounded"
+                            className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300 p-1 rounded"
                             title="طباعة الفاتورة"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1725,7 +1735,7 @@ const SalesPage = () => {
                           </button>
                           <button
                             onClick={() => setSelectedSale(sale)}
-                            className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 p-1 rounded"
                             title="عرض التفاصيل"
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1736,7 +1746,7 @@ const SalesPage = () => {
                           {sale.status === 'DRAFT' && (
                             <button
                               onClick={() => handleEditSale(sale)}
-                              className={`p-1 rounded ${sale.isAutoGenerated ? 'text-gray-400 cursor-not-allowed' : 'text-orange-600 hover:text-orange-900'}`}
+                              className={`p-1 rounded ${sale.isAutoGenerated ? 'text-slate-400 dark:text-text-tertiary cursor-not-allowed' : 'text-orange-600 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-300'}`}
                               title={sale.isAutoGenerated ? 'لا يمكن تعديل الفواتير التلقائية - عدّل الفاتورة الأصلية' : 'تعديل الفاتورة'}
                               disabled={isUpdating || sale.isAutoGenerated}
                             >
@@ -1747,7 +1757,7 @@ const SalesPage = () => {
                           )}
                           <button
                             onClick={() => handleDeleteSale(sale)}
-                            className="text-red-600 hover:text-red-900 p-1 rounded"
+                            className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 p-1 rounded"
                             title="حذف"
                             disabled={isDeleting}
                           >
@@ -1767,36 +1777,36 @@ const SalesPage = () => {
 
       {/* Pagination */}
       {salesData?.data?.pagination && (
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div className="bg-white dark:bg-surface-primary px-4 py-3 flex items-center justify-between border-t border-slate-200 dark:border-border-primary sm:px-6">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="relative inline-flex items-center px-4 py-2 border border-slate-300 dark:border-border-primary text-sm font-medium rounded-md text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 dark:hover:bg-surface-hover transition-colors"
             >
               السابق
             </button>
             <button
               onClick={() => setCurrentPage(prev => prev + 1)}
               disabled={currentPage >= salesData.data.pagination.pages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 dark:border-border-primary text-sm font-medium rounded-md text-slate-700 dark:text-text-primary bg-white dark:bg-surface-secondary hover:bg-slate-50 dark:hover:bg-surface-hover transition-colors"
             >
               التالي
             </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-slate-700 dark:text-text-secondary">
                 عرض{' '}
-                <span className="font-medium">
+                <span className="font-medium text-slate-900 dark:text-text-primary">
                   {((currentPage - 1) * 10) + 1}
                 </span>{' '}
                 إلى{' '}
-                <span className="font-medium">
+                <span className="font-medium text-slate-900 dark:text-text-primary">
                   {Math.min(currentPage * 10, salesData.data.pagination.total)}
                 </span>{' '}
                 من{' '}
-                <span className="font-medium">{salesData.data.pagination.total}</span>{' '}
+                <span className="font-medium text-slate-900 dark:text-text-primary">{salesData.data.pagination.total}</span>{' '}
                 نتيجة
               </p>
             </div>
@@ -1806,9 +1816,9 @@ const SalesPage = () => {
                   <button
                     key={i + 1}
                     onClick={() => setCurrentPage(i + 1)}
-                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === i + 1
-                      ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors ${currentPage === i + 1
+                      ? 'z-10 bg-blue-50 dark:bg-blue-900/20 border-blue-500 text-blue-600 dark:text-blue-400'
+                      : 'bg-white dark:bg-surface-secondary border-slate-300 dark:border-border-primary text-slate-500 dark:text-text-secondary hover:bg-slate-50 dark:hover:bg-surface-hover'
                       }`}
                   >
                     {i + 1}
@@ -1822,36 +1832,36 @@ const SalesPage = () => {
 
       {/* Create Sale Modal */}
       {showCreateSaleModal && selectedCompanyId && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-10 mx-auto p-6 border w-11/12 max-w-7xl shadow-lg rounded-md bg-white min-h-[90vh]">
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-10 mx-auto p-6 border dark:border-border-primary w-11/12 max-w-7xl shadow-lg rounded-md bg-white dark:bg-surface-primary min-h-[90vh]">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">إنشاء فاتورة مبيعات جديدة</h3>
+              <h3 className="text-lg font-medium text-slate-800 dark:text-text-primary mb-4">إنشاء فاتورة مبيعات جديدة</h3>
 
               {/* عرض الشركة المختارة */}
-              <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <div className="mb-4 bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-200 dark:border-blue-800/30">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-blue-900">🏢 الشركة:</span>
-                  <span className="text-sm font-semibold text-blue-700">
+                  <span className="text-sm font-medium text-blue-900 dark:text-blue-300">🏢 الشركة:</span>
+                  <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">
                     {companiesData?.data?.companies?.find(c => c.id === selectedCompanyId)?.name}
                   </span>
-                  <span className="text-xs text-blue-600">
+                  <span className="text-xs text-blue-600 dark:text-blue-500">
                     ({companiesData?.data?.companies?.find(c => c.id === selectedCompanyId)?.code})
                   </span>
                 </div>
-                <p className="text-xs text-blue-600 mt-1">
+                <p className="text-xs text-blue-600 dark:text-blue-500 mt-1">
                   💡 سيتم البيع من مخزون هذه الشركة فقط
                 </p>
               </div>
 
               {/* ملاحظة مهمة عن البيع بالمتر */}
-              <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border-2 border-blue-300">
+              <div className="mb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/10 dark:to-purple-900/10 p-4 rounded-lg border-2 border-blue-300 dark:border-blue-800/30">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">💡</span>
                   <div>
-                    <p className="text-sm text-blue-900 font-bold mb-1">
+                    <p className="text-sm text-blue-900 dark:text-blue-300 font-bold mb-1">
                       ملاحظة مهمة: البيع بالمتر المربع
                     </p>
-                    <p className="text-xs text-blue-800 leading-relaxed">
+                    <p className="text-xs text-blue-800 dark:text-blue-400 leading-relaxed">
                       • للأصناف التي وحدتها "صندوق": البيع يتم <strong>بالمتر المربع</strong><br />
                       • سيتم <strong>التقريب للأعلى</strong> لعدد الصناديق (مثال: 4.5 صندوق → 5 صناديق)<br />
                       • سيحصل العميل على <strong>عدد الأمتار الكامل</strong> للصناديق المباعة<br />
@@ -1879,8 +1889,8 @@ const SalesPage = () => {
               )}
 
               {productsLoading && (
-                <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 font-medium">
+                <div className="mb-4 bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-200 dark:border-blue-800/30">
+                  <p className="text-sm text-blue-800 dark:text-blue-300 font-medium">
                     ⏳ جاري تحميل الأصناف...
                   </p>
                 </div>
@@ -1889,7 +1899,7 @@ const SalesPage = () => {
               <form onSubmit={handleCreateSale} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="relative" ref={customerSearchRef}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                       العميل *
                     </label>
                     <div className="flex gap-2">
@@ -1906,7 +1916,7 @@ const SalesPage = () => {
                           }}
                           onFocus={() => setShowCustomerSuggestions(true)}
                           placeholder="ابحث عن العميل بالاسم أو الهاتف..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                           required={!saleForm.customerId}
                         />
                         {customersLoading && (
@@ -1917,7 +1927,7 @@ const SalesPage = () => {
 
                         {/* Customer Suggestions Dropdown */}
                         {showCustomerSuggestions && !customersLoading && (
-                          <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          <div className="absolute z-50 w-full mt-1 bg-white dark:bg-surface-elevated border border-slate-300 dark:border-border-primary rounded-md shadow-lg max-h-60 overflow-y-auto">
                             {customersData?.data?.customers
                               ?.filter((customer: Customer) =>
                                 !customer.phone?.startsWith('BRANCH') &&
@@ -1933,11 +1943,11 @@ const SalesPage = () => {
                                     setCustomerSearchTerm('');
                                     setShowCustomerSuggestions(false);
                                   }}
-                                  className="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                  className="px-3 py-2 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors"
                                 >
-                                  <div className="font-medium text-gray-900">{customer.name}</div>
+                                  <div className="font-medium text-slate-900 dark:text-text-primary">{customer.name}</div>
                                   {customer.phone && (
-                                    <div className="text-xs text-gray-500">📱 {customer.phone}</div>
+                                    <div className="text-xs text-slate-500 dark:text-text-tertiary">📱 {customer.phone}</div>
                                   )}
                                 </div>
                               ))}
@@ -1947,7 +1957,7 @@ const SalesPage = () => {
                                 (customer.name.toLowerCase().includes(customerSearchTerm.toLowerCase()) ||
                                   customer.phone?.includes(customerSearchTerm))
                               )?.length === 0 && (
-                                <div className="px-3 py-2 text-gray-500 text-sm">
+                                <div className="px-3 py-2 text-slate-500 dark:text-text-tertiary text-sm">
                                   لا توجد نتائج
                                 </div>
                               )}
@@ -1979,14 +1989,14 @@ const SalesPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                       رقم الفاتورة
                     </label>
                     <input
                       type="text"
                       value="سيتم توليده تلقائياً"
                       readOnly
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-600 cursor-not-allowed"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md bg-slate-50 dark:bg-surface-secondary text-slate-500 dark:text-text-tertiary cursor-not-allowed"
                     />
                     <p className="text-xs text-gray-500 mt-1">
                       سيتم توليد رقم الفاتورة تلقائياً عند الحفظ
@@ -1994,13 +2004,13 @@ const SalesPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                       📝 ملاحظات (اختياري)
                     </label>
                     <textarea
                       value={saleForm.notes || ''}
                       onChange={(e) => setSaleForm(prev => ({ ...prev, notes: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                       rows={3}
                       placeholder="أضف أي ملاحظات حول الفاتورة..."
                     />
@@ -2013,7 +2023,7 @@ const SalesPage = () => {
                 {/* Sale Lines */}
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <label className="block text-base font-bold text-gray-800">
+                    <label className="block text-base font-bold text-slate-800 dark:text-text-primary">
                       📋 بنود الفاتورة *
                     </label>
                     <div className="flex items-center gap-2">
@@ -2029,14 +2039,14 @@ const SalesPage = () => {
                   </div>
 
                   {/* Product Search Filters */}
-                  <div className="mb-4 p-4 bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-lg">
+                  <div className="mb-4 p-4 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-surface-secondary dark:to-blue-900/10 border-2 border-slate-200 dark:border-border-primary rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🔍</span>
-                        <h4 className="text-sm font-bold text-gray-700">البحث عن المنتجات</h4>
+                        <h4 className="text-sm font-bold text-slate-700 dark:text-text-primary">البحث عن المنتجات</h4>
                       </div>
                       {selectedCompanyId && (
-                        <span className="text-xs text-blue-700 font-medium bg-blue-100 px-2 py-1 rounded">
+                        <span className="text-xs text-blue-700 dark:text-blue-400 font-medium bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">
                           أصناف {companiesData?.data?.companies?.find(c => c.id === selectedCompanyId)?.name} فقط
                         </span>
                       )}
@@ -2044,7 +2054,7 @@ const SalesPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       {/* البحث بالكود - مطابقة تامة = */}
                       <div className="relative code-dropdown-container">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-slate-700 dark:text-text-secondary mb-1">
                           🔢 البحث بالكود (مطابقة تامة)
                         </label>
                         <input
@@ -2053,11 +2063,11 @@ const SalesPage = () => {
                           onChange={(e) => handleProductCodeSearch(e.target.value)}
                           onFocus={() => productCodeSearch && setShowCodeDropdown(true)}
                           placeholder="أدخل الكود بالضبط..."
-                          className="w-full px-3 py-2 border-2 border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
+                          className="w-full px-3 py-2 border-2 border-blue-300 dark:border-blue-800/30 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all font-mono"
                         />
                         {/* القائمة المنسدلة للبحث بالكود */}
                         {showCodeDropdown && productCodeSearch && (
-                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-blue-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-surface-elevated border border-blue-300 dark:border-blue-800/30 rounded-md shadow-lg max-h-60 overflow-y-auto">
                             {filteredByCode.length > 0 ? (
                               filteredByCode.map((product: any) => {
                                 const targetCompanyId = user?.isSystemUser ? selectedCompanyId : user?.companyId;
@@ -2072,21 +2082,21 @@ const SalesPage = () => {
                                   >
                                     <div className="flex justify-between items-start gap-3">
                                       <div className="text-sm flex-1">
-                                        <div className={`font-medium ${isFromParentCompany ? 'text-orange-900' : 'text-gray-900'}`}>
+                                        <div className={`font-medium ${isFromParentCompany ? 'text-orange-900 dark:text-orange-300' : 'text-slate-900 dark:text-text-primary'}`}>
                                           {product.name}
                                           {isFromParentCompany && (
-                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 mr-2">
                                               مخزن التقازي
                                             </span>
                                           )}
                                         </div>
-                                        <div className="text-xs text-gray-500 mt-1">كود: {product.sku}</div>
+                                        <div className="text-xs text-slate-500 dark:text-text-tertiary mt-1">كود: {product.sku}</div>
                                         {/* عرض معلومات المخزون */}
                                         {(() => {
                                           const stockInfo = getProductStock(product, targetCompanyId || null);
                                           return (
                                             <div className="flex items-center gap-2 mt-1">
-                                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${stockInfo.boxes > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${stockInfo.boxes > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                                 }`}>
                                                 📦 {stockInfo.boxes} {product.unit || 'وحدة'}
                                                 {product.unit === 'صندوق' && product.unitsPerBox && (
@@ -2119,7 +2129,7 @@ const SalesPage = () => {
                       </div>
                       {/* البحث بالاسم - like */}
                       <div className="relative name-dropdown-container">
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-slate-700 dark:text-text-secondary mb-1">
                           🔍 البحث بالاسم (جزء من الاسم)
                         </label>
                         <input
@@ -2128,11 +2138,11 @@ const SalesPage = () => {
                           onChange={(e) => handleProductNameSearch(e.target.value)}
                           onFocus={() => productNameSearch && setShowNameDropdown(true)}
                           placeholder="ابحث بجزء من الاسم..."
-                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                          className="w-full px-3 py-2 border-2 border-slate-300 dark:border-border-primary rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary outline-none transition-all"
                         />
                         {/* القائمة المنسدلة للبحث بالاسم */}
                         {showNameDropdown && productNameSearch && (
-                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-surface-elevated border border-slate-300 dark:border-border-primary rounded-md shadow-lg max-h-60 overflow-y-auto">
                             {filteredByName.length > 0 ? (
                               filteredByName.slice(0, 10).map((product: any) => {
                                 const targetCompanyId = user?.isSystemUser ? selectedCompanyId : user?.companyId;
@@ -2142,7 +2152,7 @@ const SalesPage = () => {
                                     key={product.id}
                                     type="button"
                                     onClick={() => handleSelectProductFromDropdown(product)}
-                                    className={`w-full px-3 py-2 text-right focus:outline-none border-b border-gray-100 last:border-b-0 transition-colors ${isFromParentCompany ? 'hover:bg-orange-50' : 'hover:bg-blue-50'
+                                    className={`w-full px-3 py-2 text-right focus:outline-none border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors ${isFromParentCompany ? 'hover:bg-orange-50 dark:hover:bg-orange-900/10' : 'hover:bg-blue-50 dark:hover:bg-blue-900/10'
                                       }`}
                                   >
                                     <div className="flex justify-between items-start gap-3">
@@ -2193,7 +2203,7 @@ const SalesPage = () => {
                         )}
                       </div>
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                        <label className="block text-xs font-medium text-slate-700 dark:text-text-secondary mb-1">
                           مسح QR Code
                         </label>
                         <button
@@ -2208,7 +2218,7 @@ const SalesPage = () => {
                           </svg>
                           {showQRScanner ? 'إغلاق الماسح' : 'مسح QR Code'}
                         </button>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-slate-500 dark:text-text-tertiary mt-1">
                           📱 امسح الكود لإضافة الصنف تلقائياً
                         </p>
                       </div>
@@ -2216,31 +2226,31 @@ const SalesPage = () => {
 
                     {/* QR Scanner Camera */}
                     {showQRScanner && (
-                      <div className="mt-3 p-4 bg-purple-50 border-2 border-purple-300 rounded-lg">
+                      <div className="mt-3 p-4 bg-purple-50 dark:bg-purple-900/10 border-2 border-purple-300 dark:border-purple-800/30 rounded-lg">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <div>
-                              <h4 className="text-sm font-bold text-purple-900">📱 ماسح QR Code</h4>
-                              <p className="text-xs text-purple-700">وجّه الكاميرا نحو QR Code</p>
+                              <h4 className="text-sm font-bold text-purple-900 dark:text-purple-300">📱 ماسح QR Code</h4>
+                              <p className="text-xs text-purple-700 dark:text-purple-400">وجّه الكاميرا نحو QR Code</p>
                             </div>
                           </div>
                           <button
                             type="button"
                             onClick={() => setShowQRScanner(false)}
-                            className="text-purple-600 hover:text-purple-800 font-bold text-xl"
+                            className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-bold text-xl"
                           >
                             ✕
                           </button>
                         </div>
 
                         {/* Camera Preview */}
-                        <div id="qr-reader" className="rounded-lg overflow-hidden"></div>
+                        <div id="qr-reader" className="rounded-lg overflow-hidden ring-2 ring-purple-100 dark:ring-purple-900/30"></div>
 
-                        <div className="mt-3 flex items-start gap-2 text-xs text-purple-700 bg-white p-2 rounded">
+                        <div className="mt-3 flex items-start gap-2 text-xs text-purple-700 dark:text-purple-300 bg-white dark:bg-surface-secondary p-2 rounded">
                           <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                           </svg>
@@ -2258,11 +2268,11 @@ const SalesPage = () => {
                       </div>
                     )}
                     {(productCodeSearch || productNameSearch) && (
-                      <div className="mt-3 flex justify-between items-center p-2 bg-white rounded-md border border-blue-200">
-                        <div className="text-xs font-medium text-gray-600">
+                      <div className="mt-3 flex justify-between items-center p-2 bg-white dark:bg-surface-secondary rounded-md border border-blue-200 dark:border-blue-800/30">
+                        <div className="text-xs font-medium text-slate-600 dark:text-text-secondary">
                           📊 عرض {productCodeSearch ? filteredByCode.length : filteredByName.length} منتج من أصل {productsData?.data?.products?.length || 0}
-                          {productCodeSearch && <span className="text-blue-600 mr-2">| كود: {productCodeSearch}</span>}
-                          {productNameSearch && <span className="text-green-600 mr-2">| اسم: {productNameSearch}</span>}
+                          {productCodeSearch && <span className="text-blue-600 dark:text-blue-400 mr-2">| كود: {productCodeSearch}</span>}
+                          {productNameSearch && <span className="text-green-600 dark:text-green-400 mr-2">| اسم: {productNameSearch}</span>}
                         </div>
                         <button
                           type="button"
@@ -2270,7 +2280,7 @@ const SalesPage = () => {
                             setProductCodeSearch('');
                             setProductNameSearch('');
                           }}
-                          className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 hover:bg-blue-50 rounded transition-colors"
+                          className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium px-2 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                         >
                           ✖️ مسح البحث
                         </button>
@@ -2280,10 +2290,10 @@ const SalesPage = () => {
 
                   <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                     {saleForm.lines.length === 0 ? (
-                      <div className="text-center py-12 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+                      <div className="text-center py-12 bg-slate-50 dark:bg-surface-secondary border-2 border-dashed border-slate-300 dark:border-border-primary rounded-lg">
                         <div className="text-6xl mb-3">📝</div>
-                        <p className="text-gray-600 font-medium mb-2">لا توجد بنود في الفاتورة</p>
-                        <p className="text-sm text-gray-500">اضغط على "إضافة بند" لبدء إنشاء الفاتورة</p>
+                        <p className="text-slate-600 dark:text-text-primary font-medium mb-2">لا توجد بنود في الفاتورة</p>
+                        <p className="text-sm text-slate-500 dark:text-text-secondary">اضغط على "إضافة بند" لبدء إنشاء الفاتورة</p>
                       </div>
                     ) : (
                       saleForm.lines.map((line, index) => {
@@ -2332,24 +2342,24 @@ const SalesPage = () => {
 
                         if (hasParentItems && hasCurrentItems) {
                           return (
-                            <div className="mt-4 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-300 rounded-lg">
+                            <div className="mt-4 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 dark:from-orange-900/10 dark:to-yellow-900/10 border-2 border-orange-300 dark:border-orange-800/30 rounded-lg">
                               <div className="flex items-center gap-2">
-                                <span className="text-orange-600">🔄</span>
-                                <span className="text-sm font-medium text-orange-700">
+                                <span className="text-orange-600 dark:text-orange-400">🔄</span>
+                                <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
                                   فاتورة مختلطة - سيتم إنشاء فواتير متعددة تلقائياً
                                 </span>
                               </div>
-                              <div className="text-xs text-orange-600 mt-1">
+                              <div className="text-xs text-orange-600 dark:text-orange-400 mt-1">
                                 • فاتورة مبيعات للعميل • فاتورة مبيعات من مخزن التقازي (آجلة) • فاتورة مشتريات لمخزن التقازي
                               </div>
                             </div>
                           );
                         } else if (hasParentItems) {
                           return (
-                            <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-300 rounded-lg">
+                            <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border-2 border-blue-300 dark:border-blue-800/30 rounded-lg">
                               <div className="flex items-center gap-2">
-                                <span className="text-blue-600">🏢</span>
-                                <span className="text-sm font-medium text-blue-700">
+                                <span className="text-blue-600 dark:text-blue-400">🏢</span>
+                                <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
                                   فاتورة من مخزن التقازي - سيتم إنشاء فواتير متعددة تلقائياً
                                 </span>
                               </div>
@@ -2357,10 +2367,10 @@ const SalesPage = () => {
                           );
                         } else {
                           return (
-                            <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-lg">
+                            <div className="mt-4 p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/10 dark:to-emerald-900/10 border-2 border-green-300 dark:border-border-primary rounded-lg">
                               <div className="flex items-center gap-2">
-                                <span className="text-green-600">✅</span>
-                                <span className="text-sm font-medium text-green-700">
+                                <span className="text-green-600 dark:text-green-400">✅</span>
+                                <span className="text-sm font-medium text-green-700 dark:text-green-300">
                                   فاتورة بسيطة - من الشركة الحالية فقط
                                 </span>
                               </div>
@@ -2371,13 +2381,13 @@ const SalesPage = () => {
 
                       {/* خصم إجمالي الفاتورة */}
                       {enableInvoiceDiscount && (
-                        <div className="mt-4 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg">
-                          <label className="block text-sm font-bold text-gray-700 mb-3">
+                        <div className="mt-4 p-4 bg-slate-50 dark:bg-surface-secondary border-2 border-slate-200 dark:border-border-primary rounded-lg">
+                          <label className="block text-sm font-bold text-slate-700 dark:text-text-primary mb-3">
                             💸 خصم إجمالي الفاتورة:
                           </label>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">نسبة الخصم (%)</label>
+                              <label className="block text-xs text-slate-500 dark:text-text-tertiary mb-1">نسبة الخصم (%)</label>
                               <input
                                 type="number"
                                 value={saleForm.totalDiscountPercentage || 0}
@@ -2395,14 +2405,14 @@ const SalesPage = () => {
                                     totalDiscountAmount: amount
                                   }));
                                 }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary"
                                 min="0"
                                 max="100"
                                 step="any"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">مبلغ الخصم (د.ل)</label>
+                              <label className="block text-xs text-slate-500 dark:text-text-tertiary mb-1">مبلغ الخصم (د.ل)</label>
                               <input
                                 type="number"
                                 value={saleForm.totalDiscountAmount || 0}
@@ -2421,7 +2431,7 @@ const SalesPage = () => {
                                     totalDiscountPercentage: Number(perc.toFixed(2))
                                   }));
                                 }}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500"
+                                className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary"
                                 min="0"
                                 step="any"
                               />
@@ -2431,9 +2441,9 @@ const SalesPage = () => {
                       )}
 
                       {/* المجموع الإجمالي */}
-                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 border-2 border-green-300 rounded-lg">
+                      <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/10 dark:to-blue-900/10 border-2 border-green-300 dark:border-border-primary rounded-lg">
                         <div className="flex flex-col gap-2">
-                          <div className="flex justify-between items-center text-sm text-gray-800 font-bold">
+                          <div className="flex justify-between items-center text-sm text-slate-800 dark:text-text-primary font-bold">
                             <span>إجمالي الفاتورة:</span>
                             <span>{formatArabicCurrency(saleForm.lines.reduce((sum, line) => {
                               // استخدام calculateLineTotal للحساب الصحيح (يأخذ بعين الاعتبار الأصناف من الشركة الأم)
@@ -2448,9 +2458,9 @@ const SalesPage = () => {
                             ))}</span>
                           </div>
 
-                          <div className="flex justify-between items-center pt-2 border-t border-green-200">
-                            <span className="text-lg font-bold text-gray-700">الصافي النهائي:</span>
-                            <span className="text-2xl font-bold text-green-600">
+                          <div className="flex justify-between items-center pt-2 border-t border-green-200 dark:border-border-primary">
+                            <span className="text-lg font-bold text-slate-700 dark:text-text-secondary">الصافي النهائي:</span>
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                               {formatArabicCurrency(Math.max(0,
                                 saleForm.lines.reduce((sum, line) => sum + calculateLineTotal(line), 0) - Math.max(0, Number(saleForm.totalDiscountAmount || 0))
                               ))}
@@ -2462,7 +2472,7 @@ const SalesPage = () => {
                   )}
                 </div>
 
-                <div className="flex justify-end gap-4 pt-8 border-t-2 border-gray-200 mt-6">
+                <div className="flex justify-end gap-4 pt-8 border-t-2 border-slate-200 dark:border-border-primary mt-6">
                   <button
                     type="button"
                     onClick={() => {
@@ -2470,7 +2480,7 @@ const SalesPage = () => {
                       setProductCodeSearch('');
                       setProductNameSearch('');
                     }}
-                    className="flex items-center gap-2 px-8 py-3 border-2 border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 hover:border-gray-400 transition-all duration-200 font-medium text-base"
+                    className="flex items-center gap-2 px-8 py-3 border-2 border-slate-300 dark:border-border-primary rounded-lg text-slate-700 dark:text-text-primary hover:bg-slate-100 dark:hover:bg-surface-hover hover:border-slate-400 dark:hover:border-border-primary transition-all duration-200 font-medium text-base"
                   >
                     <span>❌</span>
                     <span>إلغاء</span>
@@ -2479,7 +2489,7 @@ const SalesPage = () => {
                     type="submit"
                     disabled={isCreating || isCreatingComplex || !saleForm.customerId}
                     className={`flex items-center gap-2 px-8 py-3 rounded-lg shadow-md transition-all duration-200 font-medium text-base ${!saleForm.customerId
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-slate-300 dark:bg-surface-secondary text-slate-500 dark:text-text-tertiary cursor-not-allowed'
                       : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white hover:shadow-lg'
                       } ${(isCreating || isCreatingComplex) ? 'opacity-50' : ''}`}
                   >
@@ -2499,10 +2509,10 @@ const SalesPage = () => {
 
       {/* Create Customer Modal */}
       {showCreateCustomerModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border dark:border-border-primary w-96 shadow-lg rounded-md bg-white dark:bg-surface-primary">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">إضافة عميل جديد</h3>
+              <h3 className="text-lg font-medium text-slate-800 dark:text-text-primary mb-4">إضافة عميل جديد</h3>
 
               <form onSubmit={async (e) => {
                 e.preventDefault();
@@ -2534,36 +2544,36 @@ const SalesPage = () => {
                 }
               }} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                     اسم العميل *
                   </label>
                   <input
                     type="text"
                     name="name"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                     رقم الهاتف
                   </label>
                   <input
                     type="tel"
                     name="phone"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-1">
                     ملاحظات
                   </label>
                   <textarea
                     name="note"
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                   />
                 </div>
 
@@ -2571,7 +2581,7 @@ const SalesPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreateCustomerModal(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    className="px-4 py-2 border border-slate-300 dark:border-border-primary rounded-md text-slate-700 dark:text-text-primary hover:bg-slate-50 dark:hover:bg-surface-hover transition-colors"
                   >
                     إلغاء
                   </button>
@@ -2590,65 +2600,65 @@ const SalesPage = () => {
 
       {/* Sale Details Modal */}
       {selectedSale && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-11/12 max-w-2xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border dark:border-border-primary w-11/12 max-w-2xl shadow-lg rounded-md bg-white dark:bg-surface-primary">
             <div className="mt-3">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
+              <h3 className="text-lg font-medium text-slate-800 dark:text-text-primary mb-4">
                 تفاصيل الفاتورة #{selectedSale!.invoiceNumber || selectedSale!.id}
               </h3>
 
               <div className="space-y-4">
                 {/* معلومات الشركة */}
-                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                <div className="bg-blue-50 dark:bg-blue-900/10 p-3 rounded-lg border border-blue-200 dark:border-blue-800/30">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-blue-900">الشركة:</span>
-                    <span className="text-sm font-semibold text-blue-700">{selectedSale!.company?.name}</span>
-                    <span className="text-xs text-blue-600">({selectedSale!.company?.code})</span>
+                    <span className="text-sm font-medium text-blue-900 dark:text-blue-300">الشركة:</span>
+                    <span className="text-sm font-semibold text-blue-700 dark:text-blue-400">{selectedSale!.company?.name}</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-500">({selectedSale!.company?.code})</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 text-slate-800 dark:text-text-primary">
                   <div>
-                    <span className="font-medium">العميل:</span> {selectedSale!.customer?.name || 'غير محدد'}
+                    <span className="font-medium text-slate-500 dark:text-text-secondary">العميل:</span> {selectedSale!.customer?.name || 'غير محدد'}
                   </div>
                   <div>
-                    <span className="font-medium">التاريخ:</span> {new Date(selectedSale!.createdAt).toLocaleDateString('en-US')}
+                    <span className="font-medium text-slate-500 dark:text-text-secondary">التاريخ:</span> {new Date(selectedSale!.createdAt).toLocaleDateString('en-US')}
                   </div>
                   <div>
-                    <span className="font-medium">الحالة:</span>
+                    <span className="font-medium text-slate-500 dark:text-text-secondary">الحالة:</span>
                     <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${selectedSale!.status === 'DRAFT'
-                      ? 'bg-yellow-100 text-yellow-800'
+                      ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
                       : selectedSale!.status === 'APPROVED'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                       }`}>
                       {selectedSale!.status === 'DRAFT' ? 'مبدئية' :
                         selectedSale!.status === 'APPROVED' ? 'معتمدة' : 'ملغية'}
                     </span>
                   </div>
                   {selectedSale!.notes && (
-                    <div>
-                      <span className="font-medium">الملاحظات:</span> {selectedSale!.notes}
+                    <div className="col-span-2">
+                      <span className="font-medium text-slate-500 dark:text-text-secondary">الملاحظات:</span> {selectedSale!.notes}
                     </div>
                   )}
                 </div>
 
                 <div>
-                  <h4 className="font-medium mb-2">بنود الفاتورة:</h4>
+                  <h4 className="font-medium text-slate-800 dark:text-text-primary mb-2">بنود الفاتورة:</h4>
                   <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
+                    <table className="min-w-full divide-y divide-slate-200 dark:divide-border-primary">
+                      <thead className="bg-slate-50 dark:bg-surface-secondary">
                         <tr>
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">كود الصنف</th>
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">الصنف</th>
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">الكمية</th>
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">سعر الوحدة</th>
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">الإجمالي</th>
-                          {enableLineDiscount && <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">الخصم</th>}
-                          <th className="px-4 py-2 text-right text-xs font-medium text-gray-500">الصافي</th>
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">كود الصنف</th>
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">الصنف</th>
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">الكمية</th>
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">سعر الوحدة</th>
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">الإجمالي</th>
+                          {enableLineDiscount && <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">الخصم</th>}
+                          <th className="px-4 py-2 text-right text-xs font-medium text-slate-500 dark:text-text-secondary">الصافي</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-200">
+                      <tbody className="divide-y divide-slate-200 dark:divide-border-primary">
                         {selectedSale!.lines.map((line, index) => {
                           // حساب الأمتار المربعة وسعر المتر للأصناف بوحدة صندوق
                           const isBox = line.product?.unit === 'صندوق';
@@ -2659,34 +2669,34 @@ const SalesPage = () => {
                           const displayPrice = isBox && unitsPerBox ? line.unitPrice / unitsPerBox : line.unitPrice;
 
                           return (
-                            <tr key={index}>
-                              <td className="px-4 py-2 text-sm font-mono text-gray-600">{line.product?.sku}</td>
+                            <tr key={index} className="text-slate-800 dark:text-text-primary">
+                              <td className="px-4 py-2 text-sm font-mono text-slate-500 dark:text-text-tertiary">{line.product?.sku}</td>
                               <td className="px-4 py-2 text-sm">
                                 {line.product?.name}
                                 {isBox && unitsPerBox && (
-                                  <span className="block text-xs text-gray-500 mt-0.5">
+                                  <span className="block text-xs text-slate-500 dark:text-text-tertiary mt-0.5">
                                     ({formatArabicNumber(unitsPerBox)} م²/صندوق)
                                   </span>
                                 )}
                               </td>
                               <td className="px-4 py-2 text-sm">
-                                <span className="font-medium text-blue-600">{formatArabicNumber(line.qty)}</span>
-                                <span className="text-gray-600 mr-1">{line.product?.unit || 'وحدة'}</span>
+                                <span className="font-medium text-blue-600 dark:text-blue-400">{formatArabicNumber(line.qty)}</span>
+                                <span className="text-slate-500 dark:text-text-tertiary mr-1">{line.product?.unit || 'وحدة'}</span>
                                 {isBox && unitsPerBox && (
-                                  <span className="block text-xs text-blue-500 font-medium whitespace-nowrap">
+                                  <span className="block text-xs text-blue-500 dark:text-blue-400 font-medium whitespace-nowrap">
                                     {formatArabicArea(line.qty * unitsPerBox)} م²
                                   </span>
                                 )}
                               </td>
                               <td className="px-4 py-2 text-sm">
                                 <span className="font-medium">{formatArabicCurrency(displayPrice)}</span>
-                                {isBox && <span className="text-gray-500 text-xs block">/م²</span>}
+                                {isBox && <span className="text-slate-500 dark:text-text-tertiary text-xs block">/م²</span>}
                               </td>
                               <td className="px-4 py-2 text-sm">
                                 {formatArabicCurrency(line.qty * line.unitPrice)}
                               </td>
                               {enableLineDiscount && (
-                                <td className="px-4 py-2 text-sm text-red-600">
+                                <td className="px-4 py-2 text-sm text-red-600 dark:text-red-400">
                                   {line.discountAmount && line.discountAmount > 0 ? (
                                     <>
                                       <span>{formatArabicCurrency(line.discountAmount)}</span>
@@ -2695,7 +2705,7 @@ const SalesPage = () => {
                                   ) : '-'}
                                 </td>
                               )}
-                              <td className="px-4 py-2 text-sm font-medium text-green-600">{formatArabicCurrency(line.subTotal)}</td>
+                              <td className="px-4 py-2 text-sm font-medium text-green-600 dark:text-green-400">{formatArabicCurrency(line.subTotal)}</td>
                             </tr>
                           );
                         })}
@@ -2704,19 +2714,19 @@ const SalesPage = () => {
                   </div>
                 </div>
 
-                <div className="border-t pt-4 space-y-2">
-                  <div className="flex justify-between items-center text-gray-800 text-sm font-bold">
+                <div className="border-t dark:border-border-primary pt-4 space-y-2">
+                  <div className="flex justify-between items-center text-slate-800 dark:text-text-primary text-sm font-bold">
                     <span>إجمالي الفاتورة:</span>
                     <span>{formatArabicCurrency(Math.max(0, selectedSale!.lines.reduce((sum, line) => sum + (Math.max(0, Number(line.qty)) * Math.max(0, Number(line.unitPrice))), 0)))}</span>
                   </div>
-                  <div className="flex justify-between items-center text-red-600 text-sm">
+                  <div className="flex justify-between items-center text-red-600 dark:text-red-400 text-sm">
                     <span className="font-medium">قيمة الخصم:</span>
                     <span>-{formatArabicCurrency(Math.max(0,
                       selectedSale!.lines.reduce((sum, line) => sum + Math.max(0, Number(line.discountAmount || 0)), 0) + Math.max(0, Number(selectedSale!.totalDiscountAmount || 0))
                     ))}</span>
                   </div>
 
-                  <div className="flex justify-between items-center text-lg font-bold border-t-2 border-double border-blue-600 pt-2 mt-2 text-blue-700">
+                  <div className="flex justify-between items-center text-lg font-bold border-t-2 border-double border-blue-600 dark:border-blue-500 pt-2 mt-2 text-blue-700 dark:text-blue-400">
                     <span>الصافي النهائي:</span>
                     <span>{formatArabicCurrency(Math.max(0, Number(selectedSale!.total)))}</span>
                   </div>
@@ -2725,7 +2735,7 @@ const SalesPage = () => {
                 <div className="flex justify-end pt-4">
                   <button
                     onClick={() => setSelectedSale(null)}
-                    className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
+                    className="px-4 py-2 bg-slate-600 dark:bg-surface-secondary text-white dark:text-text-primary rounded-md hover:bg-slate-700 dark:hover:bg-surface-hover transition-colors"
                   >
                     إغلاق
                   </button>
@@ -2739,8 +2749,8 @@ const SalesPage = () => {
       {/* Print Modal */}
       {/* Sale Edit Modal */}
       {showEditModal && saleToEdit && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-slate-900/60 dark:bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-surface-primary rounded-lg shadow-xl max-w-4xl w-full my-8 max-h-[90vh] overflow-y-auto border dark:border-border-primary">
             <div className="bg-gradient-to-r from-orange-600 to-orange-700 text-white px-6 py-4 flex justify-between items-center sticky top-0 z-10">
               <h2 className="text-xl font-bold">✏️ تعديل الفاتورة</h2>
               <button
@@ -2752,7 +2762,7 @@ const SalesPage = () => {
                   setShowCodeDropdown(false);
                   setShowNameDropdown(false);
                 }}
-                className="text-white hover:text-gray-200"
+                className="text-white hover:text-white/80 transition-colors"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -2762,38 +2772,38 @@ const SalesPage = () => {
 
             <form onSubmit={handleEditSubmit} className="p-6">
               {/* معلومات الفاتورة */}
-              <div className="mb-6 bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 mb-2">
-                  <span className="font-medium">رقم الفاتورة الحالي:</span> {saleToEdit.invoiceNumber || saleToEdit.id}
+              <div className="mb-6 bg-slate-50 dark:bg-surface-secondary p-4 rounded-lg border dark:border-border-primary">
+                <p className="text-slate-700 dark:text-text-primary mb-2">
+                  <span className="font-medium text-slate-500 dark:text-text-secondary">رقم الفاتورة الحالي:</span> {saleToEdit.invoiceNumber || saleToEdit.id}
                 </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">المجموع القديم:</span> {formatArabicCurrency(saleToEdit.total)}
+                <p className="text-slate-700 dark:text-text-primary">
+                  <span className="font-medium text-slate-500 dark:text-text-secondary">المجموع القديم:</span> {formatArabicCurrency(saleToEdit.total)}
                 </p>
               </div>
 
               {/* رقم الفاتورة */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-2">
                   رقم الفاتورة
                 </label>
                 <input
                   type="text"
                   name="invoiceNumber"
                   defaultValue={saleToEdit.invoiceNumber || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                   placeholder="أدخل رقم الفاتورة"
                 />
               </div>
 
               {/* العميل */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary mb-2">
                   العميل
                 </label>
                 <select
                   name="customerId"
                   defaultValue={saleToEdit.customerId || ''}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-4 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                 >
                   <option value="">غير محدد</option>
                   {customersData?.data?.customers?.map(customer => (
@@ -2805,14 +2815,14 @@ const SalesPage = () => {
               </div>
 
               {/* Product Search Filters */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50 border-2 border-gray-200 rounded-lg">
+              <div className="mb-6 p-4 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900/10 dark:to-blue-900/10 border-2 border-slate-200 dark:border-border-primary rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <span className="text-lg">🔍</span>
-                    <h4 className="text-sm font-bold text-gray-700">البحث عن المنتجات</h4>
+                    <h4 className="text-sm font-bold text-slate-700 dark:text-text-primary">البحث عن المنتجات</h4>
                   </div>
                   {saleToEdit && (
-                    <span className="text-xs text-blue-700 font-medium bg-blue-100 px-2 py-1 rounded">
+                    <span className="text-xs text-blue-700 dark:text-blue-300 font-medium bg-blue-100 dark:bg-blue-900/30 px-2 py-1 rounded">
                       أصناف {companiesData?.data?.companies?.find(c => c.id === saleToEdit.companyId)?.name || 'الشركة'} فقط
                     </span>
                   )}
@@ -2820,7 +2830,7 @@ const SalesPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* البحث بالكود - مطابقة تامة = */}
                   <div className="relative code-dropdown-container">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 dark:text-text-secondary mb-1">
                       🔢 البحث بالكود (مطابقة تامة)
                     </label>
                     <input
@@ -2829,11 +2839,11 @@ const SalesPage = () => {
                       onChange={(e) => handleProductCodeSearch(e.target.value)}
                       onFocus={() => productCodeSearch && setShowCodeDropdown(true)}
                       placeholder="أدخل الكود بالضبط..."
-                      className="w-full px-3 py-2 border-2 border-blue-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-mono"
+                      className="w-full px-3 py-2 border-2 border-blue-300 dark:border-blue-800/30 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all font-mono"
                     />
                     {/* القائمة المنسدلة للبحث بالكود */}
                     {showCodeDropdown && productCodeSearch && (
-                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-blue-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-surface-primary border border-blue-300 dark:border-blue-800/50 rounded-md shadow-lg max-h-60 overflow-y-auto">
                         {filteredByCode.length > 0 ? (
                           filteredByCode.map((product: any) => {
                             const targetCompanyId = user?.isSystemUser ? selectedCompanyId : user?.companyId;
@@ -2845,12 +2855,12 @@ const SalesPage = () => {
                                 key={product.id}
                                 type="button"
                                 onClick={() => handleSelectProductForEdit(product)}
-                                className={`w-full px-3 py-2 text-right focus:outline-none border-b border-gray-100 last:border-b-0 transition-colors ${isInInvoice ? 'bg-green-50 hover:bg-green-100' : (isFromParentCompany ? 'hover:bg-orange-50' : 'hover:bg-blue-50')
+                                className={`w-full px-3 py-2 text-right focus:outline-none border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors ${isInInvoice ? 'bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20' : (isFromParentCompany ? 'hover:bg-orange-50 dark:hover:bg-orange-900/10' : 'hover:bg-blue-50 dark:hover:bg-blue-900/10')
                                   }`}
                               >
                                 <div className="flex justify-between items-start gap-3">
                                   <div className="text-sm flex-1">
-                                    <div className={`font-medium ${isFromParentCompany ? 'text-orange-900' : 'text-gray-900'}`}>
+                                    <div className={`font-medium ${isFromParentCompany ? 'text-orange-900 dark:text-orange-300' : 'text-slate-900 dark:text-text-primary'}`}>
                                       {product.name}
                                       {isFromParentCompany && (
                                         <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
@@ -2858,18 +2868,18 @@ const SalesPage = () => {
                                         </span>
                                       )}
                                       {isInInvoice && (
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white mr-2">
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-600 dark:bg-green-500 text-white mr-2">
                                           ✓ موجود (الكمية: {existingLine.qty})
                                         </span>
                                       )}
                                     </div>
-                                    <div className="text-xs text-gray-500 mt-1">كود: {product.sku}</div>
+                                    <div className="text-xs text-slate-500 dark:text-text-secondary mt-1">كود: {product.sku}</div>
                                     {/* عرض معلومات المخزون */}
                                     {(() => {
                                       const stockInfo = getProductStock(product, targetCompanyId || null);
                                       return (
                                         <div className="flex items-center gap-2 mt-1">
-                                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${stockInfo.boxes > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${stockInfo.boxes > 0 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                             }`}>
                                             📦 {stockInfo.boxes} {product.unit || 'وحدة'}
                                             {product.unit === 'صندوق' && product.unitsPerBox && (
@@ -2885,7 +2895,7 @@ const SalesPage = () => {
                                       );
                                     })()}
                                   </div>
-                                  <div className="text-xs font-medium text-blue-600 whitespace-nowrap">
+                                  <div className="text-xs font-medium text-blue-600 dark:text-blue-400 whitespace-nowrap">
                                     {product.price?.sellPrice ? `${Number(product.price.sellPrice).toFixed(2)} د.ل` : 'غير محدد'}
                                   </div>
                                 </div>
@@ -2902,7 +2912,7 @@ const SalesPage = () => {
                   </div>
                   {/* البحث بالاسم - like */}
                   <div className="relative name-dropdown-container">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                    <label className="block text-xs font-medium text-slate-700 dark:text-text-secondary mb-1">
                       🔍 البحث بالاسم (جزء من الاسم)
                     </label>
                     <input
@@ -2911,11 +2921,11 @@ const SalesPage = () => {
                       onChange={(e) => handleProductNameSearch(e.target.value)}
                       onFocus={() => productNameSearch && setShowNameDropdown(true)}
                       placeholder="ابحث بجزء من الاسم..."
-                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                      className="w-full px-3 py-2 border-2 border-slate-300 dark:border-border-primary rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary transition-all"
                     />
                     {/* القائمة المنسدلة للبحث بالاسم */}
                     {showNameDropdown && productNameSearch && (
-                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                      <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-surface-primary border border-slate-300 dark:border-border-primary rounded-md shadow-lg max-h-60 overflow-y-auto">
                         {filteredByName.length > 0 ? (
                           filteredByName.slice(0, 10).map((product: any) => {
                             const targetCompanyId = user?.isSystemUser ? selectedCompanyId : user?.companyId;
@@ -2927,25 +2937,25 @@ const SalesPage = () => {
                                 key={product.id}
                                 type="button"
                                 onClick={() => handleSelectProductForEdit(product)}
-                                className={`w-full px-3 py-2 text-right focus:outline-none border-b border-gray-100 last:border-b-0 transition-colors ${isInInvoice ? 'bg-green-50 hover:bg-green-100' : (isFromParentCompany ? 'hover:bg-orange-50' : 'hover:bg-blue-50')
+                                className={`w-full px-3 py-2 text-right focus:outline-none border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors ${isInInvoice ? 'bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20' : (isFromParentCompany ? 'hover:bg-orange-50 dark:hover:bg-orange-900/10' : 'hover:bg-blue-50 dark:hover:bg-blue-900/10')
                                   }`}
                               >
                                 <div className="flex justify-between items-start gap-3">
                                   <div className="text-sm flex-1">
-                                    <div className={`font-medium ${isFromParentCompany ? 'text-orange-900' : 'text-gray-900'}`}>
+                                    <div className={`font-medium ${isFromParentCompany ? 'text-orange-900 dark:text-orange-300' : 'text-slate-900 dark:text-text-primary'}`}>
                                       {product.name}
                                       {isFromParentCompany && (
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 mr-2">
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-400 mr-2">
                                           مخزن التقازي
                                         </span>
                                       )}
                                       {isInInvoice && (
-                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-600 text-white mr-2">
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-600 dark:bg-green-500 text-white mr-2">
                                           ✓ موجود (الكمية: {existingLine.qty})
                                         </span>
                                       )}
                                     </div>
-                                    <div className="text-xs text-gray-500 mt-1">كود: {product.sku}</div>
+                                    <div className="text-xs text-slate-500 dark:text-text-secondary mt-1">كود: {product.sku}</div>
                                     {/* عرض معلومات المخزون */}
                                     {(() => {
                                       const stockInfo = getProductStock(product, targetCompanyId || null);
@@ -2985,11 +2995,11 @@ const SalesPage = () => {
                 </div>
 
                 {(productCodeSearch || productNameSearch) && (
-                  <div className="mt-3 flex justify-between items-center p-2 bg-white rounded-md border border-blue-200">
-                    <div className="text-xs font-medium text-gray-600">
+                  <div className="mt-3 flex justify-between items-center p-2 bg-white dark:bg-surface-secondary rounded-md border border-blue-200 dark:border-blue-800/30">
+                    <div className="text-xs font-medium text-slate-600 dark:text-text-secondary">
                       📊 عرض {productCodeSearch ? filteredByCode.length : filteredByName.length} منتج من أصل {productsData?.data?.products?.length || 0}
-                      {productCodeSearch && <span className="text-blue-600 mr-2">| كود: {productCodeSearch}</span>}
-                      {productNameSearch && <span className="text-green-600 mr-2">| اسم: {productNameSearch}</span>}
+                      {productCodeSearch && <span className="text-blue-600 dark:text-blue-400 mr-2">| كود: {productCodeSearch}</span>}
+                      {productNameSearch && <span className="text-green-600 dark:text-green-400 mr-2">| اسم: {productNameSearch}</span>}
                     </div>
                     <button
                       type="button"
@@ -2997,7 +3007,7 @@ const SalesPage = () => {
                         setProductCodeSearch('');
                         setProductNameSearch('');
                       }}
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 hover:bg-blue-50 rounded transition-colors"
+                      className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium px-2 py-1 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors"
                     >
                       ✖️ مسح البحث
                     </button>
@@ -3008,7 +3018,7 @@ const SalesPage = () => {
               {/* قسم الأصناف */}
               <div className="mb-6">
                 <div className="flex justify-between items-center mb-3">
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-text-secondary">
                     الأصناف ({editLines.length})
                   </label>
                   <button
@@ -3024,10 +3034,10 @@ const SalesPage = () => {
                 </div>
 
                 {editLines.length === 0 ? (
-                  <div className="text-center py-12 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg">
+                  <div className="text-center py-12 bg-slate-50 dark:bg-surface-secondary border-2 border-dashed border-slate-300 dark:border-border-primary rounded-lg">
                     <div className="text-6xl mb-3">📝</div>
-                    <p className="text-gray-600 font-medium mb-2">لا توجد بنود في الفاتورة</p>
-                    <p className="text-sm text-gray-500">اضغط على "إضافة صنف" لبدء التعديل</p>
+                    <p className="text-slate-600 dark:text-text-primary font-medium mb-2">لا توجد بنود في الفاتورة</p>
+                    <p className="text-sm text-slate-500 dark:text-text-secondary">اضغط على "إضافة صنف" لبدء التعديل</p>
                   </div>
                 ) : (
                   <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
@@ -3058,13 +3068,13 @@ const SalesPage = () => {
 
               {/* خصم إجمالي الفاتورة (تعديل) */}
               {enableInvoiceDiscount && (
-                <div className="mb-6 p-4 bg-gray-50 border-2 border-gray-200 rounded-lg">
-                  <label className="block text-sm font-bold text-gray-700 mb-3">
+                <div className="mb-6 p-4 bg-slate-50 dark:bg-surface-secondary border-2 border-slate-200 dark:border-border-primary rounded-lg">
+                  <label className="block text-sm font-bold text-slate-700 dark:text-text-primary mb-3">
                     💸 خصم إجمالي الفاتورة:
                   </label>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">نسبة الخصم (%)</label>
+                      <label className="block text-xs text-slate-500 dark:text-text-tertiary mb-1">نسبة الخصم (%)</label>
                       <input
                         type="number"
                         value={editTotalDiscountPercentage || 0}
@@ -3081,14 +3091,14 @@ const SalesPage = () => {
                           setEditTotalDiscountPercentage(perc);
                           setEditTotalDiscountAmount(amount);
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-orange-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary"
                         min="0"
                         max="100"
                         step="any"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs text-gray-500 mb-1">مبلغ الخصم (د.ل)</label>
+                      <label className="block text-xs text-slate-500 dark:text-text-tertiary mb-1">مبلغ الخصم (د.ل)</label>
                       <input
                         type="number"
                         value={editTotalDiscountAmount || 0}
@@ -3106,7 +3116,7 @@ const SalesPage = () => {
                           setEditTotalDiscountAmount(Number(amount.toFixed(2)));
                           setEditTotalDiscountPercentage(perc);
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-slate-300 dark:border-border-primary rounded-md focus:ring-orange-500 bg-white dark:bg-surface-secondary text-slate-800 dark:text-text-primary"
                         min="0"
                         step="any"
                       />
@@ -3117,9 +3127,9 @@ const SalesPage = () => {
 
               {/* المجموع الجديد */}
               {editLines.length > 0 && (
-                <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                <div className="mb-6 bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-200 dark:border-blue-800/30">
                   <div className="flex flex-col gap-2">
-                    <div className="flex justify-between items-center text-sm text-gray-800 font-bold">
+                    <div className="flex justify-between items-center text-sm text-slate-800 dark:text-text-primary font-bold">
                       <span>إجمالي الفاتورة:</span>
                       <span>{formatArabicCurrency(Number(editLines.reduce((sum, line) => {
                         // استخدام calculateLineTotal للحساب الصحيح (يأخذ بعين الاعتبار الأصناف من الشركة الأم)
@@ -3127,16 +3137,16 @@ const SalesPage = () => {
                         return sum + lineTotal;
                       }, 0).toFixed(2)))}</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm text-red-600 font-medium">
+                    <div className="flex justify-between items-center text-sm text-red-600 dark:text-red-400 font-medium">
                       <span>قيمة الخصم:</span>
                       <span>-{formatArabicCurrency(Math.max(0, Number(
                         ((enableLineDiscount ? editLines.reduce((sum, line) => sum + Math.max(0, Number(line.discountAmount || 0)), 0) : 0) + (enableInvoiceDiscount ? Math.max(0, Number(editTotalDiscountAmount || 0)) : 0)).toFixed(2)
                       )))}</span>
                     </div>
 
-                    <div className="flex justify-between items-center pt-2 border-t border-blue-200">
-                      <span className="text-lg font-bold text-gray-700">الصافي النهائي:</span>
-                      <span className="text-2xl font-bold text-blue-600">
+                    <div className="flex justify-between items-center pt-2 border-t border-blue-200 dark:border-border-primary">
+                      <span className="text-lg font-bold text-slate-700 dark:text-text-secondary">الصافي النهائي:</span>
+                      <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                         {formatArabicCurrency(Math.max(0, Number(
                           (editLines.reduce((sum, line) => {
                             // استخدام calculateLineTotal للحساب الصحيح مع الخصم
@@ -3151,15 +3161,15 @@ const SalesPage = () => {
               )}
 
               {/* ملاحظة تحذيرية */}
-              <div className="bg-amber-50 border-r-4 border-amber-400 p-4 mb-6">
+              <div className="bg-amber-50 dark:bg-amber-900/10 border-r-4 border-amber-400 p-4 mb-6 rounded-l-lg">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="h-5 w-5 text-amber-500 dark:text-amber-400" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                     </svg>
                   </div>
                   <div className="mr-3">
-                    <p className="text-sm text-amber-700">
+                    <p className="text-sm text-amber-800 dark:text-amber-300">
                       <strong>تنبيه:</strong> عند تعديل الأصناف أو الكميات، سيتم إرجاع المخزون القديم وخصم المخزون الجديد. تأكد من توفر المخزون الكافي.
                     </p>
                   </div>
@@ -3178,7 +3188,7 @@ const SalesPage = () => {
                     setShowCodeDropdown(false);
                     setShowNameDropdown(false);
                   }}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+                  className="px-4 py-2 bg-slate-200 dark:bg-surface-secondary text-slate-700 dark:text-text-primary rounded-lg hover:bg-slate-300 dark:hover:bg-surface-hover transition-colors"
                 >
                   إلغاء
                 </button>

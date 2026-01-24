@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import prisma from '../models/prismaClient';
 import { AuthRequest } from '../middleware/auth';
+import { normalizePermissions } from '../utils/permissionUtils';
 
 // تسجيل الدخول
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -157,7 +158,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
           fullName: user.FullName,
           email: user.Email,
           role: user.Role?.RoleName || 'user',
-          permissions: ((user as any).Permissions || user.Role?.Permissions || []) as string[],
+          permissions: (user as any).Permissions !== null && (user as any).Permissions !== undefined
+            ? normalizePermissions((user as any).Permissions)
+            : normalizePermissions(user.Role?.Permissions),
           companyId: user.CompanyID,
           isSystemUser: user.IsSystemUser
         }
@@ -235,6 +238,14 @@ export const getCurrentUser = async (req: AuthRequest, res: Response): Promise<v
       return;
     }
 
+    // تحويل Permissions من JSON إلى array
+    const userPermissionsRaw = (user as any).Permissions;
+    const rolePermissionsRaw = user.Role?.Permissions;
+
+    const permissions = userPermissionsRaw !== null && userPermissionsRaw !== undefined
+      ? normalizePermissions(userPermissionsRaw)
+      : normalizePermissions(rolePermissionsRaw);
+
     res.json({
       success: true,
       data: {
@@ -244,7 +255,7 @@ export const getCurrentUser = async (req: AuthRequest, res: Response): Promise<v
         email: user.Email,
         phone: user.Phone,
         role: user.Role?.RoleName || 'user',
-        permissions: ((user as any).Permissions || user.Role?.Permissions || []) as string[],
+        permissions: permissions,
         companyId: user.CompanyID,
         company: user.Company ? {
           id: user.Company.id,

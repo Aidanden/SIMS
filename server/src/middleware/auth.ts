@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../models/prismaClient';
 import { responseHelper } from '../utils/responseHelper';
+import { normalizePermissions } from '../utils/permissionUtils';
 
 interface JwtPayload {
   userId: string;
@@ -27,6 +28,8 @@ export interface AuthRequest extends Request {
     roleName?: string;
     permissions?: any;
     isSystemUser?: boolean;
+    username?: string;
+    fullName?: string;
   };
   storeUser?: {
     id: string;
@@ -46,6 +49,8 @@ declare global {
         roleName?: string;
         permissions?: any;
         isSystemUser?: boolean;
+        username?: string;
+        fullName?: string;
       };
       storeUser?: {
         id: string;
@@ -118,20 +123,21 @@ export const authenticateToken = async (
     // تحويل Permissions من JSON إلى array
     // أولوية للـ Permissions المباشرة من المستخدم، ثم من الـ Role
     let permissions: string[] = [];
-    const userPermissions = (user as any).Permissions;
-    const rolePermissions = user.Role?.Permissions;
 
-    // استخدام permissions المستخدم إذا كانت موجودة، وإلا استخدم permissions الـ Role
-    const permissionsSource = userPermissions || rolePermissions;
+    // استخدام normalizePermissions لضمان معالجة صحيحة للبيانات
+    const userPermissionsRaw = (user as any).Permissions;
+    const rolePermissionsRaw = user.Role?.Permissions;
 
-    if (permissionsSource) {
-      if (Array.isArray(permissionsSource)) {
-        permissions = (permissionsSource as any[]).filter(p => typeof p === 'string') as string[];
-      } else if (typeof permissionsSource === 'object') {
-        // إذا كان JSON object، نحوله لـ array
-        permissions = Object.values(permissionsSource as any).filter(p => typeof p === 'string') as string[];
-      }
-    }
+    // إذا كان لدى المستخدم permissions (حتى لو فارغة [])، نستخدمها
+    // فقط إذا كانت null أو undefined نستخدم permissions الدور
+    // هذا يسمح للمستخدم بأن يكون لديه "لا صلاحيات" بشكل صريح
+    const userPermissions = userPermissionsRaw !== null && userPermissionsRaw !== undefined
+      ? normalizePermissions(userPermissionsRaw)
+      : null;
+
+    const rolePermissions = normalizePermissions(rolePermissionsRaw);
+
+    permissions = userPermissions !== null ? userPermissions : rolePermissions;
 
     // إضافة معلومات المستخدم إلى الطلب
     req.user = {
@@ -142,6 +148,8 @@ export const authenticateToken = async (
       roleName: user.Role?.RoleName || 'مستخدم',
       permissions: permissions,
       isSystemUser: decoded.isSystemUser || user.IsSystemUser,
+      username: user.UserName,
+      fullName: user.FullName,
     };
 
     next();
