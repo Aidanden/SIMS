@@ -327,8 +327,8 @@ selectedCreditSale.payments.map((payment: any) => (
 ```
 ✅ TypeScript: لا توجد أخطاء
 ✅ Linter: لا توجد تحذيرات
-✅ Server: يعمل على المنفذ 4000 ✨
-✅ Client: يعمل على المنفذ 3030 ✨
+✅ Server: يعمل على المنفذ 4050 ✨
+✅ Client: يعمل على المنفذ 4040 ✨
 ✅ Compilation: ناجح ✨
 ```
 

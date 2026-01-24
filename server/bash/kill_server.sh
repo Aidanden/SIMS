@@ -1,5 +1,5 @@
 #!/bin/bash
-PID=$(lsof -t -i:4000  )
+PID=$(lsof -t -i:4050  )
 if [ -n "$PID" ]; then
     echo "Killing server with PID: $PID"
     kill -9 $PID

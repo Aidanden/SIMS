@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Lock, User, LogIn } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAppDispatch, useAppSelector } from "@/app/redux";
 import { useLoginMutation } from "@/state/authApi";
@@ -15,7 +16,7 @@ const LoginPage = () => {
   const { isAuthenticated, isLoading, error } = useAppSelector((state) => state.auth);
   const toast = useToast();
   const [login] = useLoginMutation();
-  
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     username: "",
@@ -27,7 +28,7 @@ const LoginPage = () => {
   useEffect(() => {
     // إعادة تعيين حالات التحميل عند تحميل صفحة تسجيل الدخول
     dispatch(resetLoadingStates());
-    
+
     if (isAuthenticated) {
       router.push("/dashboard");
     }
@@ -43,7 +44,7 @@ const LoginPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.username || !formData.password) {
       toast.error("بيانات ناقصة", "يرجى إدخال اسم المستخدم وكلمة المرور");
       return;
@@ -62,13 +63,13 @@ const LoginPage = () => {
         // حفظ الـ token وبيانات المستخدم في localStorage
         localStorage.setItem("token", result.data.token);
         localStorage.setItem("user", JSON.stringify(result.data.user));
-        
+
         // تحديث Redux state
         dispatch(loginSuccess({
           user: result.data.user,
           token: result.data.token,
         }));
-        
+
         // سيتم التوجيه مباشرة بعد النجاح
         router.push("/dashboard");
       } else {
@@ -89,10 +90,14 @@ const LoginPage = () => {
         <div className="w-full max-w-sm lg:w-96">
           {/* Logo */}
           <div className="flex justify-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
+            <div className="w-32 h-32 relative flex items-center justify-center">
+              <Image
+                src="/Arabtech@3x.png"
+                alt="Logo"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
           </div>
 
@@ -223,8 +228,8 @@ const LoginPage = () => {
           {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-xs text-slate-500">
-            &copy; 2025 ARABTECH . جميع الحقوق محفوظة     
-                   </p>
+              &copy; 2026 ARABTECH . جميع الحقوق محفوظة
+            </p>
           </div>
         </div>
       </div>
@@ -250,7 +255,7 @@ const LoginPage = () => {
           <p className="text-xl mb-8 text-blue-100 text-right leading-relaxed">
             حلول متقدمة لإدارة أعمالك بكفاءة وأمان عالي مع واجهة سهلة الاستخدام
           </p>
-          
+
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-right">
               <div className="w-2 h-2 bg-blue-300 rounded-full"></div>
@@ -272,10 +277,10 @@ const LoginPage = () => {
 
           <div className="mt-12 text-right">
             <p className="text-blue-200 text-sm">
-              &copy; 2025 CeramiSys Management System
+              &copy; 2026 Smart Integrated Management System
             </p>
             <p className="text-blue-300 text-xs mt-1">
-              جميع الحقوق محفوظة . ARABTECH 
+              جميع الحقوق محفوظة . ARABTECH
             </p>
           </div>
         </div>

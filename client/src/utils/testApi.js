@@ -2,19 +2,19 @@
 const testApiConnection = async () => {
   try {
     console.log('🔍 Testing API connection...');
-    
+
     // اختبار الاتصال الأساسي
-    const response = await fetch('http://localhost:4000/api/users/users', {
+    const response = await fetch('http://localhost:4050/api/users/users', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
     });
-    
+
     console.log('📡 Response status:', response.status);
     console.log('📡 Response headers:', response.headers);
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log('✅ API connection successful!');
@@ -39,16 +39,16 @@ testApiConnection();
 // اختبار مع مسارات مختلفة
 const testDifferentPaths = async () => {
   const paths = [
-    'http://localhost:4000/api/users/users',
-    'http://localhost:4000/api/users',
+    'http://localhost:4050/api/users/users',
+    'http://localhost:4050/api/users',
     'http://localhost:3001/api/users/users',
     'http://localhost:3001/api/users',
     '/api/users/users',
     '/api/users'
   ];
-  
+
   console.log('🔍 Testing different API paths...');
-  
+
   for (const path of paths) {
     try {
       console.log(`\n📡 Testing: ${path}`);
@@ -59,7 +59,7 @@ const testDifferentPaths = async () => {
           'Accept': 'application/json',
         },
       });
-      
+
       if (response.ok) {
         console.log(`✅ ${path} - SUCCESS (${response.status})`);
       } else {

@@ -14,23 +14,51 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   // Public routes that don't require authentication
-  const publicRoutes = ['/login', '/unauthorized'];
-  const isPublicRoute = publicRoutes.includes(pathname);
+  const publicRoutes = ['/login', '/unauthorized', '/forgot-password', '/reset-password'];
+
+  // Check if current path starts with any of the public routes
+  // This handles sub-routes and potential trailing slashes
+  const isPublicRoute = pathname ? publicRoutes.some(route => {
+    const normalizedPath = pathname.toLowerCase().trim();
+    const normalizedRoute = route.toLowerCase().trim();
+    return normalizedPath === normalizedRoute || normalizedPath.startsWith(`${normalizedRoute}/`);
+  }) : false;
   const isStorePortalRoute = pathname?.startsWith('/store-portal');
 
-  // ThemeProvider يتولى تطبيق الثيم الآن، لذا لا نحتاج هذا useEffect
+  // Debug routing in development (تم إبقاؤه للمراقبة فقط - يمكن إزالته لاحقاً)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      // console.log ... (تم التعطيل لتنظيف الكونسول)
+    }
+  }, [pathname, isAuthenticated, isPublicRoute, isStorePortalRoute]);
 
   useEffect(() => {
-    // Only redirect if we're not authenticated and not on a public route or store portal route
-    // The AuthProvider handles initial session validation
-    if (!isAuthenticated && !isPublicRoute && !isStorePortalRoute) {
+    // Only redirect if:
+    // 1. Pathname is available
+    // 2. We're NOT authenticated
+    // 3. It's NOT a public route
+    // 4. It's NOT a store portal route
+    if (pathname && !isAuthenticated && !isPublicRoute && !isStorePortalRoute) {
       router.push('/login');
     }
-  }, [isAuthenticated, isPublicRoute, isStorePortalRoute, router]);
+  }, [isAuthenticated, isPublicRoute, isStorePortalRoute, router, pathname]);
 
-  // Show loading spinner for protected routes when not authenticated
-  // This provides a fallback while AuthProvider is validating the session
-  if (!isAuthenticated && !isPublicRoute && !isStorePortalRoute) {
+  // ---------------------------------------------------------------------------
+  // RENDER LOGIC
+  // ---------------------------------------------------------------------------
+
+  // 1. For public routes or store portal, return content immediately (Layout A)
+  // لا نظهر السايد بار أو الناف بار
+  if (isPublicRoute || isStorePortalRoute) {
+    return (
+      <div className={isStorePortalRoute ? "" : "min-h-screen bg-gray-50"}>
+        {children}
+      </div>
+    );
+  }
+
+  // 2. Loading State for projected routes (Layout B)
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -41,15 +69,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     );
   }
 
-  // For public routes or store portal, don't show sidebar and navbar
-  if (isPublicRoute || isStorePortalRoute) {
-    return (
-      <div className={isStorePortalRoute ? "" : "min-h-screen bg-gray-50"}>
-        {children}
-      </div>
-    );
-  }
-
+  // 3. Main Dashboard Layout (Layout C)
+  // نظهر السايد بار والناف بار
   return (
     <div
       dir="rtl"

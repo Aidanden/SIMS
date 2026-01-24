@@ -374,7 +374,7 @@
 
 ### **1. افتح شاشة المحاسب**
 ```
-http://localhost:3030/accountant
+http://localhost:4040/accountant
 ```
 
 ### **2. تحقق من الأزرار**

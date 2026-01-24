@@ -26,22 +26,24 @@ interface SessionTimeoutProviderProps {
 
 export const SessionTimeoutProvider: React.FC<SessionTimeoutProviderProps> = ({ children }) => {
   const pathname = usePathname();
-  const isLoginPage = pathname === '/login' || pathname === '/';
-  
+  // قائمة الصفحات العامة التي لا تتطلب مؤقت جلسة
+  const publicRoutes = ['/login', '/', '/forgot-password', '/reset-password'];
+  const isPublicPage = pathname ? publicRoutes.some(route => pathname === route || pathname.startsWith(route)) : false;
+
   const { resetTimer, logout, lastActivity } = useSessionTimeout({
     timeout: 5 * 60 * 1000, // 5 دقائق
     warningTime: 1 * 60 * 1000, // تحذير قبل دقيقة
   });
 
-  // عدم تفعيل مؤقت الجلسة في صفحة تسجيل الدخول
+  // عدم تفعيل مؤقت الجلسة في الصفحات العامة
   useEffect(() => {
-    if (isLoginPage) {
+    if (isPublicPage) {
       return;
     }
-  }, [isLoginPage]);
+  }, [isPublicPage]);
 
-  // عدم تقديم السياق في صفحة تسجيل الدخول
-  if (isLoginPage) {
+  // عدم تقديم السياق في الصفحات العامة
+  if (isPublicPage) {
     return <>{children}</>;
   }
 

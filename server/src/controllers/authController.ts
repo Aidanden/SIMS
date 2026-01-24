@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import prisma from '../models/prismaClient';
 import { AuthRequest } from '../middleware/auth';
 import { normalizePermissions } from '../utils/permissionUtils';
+import { emailService } from '../services/EmailService';
 
 // تسجيل الدخول
 export const login = async (req: Request, res: Response): Promise<void> => {
@@ -349,6 +350,130 @@ export const changePassword = async (req: AuthRequest, res: Response): Promise<v
 
   } catch (error) {
     console.error('خطأ في تغيير كلمة المرور:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في الخادم'
+    });
+  }
+};
+
+// طلب إعادة تعيين كلمة المرور
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: 'البريد الإلكتروني مطلوب'
+      });
+      return;
+    }
+
+    const user = await prisma.users.findUnique({
+      where: { Email: email }
+    });
+
+    if (!user) {
+      // لا نرسل رسالة خطأ صريحة لحماية الخصوصية
+      res.json({
+        success: true,
+        message: 'إذا كان البريد الإلكتروني مسجلاً، سيتم إرسال رابط إعادة التعيين إليه'
+      });
+      return;
+    }
+
+    // إنشاء توكن إعادة التعيين صالح لمدة ساعة
+    const resetToken = jwt.sign(
+      { userId: user.UserID, type: 'reset' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '1h' }
+    );
+
+    // إرسال البريد الإلكتروني
+    const emailSent = await emailService.sendPasswordResetEmail(email, resetToken);
+
+    if (emailSent) {
+      res.json({
+        success: true,
+        message: 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'فشل في إرسال البريد الإلكتروني'
+      });
+    }
+
+  } catch (error) {
+    console.error('خطأ في طلب إعادة تعيين كلمة المرور:', error);
+    res.status(500).json({
+      success: false,
+      message: 'خطأ في الخادم'
+    });
+  }
+};
+
+// إعادة تعيين كلمة المرور باستخدام التوكن
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { token, newPassword } = req.body;
+
+    if (!token || !newPassword) {
+      res.status(400).json({
+        success: false,
+        message: 'التوكن وكلمة المرور الجديدة مطلوبان'
+      });
+      return;
+    }
+
+    // التحقق من التوكن
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    } catch (err) {
+      res.status(400).json({
+        success: false,
+        message: 'رابط إعادة التعيين غير صالح أو منتهي الصلاحية'
+      });
+      return;
+    }
+
+    if (decoded.type !== 'reset') {
+      res.status(400).json({
+        success: false,
+        message: 'توكن غير صالح'
+      });
+      return;
+    }
+
+    // تشفير كلمة المرور الجديدة
+    const hashedNewPassword = await bcrypt.hash(newPassword, 12);
+
+    // تحديث كلمة المرور
+    await prisma.users.update({
+      where: { UserID: decoded.userId },
+      data: {
+        Password: hashedNewPassword,
+        PasswordChangedAt: new Date(),
+        LoginAttempts: 0,
+        LockedUntil: null
+      }
+    });
+
+    // إلغاء تفعيل جميع الجلسات النشطة للمستخدم للأمان
+    await prisma.userSessions.updateMany({
+      where: { UserID: decoded.userId },
+      data: { IsActive: false }
+    });
+
+    res.json({
+      success: true,
+      message: 'تم إعادة تعيين كلمة المرور بنجاح، يمكنك الآن تسجيل الدخول'
+    });
+
+  } catch (error) {
+    console.error('خطأ في إعادة تعيين كلمة المرور:', error);
     res.status(500).json({
       success: false,
       message: 'خطأ في الخادم'

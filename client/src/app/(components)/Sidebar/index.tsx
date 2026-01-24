@@ -33,6 +33,7 @@ import { useGetSalesQuery } from "@/state/salesApi";
 import { useGetDispatchOrdersQuery, useGetReturnOrdersQuery } from "@/state/warehouseApi";
 import { useGetPaymentReceiptsQuery } from "@/state/api/paymentReceiptsApi";
 import { useGetInvoiceStatsQuery } from "@/state/externalStoreInvoicesApi";
+import Image from "next/image";
 
 interface SidebarLinkProps {
   href: string;
@@ -210,298 +211,301 @@ const Sidebar = () => {
     }`;
 
   return (
-    <div className={sidebarClassNames}>
-      {/* TOP LOGO & HEADER */}
-      <div className="relative">
-        <div
-          className={`flex items-center transition-all duration-300 pt-5 pb-5 border-b border-slate-200 dark:border-border-primary ${isSidebarCollapsed ? "px-2 flex-col gap-3" : "px-5 gap-3"
-            }`}
-        >
-          {/* Logo */}
-          <div className={`transition-all duration-300 shrink-0 ${isSidebarCollapsed ? "w-12 h-12" : "w-11 h-11"
-            }`}>
-            <div className="w-full h-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 dark:from-blue-500 dark:via-blue-600 dark:to-indigo-600 rounded-xl flex items-center justify-center shadow-lg hover:shadow-xl transition-shadow duration-300 relative overflow-hidden">
-              <div className="absolute inset-0 bg-white/10 dark:bg-white/20"></div>
-              <svg className="w-6 h-6 text-white relative z-10" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
-              </svg>
+    <>
+      <div className={sidebarClassNames}>
+        {/* TOP LOGO & HEADER */}
+        <div className="border-b border-slate-200 dark:border-border-primary">
+          <div
+            className={`flex items-center transition-all duration-300 pt-5 pb-5 ${isSidebarCollapsed ? "px-2 flex-col gap-3" : "px-5 gap-3"
+              }`}
+          >
+            {/* Logo */}
+            <div className={`transition-all duration-300 shrink-0 ${isSidebarCollapsed ? "w-12 h-12" : "w-11 h-11"
+              }`}>
+              <div className="w-full h-full flex items-center justify-center relative overflow-hidden">
+                <Image
+                  src="/Arabtech@3x.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+
+            {/* Text - يختفي عند التصغير */}
+            <div className={`flex-1 min-w-0 transition-all duration-300 overflow-hidden ${isSidebarCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
+              }`}>
+              <h1 className="font-bold text-lg text-slate-800 dark:text-text-primary truncate leading-tight">
+                نظام الإدارة الذكي
+              </h1>
+              <p className="text-xs text-slate-500 dark:text-text-tertiary truncate mt-0.5">SIMS</p>
             </div>
           </div>
-
-          {/* Text - يختفي عند التصغير */}
-          <div className={`flex-1 min-w-0 transition-all duration-300 overflow-hidden ${isSidebarCollapsed ? "w-0 opacity-0 hidden" : "w-auto opacity-100"
-            }`}>
-            <h1 className="font-bold text-lg text-slate-800 dark:text-text-primary truncate leading-tight">
-              نظام إدارة
-            </h1>
-            <p className="text-xs text-slate-500 dark:text-text-tertiary truncate mt-0.5">CeramiSys</p>
-          </div>
         </div>
 
-        {/* زر التصغير/التكبير - موضع ثابت */}
-        <button
-          className={`group absolute top-1/2 -translate-y-1/2 transition-all duration-300 flex items-center justify-center z-10 ${isSidebarCollapsed ? "left-1/2 -translate-x-1/2 w-12 h-12" : "left-4 w-8 h-8"
-            }`}
-          onClick={toggleSidebar}
-          title={isSidebarCollapsed ? "توسيع القائمة" : "تصغير القائمة"}
-        >
-          <div className={`flex items-center justify-center rounded-lg bg-slate-100 dark:bg-surface-secondary hover:bg-blue-50 dark:hover:bg-surface-hover active:bg-blue-100 dark:active:bg-surface-active transition-all duration-200 shadow-sm hover:shadow-md ${isSidebarCollapsed ? "w-10 h-10" : "w-8 h-8"
-            }`}>
-            <svg
-              className={`text-slate-600 dark:text-text-secondary group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-300 pointer-events-none ${isSidebarCollapsed ? "w-5 h-5 rotate-180" : "w-4 h-4"
-                }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
-          </div>
-        </button>
-      </div>
-
-      {/* NAVIGATION LINKS */}
-      <div className="flex-grow py-6 overflow-y-auto overflow-x-hidden">
-        <nav className="space-y-1">
-          {canAccessScreen('/dashboard') && (
-            <SidebarLink
-              href="/dashboard"
-              icon={Home}
-              label="الرئيسية"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/companies') && (
-            <SidebarLink
-              href="/companies"
-              icon={Building2}
-              label="إدارة الشركات"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-
-          {canAccessScreen('/products') && (
-            <SidebarLink
-              href="/products"
-              icon={ShoppingBag}
-              label="الأصناف والمخزن"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-
-          {canAccessScreen('/sales') && (
-            <SidebarLink
-              href="/sales"
-              icon={ShoppingCart}
-              label="المبيعات"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/accountant') && (
-            <SidebarLink
-              href="/accountant"
-              icon={CreditCard}
-              label="مساحة عمل المحاسب"
-              isCollapsed={isSidebarCollapsed}
-              badgeCount={pendingCount}
-            />
-          )}
-          {canAccessScreen('/treasury') && (
-            <SidebarLink
-              href="/treasury"
-              icon={Wallet}
-              label="حركات الخزينة"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/general-receipts') && (
-            <SidebarLink
-              href="/general-receipts"
-              icon={ArrowRightLeft}
-              label="إيصالات خارجية"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/payroll') && (
-            <SidebarLink
-              href="/payroll"
-              icon={UsersRound}
-              label="المرتبات والموظفين"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/bad-debts') && (
-            <SidebarLink
-              href="/bad-debts"
-              icon={Receipt}
-              label="المصروفات المعدومة"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/customer-accounts') && (
-            <SidebarLink
-              href="/customer-accounts"
-              icon={Wallet}
-              label="حسابات العملاء"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/supplier-accounts') && (
-            <SidebarLink
-              href="/supplier-accounts"
-              icon={CircleDollarSign}
-              label="حسابات الموردين"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/warehouse-dispatch') && (
-            <SidebarLink
-              href="/warehouse-dispatch"
-              icon={Layout}
-              label="أوامر صرف المخزن"
-              isCollapsed={isSidebarCollapsed}
-              badgeCount={totalPendingWarehouseOrders}
-            />
-          )}
-
-
-          {/* إخفاء شاشة "المبيعات من الشركة الأم" من الشركة الأم نفسها */}
-          {!isParentCompany && canAccessScreen('/complex-inter-company-sales') && (
-            <SidebarLink
-              href="/complex-inter-company-sales"
-              icon={ArrowRightLeft}
-              label="المبيعات من الشركة الام"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/sale-returns') && (
-            <SidebarLink
-              href="/sale-returns"
-              icon={Returns}
-              label="المردودات"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/purchases') && (
-            <SidebarLink
-              href="/purchases"
-              icon={CreditCard}
-              label="المشتريات"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/payment-receipts') && (
-            <SidebarLink
-              href="/payment-receipts"
-              icon={Receipt}
-              label="إيصالات الدفع"
-              isCollapsed={isSidebarCollapsed}
-              badgeCount={pendingPaymentReceiptsCount}
-            />
-          )}
-
-          {costCalculationMethod === 'manual' && canAccessScreen('/product-cost') && (
-            <SidebarLink
-              href="/product-cost"
-              icon={BarChart3}
-              label="تكلفة الأصناف"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {costCalculationMethod === 'invoice' && canAccessScreen('/invoice-cost') && (
-            <SidebarLink
-              href="/invoice-cost"
-              icon={FileText}
-              label="تكلفة الفاتورة"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/damage-reports') && (
-            <SidebarLink
-              href="/damage-reports"
-              icon={FileText}
-              label="محاضر الإتلاف"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/external-stores') && (
-            <SidebarLink
-              href="/external-stores"
-              icon={Building2}
-              label="المحلات الخارجية"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/external-store-invoices') && (
-            <SidebarLink
-              href="/external-store-invoices"
-              icon={FileText}
-              label="فواتير المحلات"
-              isCollapsed={isSidebarCollapsed}
-              badgeCount={pendingExternalInvoicesCount}
-            />
-          )}
-          {canAccessScreen('/reports') && (
-            <>
+        {/* NAVIGATION LINKS */}
+        <div className="flex-grow py-6 overflow-y-auto overflow-x-hidden">
+          <nav className="space-y-1">
+            {canAccessScreen('/dashboard') && (
               <SidebarLink
-                href="/reports"
-                icon={BarChart3}
-                label="التقارير"
+                href="/dashboard"
+                icon={Home}
+                label="الرئيسية"
                 isCollapsed={isSidebarCollapsed}
               />
+            )}
+            {canAccessScreen('/companies') && (
+              <SidebarLink
+                href="/companies"
+                icon={Building2}
+                label="إدارة الشركات"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
 
-            </>
-          )}
-        </nav>
+            {canAccessScreen('/products') && (
+              <SidebarLink
+                href="/products"
+                icon={ShoppingBag}
+                label="الأصناف والمخزن"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
 
-        {/* Settings Section */}
-        <div className={`mt-8 ${isSidebarCollapsed ? "px-2" : "px-4"}`}>
-          <div className={`border-t border-slate-200 pt-4 transition-all duration-300 ${isSidebarCollapsed ? "opacity-0 h-0 overflow-hidden" : "opacity-100"
-            }`}>
-            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              الإعدادات
-            </h3>
+            {canAccessScreen('/sales') && (
+              <SidebarLink
+                href="/sales"
+                icon={ShoppingCart}
+                label="المبيعات"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/accountant') && (
+              <SidebarLink
+                href="/accountant"
+                icon={CreditCard}
+                label="مساحة عمل المحاسب"
+                isCollapsed={isSidebarCollapsed}
+                badgeCount={pendingCount}
+              />
+            )}
+            {canAccessScreen('/treasury') && (
+              <SidebarLink
+                href="/treasury"
+                icon={Wallet}
+                label="حركات الخزينة"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/general-receipts') && (
+              <SidebarLink
+                href="/general-receipts"
+                icon={ArrowRightLeft}
+                label="إيصالات خارجية"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/payroll') && (
+              <SidebarLink
+                href="/payroll"
+                icon={UsersRound}
+                label="المرتبات والموظفين"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/bad-debts') && (
+              <SidebarLink
+                href="/bad-debts"
+                icon={Receipt}
+                label="المصروفات المعدومة"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/customer-accounts') && (
+              <SidebarLink
+                href="/customer-accounts"
+                icon={Wallet}
+                label="حسابات العملاء"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/supplier-accounts') && (
+              <SidebarLink
+                href="/supplier-accounts"
+                icon={CircleDollarSign}
+                label="حسابات الموردين"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/warehouse-dispatch') && (
+              <SidebarLink
+                href="/warehouse-dispatch"
+                icon={Layout}
+                label="أوامر صرف المخزن"
+                isCollapsed={isSidebarCollapsed}
+                badgeCount={totalPendingWarehouseOrders}
+              />
+            )}
+
+
+            {/* إخفاء شاشة "المبيعات من الشركة الأم" من الشركة الأم نفسها */}
+            {!isParentCompany && canAccessScreen('/complex-inter-company-sales') && (
+              <SidebarLink
+                href="/complex-inter-company-sales"
+                icon={ArrowRightLeft}
+                label="المبيعات من الشركة الام"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/sale-returns') && (
+              <SidebarLink
+                href="/sale-returns"
+                icon={Returns}
+                label="المردودات"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/purchases') && (
+              <SidebarLink
+                href="/purchases"
+                icon={CreditCard}
+                label="المشتريات"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/payment-receipts') && (
+              <SidebarLink
+                href="/payment-receipts"
+                icon={Receipt}
+                label="إيصالات الدفع"
+                isCollapsed={isSidebarCollapsed}
+                badgeCount={pendingPaymentReceiptsCount}
+              />
+            )}
+
+            {costCalculationMethod === 'manual' && canAccessScreen('/product-cost') && (
+              <SidebarLink
+                href="/product-cost"
+                icon={BarChart3}
+                label="تكلفة الأصناف"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {costCalculationMethod === 'invoice' && canAccessScreen('/invoice-cost') && (
+              <SidebarLink
+                href="/invoice-cost"
+                icon={FileText}
+                label="تكلفة الفاتورة"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/damage-reports') && (
+              <SidebarLink
+                href="/damage-reports"
+                icon={FileText}
+                label="محاضر الإتلاف"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/external-stores') && (
+              <SidebarLink
+                href="/external-stores"
+                icon={Building2}
+                label="المحلات الخارجية"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/external-store-invoices') && (
+              <SidebarLink
+                href="/external-store-invoices"
+                icon={FileText}
+                label="فواتير المحلات"
+                isCollapsed={isSidebarCollapsed}
+                badgeCount={pendingExternalInvoicesCount}
+              />
+            )}
+            {canAccessScreen('/reports') && (
+              <>
+                <SidebarLink
+                  href="/reports"
+                  icon={BarChart3}
+                  label="التقارير"
+                  isCollapsed={isSidebarCollapsed}
+                />
+
+              </>
+            )}
+          </nav>
+
+          {/* Settings Section */}
+          <div className={`mt-8 ${isSidebarCollapsed ? "px-2" : "px-4"}`}>
+            <div className={`border-t border-slate-200 pt-4 transition-all duration-300 ${isSidebarCollapsed ? "opacity-0 h-0 overflow-hidden" : "opacity-100"
+              }`}>
+              <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
+                الإعدادات
+              </h3>
+            </div>
+
+
+
+            {canAccessScreen('/users') && (
+              <SidebarLink
+                href="/users"
+                icon={UsersRound}
+                label="إدارة المستخدمين"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
+            {canAccessScreen('/notifications') && (
+              <SidebarLink
+                href="/notifications"
+                icon={Bell}
+                label="الإشعارات"
+                isCollapsed={isSidebarCollapsed}
+              />
+            )}
           </div>
+        </div>
 
-
-
-          {canAccessScreen('/users') && (
-            <SidebarLink
-              href="/users"
-              icon={UsersRound}
-              label="إدارة المستخدمين"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
-          {canAccessScreen('/notifications') && (
-            <SidebarLink
-              href="/notifications"
-              icon={Bell}
-              label="الإشعارات"
-              isCollapsed={isSidebarCollapsed}
-            />
-          )}
+        {/* FOOTER */}
+        <div className={`border-t border-slate-200 p-4 transition-all duration-300 ${isSidebarCollapsed ? "opacity-0 h-0 overflow-hidden p-0" : "opacity-100"
+          }`}>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
+              <span className="text-xs font-semibold text-slate-600">CS</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">
+                SIMS v1.0
+              </p>
+              <p className="text-xs text-slate-500 truncate">
+                ARABTECH
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div className={`border-t border-slate-200 p-4 transition-all duration-300 ${isSidebarCollapsed ? "opacity-0 h-0 overflow-hidden p-0" : "opacity-100"
-        }`}>
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center shrink-0">
-            <span className="text-xs font-semibold text-slate-600">CS</span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">
-              CeramiSys v1.0
-            </p>
-            <p className="text-xs text-slate-500 truncate">
-              ARABTECH
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+      {/* زر التصغير/التكبير - عائم على حافة السايد بار */}
+      <button
+        onClick={toggleSidebar}
+        title={isSidebarCollapsed ? "توسيع القائمة" : "تصغير القائمة"}
+        className={`fixed top-20 z-50 w-8 h-8 rounded-full bg-white dark:bg-surface-primary border-2 border-blue-500 dark:border-blue-400 shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center group hover:scale-110 active:scale-95 -translate-x-1/2 ${isSidebarCollapsed ? "right-16" : "right-64"
+          }`}
+      >
+        <svg
+          className={`w-4 h-4 text-blue-600 dark:text-blue-400 transition-transform duration-300 ${isSidebarCollapsed ? "rotate-180" : ""
+            }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          strokeWidth={2.5}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+    </>
   );
 };
 

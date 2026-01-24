@@ -265,7 +265,7 @@ refetchOnReconnect: API_CACHE_CONFIG.reports.refetchOnReconnect,      // true
 #### تحقق من:
 1. **إعدادات البيئة:**
    ```bash
-   NEXT_PUBLIC_API_BASE_URL=http://localhost:4000
+   NEXT_PUBLIC_API_BASE_URL=http://localhost:4050
    ```
 
 2. **إعدادات الخادم:**

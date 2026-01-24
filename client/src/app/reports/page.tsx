@@ -161,7 +161,7 @@ export default function ReportsPage() {
       printData = salesReport.data.sales.filter((sale: any) => {
         if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
         if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-        if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
+        if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
         if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
         return true;
       });
@@ -329,7 +329,7 @@ export default function ReportsPage() {
                     ${item.currentStock.toLocaleString('ar-LY')} ${item.product.unit || 'صندوق'}
                   </div>
                 </td>
-                <td style="border: 1px solid #d69e2e; padding: 8px; text-align: center; font-size: 10px; font-weight: bold; color: #c53030;">
+                <td style="border: 1px solid #d69e2e; padding: 8px; text-align: center; font-size: 10px; font-weight: bold; color: #c54040;">
                   ${item.totalCost.toLocaleString('ar-LY', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} د.ل
                 </td>
                 <td style="border: 1px solid #d69e2e; padding: 8px; text-align: center;">
@@ -1345,7 +1345,7 @@ export default function ReportsPage() {
                       const filteredSales = salesReport.data.sales.filter((sale: any) => {
                         if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
                         if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-                        if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
+                        if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
                         if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
                         return true;
                       });
@@ -1391,7 +1391,7 @@ export default function ReportsPage() {
                 filteredItems={salesReport.data.sales.filter((sale: any) => {
                   if (filters.invoiceNumber && !textSearch(sale.invoiceNumber, filters.invoiceNumber)) return false;
                   if (filters.customerName && !textSearch(sale.customer?.name, filters.customerName)) return false;
-                  if (filters.minAmount && sale.total <parseFloat(filters.minAmount)) return false;
+                  if (filters.minAmount && sale.total < parseFloat(filters.minAmount)) return false;
                   if (filters.maxAmount && sale.total > parseFloat(filters.maxAmount)) return false;
                   return true;
                 })}
@@ -1757,7 +1757,7 @@ export default function ReportsPage() {
                         if (filters.invoiceNumber && !textSearch(purchase.invoiceNumber, filters.invoiceNumber)) return false;
                         if (filters.supplierName && !textSearch(purchase.supplier?.name, filters.supplierName)) return false;
                         if (filters.supplierPhone && !textSearch(purchase.supplier?.phone, filters.supplierPhone)) return false;
-                        if (filters.minAmount && Number(purchase.total) <Number(filters.minAmount)) return false;
+                        if (filters.minAmount && Number(purchase.total) < Number(filters.minAmount)) return false;
                         if (filters.maxAmount && Number(purchase.total) > Number(filters.maxAmount)) return false;
                         if (filters.invoiceAmount && Number(purchase.total) !== Number(filters.invoiceAmount)) return false;
                         return true;
@@ -1813,7 +1813,7 @@ export default function ReportsPage() {
                   if (filters.invoiceNumber && !textSearch(purchase.invoiceNumber, filters.invoiceNumber)) return false;
                   if (filters.supplierName && !textSearch(purchase.supplier?.name, filters.supplierName)) return false;
                   if (filters.supplierPhone && !textSearch(purchase.supplier?.phone, filters.supplierPhone)) return false;
-                  if (filters.minAmount && Number(purchase.total) <Number(filters.minAmount)) return false;
+                  if (filters.minAmount && Number(purchase.total) < Number(filters.minAmount)) return false;
                   if (filters.maxAmount && Number(purchase.total) > Number(filters.maxAmount)) return false;
                   if (filters.invoiceAmount && Number(purchase.total) !== Number(filters.invoiceAmount)) return false;
                   return true;

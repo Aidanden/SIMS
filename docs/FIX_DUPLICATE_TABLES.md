@@ -268,8 +268,8 @@
 ✅ TypeScript: 0 errors
 ✅ Linter: 0 warnings
 ✅ Compilation: ناجح
-✅ Server: Port 4000 ✨
-✅ Client: Port 3030 ✨
+✅ Server: Port 4050 ✨
+✅ Client: Port 4040 ✨
 ✅ شاشة المحاسب: جدول واحد فقط! 🎊
 ```
 

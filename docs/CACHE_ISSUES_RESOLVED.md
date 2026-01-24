@@ -91,19 +91,19 @@ netstat -ano | findstr :3000
 
 #### **2. الصفحة الرئيسية تعمل:**
 ```bash
-curl http://localhost:3030
+curl http://localhost:4040
 # النتيجة: StatusCode: 200
 ```
 
 #### **3. صفحة المشتريات تعمل:**
 ```bash
-curl http://localhost:3030/purchases
+curl http://localhost:4040/purchases
 # النتيجة: StatusCode: 200
 ```
 
 #### **4. ملف CSS يعمل:**
 ```bash
-curl http://localhost:3030/_next/static/css/app/layout.css
+curl http://localhost:4040/_next/static/css/app/layout.css
 # النتيجة: StatusCode: 200, Content-Type: text/css
 ```
 
@@ -137,5 +137,5 @@ npm run dev
 
 **آخر تحديث:** ${new Date().toLocaleDateString('ar-LY')}
 **الحالة:** ✅ تم الحل بنجاح
-**الخادم:** يعمل على http://localhost:3030
+**الخادم:** يعمل على http://localhost:4040
 

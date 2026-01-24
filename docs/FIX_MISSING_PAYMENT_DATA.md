@@ -339,7 +339,7 @@ F12 → Console
 ### **2. افتح شاشة المحاسب**
 
 ```
-http://localhost:3030/accountant
+http://localhost:4040/accountant
 ```
 
 ---
