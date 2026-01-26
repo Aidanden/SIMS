@@ -1,15 +1,15 @@
 [
   {
     "id": 1,
-    "name": "مخزن التقازي",
-    "code": "TG",
+    "name": "شركة الاندلس (فرع طرابلس)",
+    "code": "ANDALOS",
     "isParent": true,
     "parentId": null
   },
   {
     "id": 2,
-    "name": "صالة الامارات",
-    "code": "EM",
+    "name": "فرع بنغازي",
+    "code": "BENGAZI",
     "isParent": false,
     "parentId": 1
   }

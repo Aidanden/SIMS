@@ -1,0 +1,50 @@
+  originalUrl: '/api/warehouse/return-orders?status=PENDING&limit=1',
+  authHeader: 'exists',
+  token: 'exists'
+}
+Auth Decoded: admin_user_001
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: {
+  path: '/return-orders',
+  originalUrl: '/api/warehouse/return-orders?status=PENDING&limit=1',
+  authHeader: 'exists',
+  token: 'exists'
+}
+Auth Decoded: admin_user_001
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:13:51:57 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/payment-receipts
+Auth Debug: {
+  path: '/payment-receipts',
+  originalUrl: '/api/payment-receipts?status=PENDING&limit=1',
+  authHeader: 'exists',
+  token: 'exists'
+}
+Auth Decoded: admin_user_001
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: {
+  path: '/',
+  originalUrl: '/api/payment-receipts?status=PENDING&limit=1',
+  authHeader: 'exists',
+  token: 'exists'
+}
+Auth Decoded: admin_user_001
+::1 - - [26/Jan/2026:13:51:58 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69

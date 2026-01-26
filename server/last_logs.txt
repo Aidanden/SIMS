@@ -1,0 +1,50 @@
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:13:41:47 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:13:41:49 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+::1 - - [26/Jan/2026:13:41:49 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:13:41:50 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70

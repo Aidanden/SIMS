@@ -10,6 +10,7 @@ export const SCREEN_PERMISSIONS = {
   // الإدارة الأساسية
   COMPANIES: 'screen.companies',
   PRODUCTS: 'screen.products',
+  PROJECTS: 'screen.projects',
 
   // المبيعات
   SALES: 'screen.sales',
@@ -115,6 +116,15 @@ export const SCREEN_METADATA: ScreenMetadata[] = [
     category: 'inventory',
     description: 'إدارة مجموعات الأصناف والخصومات المسموح بها',
     icon: 'Shield'
+  },
+  {
+    id: 'projects',
+    name: 'إدارة المشاريع',
+    route: '/projects',
+    permission: SCREEN_PERMISSIONS.PROJECTS,
+    category: 'main',
+    description: 'إدارة المشاريع وربطها بالعملاء والمصروفات',
+    icon: 'Briefcase'
   },
 
   // شاشات المبيعات

@@ -74,18 +74,23 @@ export const authenticateToken = async (
     if (process.env.NODE_ENV !== 'production') {
       console.log('Auth Debug:', {
         path: req.path,
+        originalUrl: req.originalUrl,
         authHeader: authHeader ? 'exists' : 'null',
         token: token ? 'exists' : 'null'
       });
     }
 
     if (!token) {
+      if (process.env.NODE_ENV !== 'production') console.log('Auth Fail: No token');
       responseHelper.error(res, 'رمز المصادقة مطلوب', 401);
       return;
     }
 
     const jwtSecret = process.env['JWT_SECRET'] || 'your-secret-key';
     const decoded = jwt.verify(token, jwtSecret) as JwtPayload;
+
+    if (process.env.NODE_ENV !== 'production') console.log('Auth Decoded:', decoded.userId);
+
     const user = await prisma.users.findFirst({
       where: {
         UserID: decoded.userId,
@@ -111,26 +116,23 @@ export const authenticateToken = async (
     });
 
     if (!user) {
+      if (process.env.NODE_ENV !== 'production') console.log('Auth Fail: User not found or inactive', decoded.userId);
       responseHelper.error(res, 'المستخدم غير موجود أو غير نشط', 401);
       return;
     }
 
     if (user.Sessions.length === 0) {
+      if (process.env.NODE_ENV !== 'production') console.log('Auth Fail: Session invalid or expired', decoded.userId);
       responseHelper.error(res, 'الجلسة منتهية الصلاحية أو غير صحيحة', 401);
       return;
     }
 
     // تحويل Permissions من JSON إلى array
-    // أولوية للـ Permissions المباشرة من المستخدم، ثم من الـ Role
     let permissions: string[] = [];
 
-    // استخدام normalizePermissions لضمان معالجة صحيحة للبيانات
     const userPermissionsRaw = (user as any).Permissions;
     const rolePermissionsRaw = user.Role?.Permissions;
 
-    // إذا كان لدى المستخدم permissions (حتى لو فارغة [])، نستخدمها
-    // فقط إذا كانت null أو undefined نستخدم permissions الدور
-    // هذا يسمح للمستخدم بأن يكون لديه "لا صلاحيات" بشكل صريح
     const userPermissions = userPermissionsRaw !== null && userPermissionsRaw !== undefined
       ? normalizePermissions(userPermissionsRaw)
       : null;
@@ -154,6 +156,7 @@ export const authenticateToken = async (
 
     next();
   } catch (error) {
+    if (process.env.NODE_ENV !== 'production') console.log('Auth Error:', error instanceof Error ? error.message : 'Unknown error');
     if (error instanceof jwt.JsonWebTokenError) {
       responseHelper.error(res, 'رمز المصادقة غير صحيح', 401);
       return;

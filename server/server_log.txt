@@ -1,0 +1,1065 @@
+
+> server@1.0.0 start
+> ts-node src/index.ts
+
+Server running on port: 4050
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:16 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:49:18 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+::1 - - [26/Jan/2026:09:49:18 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:19 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:20 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:21 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:22 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:23 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:24 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:25 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+::1 - - [26/Jan/2026:09:49:25 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:27 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /health
+::1 - - [26/Jan/2026:09:49:28 +0000] "GET /health HTTP/1.1" 200 45
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:28 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:49:29 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:30 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:31 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+::1 - - [26/Jan/2026:09:49:31 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:33 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+::1 - - [26/Jan/2026:09:49:33 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:34 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:35 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:36 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:38 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:39 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:49:40 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:41 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:42 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+::1 - - [26/Jan/2026:09:49:42 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:43 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:44 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:45 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:46 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:47 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+::1 - - [26/Jan/2026:09:49:47 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:48 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:49:50 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+::1 - - [26/Jan/2026:09:49:50 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:52 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+::1 - - [26/Jan/2026:09:49:52 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:53 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:54 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:55 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:56 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:49:57 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+::1 - - [26/Jan/2026:09:49:57 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:49:59 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+::1 - - [26/Jan/2026:09:49:59 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:50:00 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:02 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+::1 - - [26/Jan/2026:09:50:02 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:03 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:04 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:05 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:05 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:07 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:08 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:09 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:10 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:11 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+::1 - - [26/Jan/2026:09:50:11 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:13 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:14 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:15 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/warehouse/return-orders
+Auth Debug: {
+  path: '/warehouse/return-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/return-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_returns', 'screen.all' ],
+  path: '/return-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:16 +0000] "GET /api/warehouse/return-orders?status=PENDING&limit=1 HTTP/1.1" 200 97
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:17 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:18 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/warehouse/dispatch-orders
+Auth Debug: {
+  path: '/warehouse/dispatch-orders',
+  authHeader: 'exists',
+  token: 'exists'
+}
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/warehouse/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/dispatch-orders', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.warehouse_dispatch', 'screen.all' ],
+  path: '/dispatch-orders'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:19 +0000] "GET /api/warehouse/dispatch-orders?status=PENDING&limit=1 HTTP/1.1" 200 99
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:20 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:21 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/sales
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.sales', 'screen.all' ],
+  path: '/'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+SalesController - Get Sales Debug: {
+  userCompanyId: 1,
+  isSystemUser: true,
+  query: {
+    page: 1,
+    limit: 1,
+    search: undefined,
+    customerId: undefined,
+    companyId: undefined,
+    status: 'DRAFT',
+    saleType: undefined,
+    paymentMethod: undefined,
+    startDate: undefined,
+    endDate: undefined,
+    receiptIssued: undefined,
+    todayOnly: undefined
+  }
+}
+::1 - - [26/Jan/2026:09:50:22 +0000] "GET /api/sales?status=DRAFT&limit=1 HTTP/1.1" 200 142
+GET /api/notifications/stats
+Auth Debug: { path: '/notifications/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:23 +0000] "GET /api/notifications/stats HTTP/1.1" 200 70
+GET /api/external-store-invoices/stats
+Auth Debug: { path: '/stats', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.external_store_invoices', 'screen.all' ],
+  path: '/stats'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+::1 - - [26/Jan/2026:09:50:24 +0000] "GET /api/external-store-invoices/stats HTTP/1.1" 200 113
+GET /api/payment-receipts
+Auth Debug: { path: '/payment-receipts', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/payment-receipts'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:25 +0000] "GET /api/payment-receipts?status=PENDING&limit=1 HTTP/1.1" 200 69
+GET /api/notifications
+Auth Debug: { path: '/notifications', authHeader: 'exists', token: 'exists' }
+🔐 Authorization Check: {
+  userId: 'admin_user_001',
+  userPermissions: [ 'screen.all' ],
+  requiredPermissions: [ 'screen.purchases', 'screen.all' ],
+  path: '/notifications'
+}
+✅ Access granted: User has "all" or "screen.all" permission
+Auth Debug: { path: '/', authHeader: 'exists', token: 'exists' }
+::1 - - [26/Jan/2026:09:50:26 +0000] "GET /api/notifications?page=1&limit=20 HTTP/1.1" 200 104

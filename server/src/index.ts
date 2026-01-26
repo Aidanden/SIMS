@@ -39,6 +39,7 @@ import badDebtRoutes from "./routes/badDebtRoutes";
 import generalReceiptRoutes from "./routes/generalReceipt.routes";
 import dashboardRoutes from "./routes/dashboardRoutes";
 import supplierProductsReportRoutes from "./routes/supplierProductsReportRoutes";
+import projectRoutes from "./routes/projectRoutes";
 
 
 /*CONFIGRATION*/
@@ -75,7 +76,7 @@ app.use('/api', (req, res, next) => {
     const path = req.path;
 
     // بيانات ثابتة - cache طويل (5 دقائق)
-    if (path.includes('/products') || path.includes('/company') || path.includes('/users')) {
+    if (path.includes('/products') || path.includes('/company') || path.includes('/users') || path.includes('/projects')) {
       res.set('Cache-Control', 'public, max-age=300');
     }
     // بيانات متغيرة - cache متوسط (1 دقيقة)
@@ -119,6 +120,7 @@ app.use('/api/product-groups', productGroupRoutes);
 app.use('/api/sales', salesRoutes);
 app.use('/api/sale-payments', salePaymentRoutes);
 app.use('/api/inter-company-sales', interCompanySaleRoutes);
+app.use('/api/projects', projectRoutes);
 app.use('/api', purchaseRoutes);
 app.use('/api/purchase-expenses', purchaseExpenseRoutes);
 app.use('/api/payment-receipts', paymentReceiptRoutes);
