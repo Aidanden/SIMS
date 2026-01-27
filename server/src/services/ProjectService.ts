@@ -20,13 +20,26 @@ export class ProjectService {
      */
     async createProject(data: CreateProjectDto, companyId: number) {
         return await this.prisma.$transaction(async (tx) => {
+            // التحقق من مدير المشروع وراتبه
+            let managerSalary = 0;
+            if (data.projectManagerId) {
+                const employee = await tx.employee.findUnique({
+                    where: { id: data.projectManagerId }
+                });
+                if (!employee) throw new Error('الموظف المختار كمدير مشروع غير موجود');
+                if (Number(employee.baseSalary) <= 0) {
+                    throw new Error('لا يمكن إضافة هذا الموظف كمدير مشروع لأن راتبه 0');
+                }
+                managerSalary = Number(employee.baseSalary);
+            }
+
             const project = await tx.project.create({
                 data: {
                     name: data.name,
                     customerId: data.customerId,
                     companyId,
                     description: data.description,
-                    projectManager: data.projectManager,
+                    projectManagerId: data.projectManagerId,
                     status: data.status as ProjectStatus || ProjectStatus.NEW,
                     startDate: data.startDate ? new Date(data.startDate) : null,
                     endDate: data.endDate ? new Date(data.endDate) : null,
@@ -36,8 +49,34 @@ export class ProjectService {
                 },
                 include: {
                     customer: true,
+                    manager: true
                 }
             });
+
+            // حساب التكلفة التقديرية لمدير المشروع
+            if (project.projectManagerId && project.startDate && project.endDate) {
+                const start = new Date(project.startDate);
+                const end = new Date(project.endDate);
+                const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+                const duration = Math.max(1, months); // على الأقل شهر واحد إذا كان في نفس الشهر
+
+                if (managerSalary > 0) {
+                    await tx.projectExpense.create({
+                        data: {
+                            projectId: project.id,
+                            companyId,
+                            name: `راتب مدير المشروع تقديري (${duration} أشهر)`,
+                            itemType: ProjectExpenseItemType.SERVICE,
+                            expenseType: ProjectExpenseType.ESTIMATED,
+                            quantity: duration,
+                            unitPrice: managerSalary,
+                            total: duration * managerSalary,
+                            expenseDate: project.startDate,
+                            notes: `تم الحساب تلقائياً بناءً على مدة المشروع وراتب الموظف: ${project.manager?.name}`
+                        }
+                    });
+                }
+            }
 
             // إذا كانت هناك قيمة تعاقدية، نسجلها كدين على العميل
             if (data.contractValue && data.contractValue > 0) {
@@ -74,7 +113,7 @@ export class ProjectService {
         if (query.search) {
             where.OR = [
                 { name: { contains: query.search, mode: 'insensitive' } },
-                { projectManager: { contains: query.search, mode: 'insensitive' } },
+                { manager: { name: { contains: query.search, mode: 'insensitive' } } },
                 { customer: { name: { contains: query.search, mode: 'insensitive' } } },
             ];
         }
@@ -88,6 +127,9 @@ export class ProjectService {
                 include: {
                     customer: {
                         select: { id: true, name: true, phone: true }
+                    },
+                    manager: {
+                        select: { id: true, name: true, jobTitle: true }
                     },
                     company: {
                         select: { id: true, name: true, code: true }
@@ -129,6 +171,7 @@ export class ProjectService {
             include: {
                 customer: true,
                 company: true,
+                manager: true,
                 expenses: {
                     include: {
                         product: {
@@ -187,20 +230,84 @@ export class ProjectService {
         const existing = await this.prisma.project.findFirst({ where });
         if (!existing) throw new Error('المشروع غير موجود أو لا تملك صلاحية تعديله');
 
-        return await this.prisma.project.update({
-            where: { id },
-            data: {
-                name: data.name,
-                customerId: data.customerId,
-                description: data.description,
-                projectManager: data.projectManager,
-                status: data.status as ProjectStatus,
-                startDate: data.startDate ? new Date(data.startDate) : undefined,
-                endDate: data.endDate ? new Date(data.endDate) : undefined,
-                estimatedBudget: data.estimatedBudget,
-                contractValue: data.contractValue,
-                notes: data.notes
+        return await this.prisma.$transaction(async (tx) => {
+            // التحقق من مدير المشروع وراتبه إذا تم تغييره
+            let managerSalary = 0;
+            if (data.projectManagerId && data.projectManagerId !== existing.projectManagerId) {
+                const employee = await tx.employee.findUnique({
+                    where: { id: data.projectManagerId }
+                });
+                if (!employee) throw new Error('الموظف المختار كمدير مشروع غير موجود');
+                if (Number(employee.baseSalary) <= 0) {
+                    throw new Error('لا يمكن إضافة هذا الموظف كمدير مشروع لأن راتبه 0');
+                }
+                managerSalary = Number(employee.baseSalary);
+            } else if (existing.projectManagerId) {
+                const employee = await tx.employee.findUnique({
+                    where: { id: existing.projectManagerId }
+                });
+                managerSalary = employee ? Number(employee.baseSalary) : 0;
             }
+
+            const updated = await tx.project.update({
+                where: { id },
+                data: {
+                    name: data.name,
+                    customerId: data.customerId,
+                    description: data.description,
+                    projectManagerId: data.projectManagerId,
+                    status: data.status as ProjectStatus,
+                    startDate: data.startDate ? new Date(data.startDate) : undefined,
+                    endDate: data.endDate ? new Date(data.endDate) : undefined,
+                    estimatedBudget: data.estimatedBudget,
+                    contractValue: data.contractValue,
+                    notes: data.notes
+                },
+                include: {
+                    manager: true
+                }
+            });
+
+            // تحديث التكلفة التقديرية لمدير المشروع إذا تغيرت التواريخ أو المدير
+            const datesChanged = (data.startDate && new Date(data.startDate).getTime() !== existing.startDate?.getTime()) ||
+                (data.endDate && new Date(data.endDate).getTime() !== existing.endDate?.getTime());
+
+            const managerChanged = data.projectManagerId !== undefined && data.projectManagerId !== existing.projectManagerId;
+
+            if ((datesChanged || managerChanged) && updated.projectManagerId && updated.startDate && updated.endDate) {
+                // حذف التكلفة التقديرية القديمة للراتب إن وجدت
+                await tx.projectExpense.deleteMany({
+                    where: {
+                        projectId: id,
+                        expenseType: ProjectExpenseType.ESTIMATED,
+                        name: { contains: 'راتب مدير المشروع تقديري' }
+                    }
+                });
+
+                const start = new Date(updated.startDate);
+                const end = new Date(updated.endDate);
+                const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+                const duration = Math.max(1, months);
+
+                if (managerSalary > 0) {
+                    await tx.projectExpense.create({
+                        data: {
+                            projectId: id,
+                            companyId,
+                            name: `راتب مدير المشروع تقديري (${duration} أشهر)`,
+                            itemType: ProjectExpenseItemType.SERVICE,
+                            expenseType: ProjectExpenseType.ESTIMATED,
+                            quantity: duration,
+                            unitPrice: managerSalary,
+                            total: duration * managerSalary,
+                            expenseDate: updated.startDate,
+                            notes: `تم التحديث تلقائياً بناءً على مدة المشروع وراتب الموظف: ${updated.manager?.name}`
+                        }
+                    });
+                }
+            }
+
+            return updated;
         });
     }
 

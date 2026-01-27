@@ -25,6 +25,7 @@ import {
   FileText as Receipt,
   Shield,
   Settings,
+  Briefcase,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import React from "react";
@@ -259,7 +260,7 @@ const Sidebar = () => {
               <SidebarLink
                 href="/companies"
                 icon={Building2}
-                label="إدارة الشركات"
+                label="إدارة الشركات و الفروع"
                 isCollapsed={isSidebarCollapsed}
               />
             )}
@@ -427,13 +428,9 @@ const Sidebar = () => {
             )}
             {canAccessScreen('/reports') && (
               <>
-                <SidebarLink
-                  href="/reports"
-                  icon={BarChart3}
-                  label="التقارير"
-                  isCollapsed={isSidebarCollapsed}
-                />
-
+                <SidebarLink href="/reports" icon={BarChart3} label="التقارير" isCollapsed={isSidebarCollapsed} />
+                <SidebarLink href="/projects" icon={Briefcase} label="إدارة المشاريع" isCollapsed={isSidebarCollapsed} />
+                <SidebarLink href="/settings" icon={Settings} label="الإعدادات" isCollapsed={isSidebarCollapsed} />
               </>
             )}
           </nav>

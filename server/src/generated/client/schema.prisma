@@ -1154,6 +1154,7 @@ model Employee {
   bonuses          EmployeeBonus[]
   generalReceipts  GeneralReceipt[]
   employeeAccounts EmployeeAccount[]
+  projectsManaged  Project[]         @relation("ProjectManager")
 
   @@index([companyId])
   @@index([isActive])
@@ -1287,23 +1288,24 @@ enum EmployeeReferenceType {
 // ========== نظام إدارة المشاريع ==========
 
 model Project {
-  id              Int           @id @default(autoincrement())
-  companyId       Int
-  customerId      Int
-  name            String
-  description     String?
-  projectManager  String?
-  status          ProjectStatus @default(NEW)
-  startDate       DateTime?
-  endDate         DateTime?
-  estimatedBudget Decimal       @default(0) @db.Decimal(18, 4)
-  contractValue   Decimal       @default(0) @db.Decimal(18, 4)
-  notes           String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id               Int           @id @default(autoincrement())
+  companyId        Int
+  customerId       Int
+  name             String
+  description      String?
+  projectManagerId Int?
+  status           ProjectStatus @default(NEW)
+  startDate        DateTime?
+  endDate          DateTime?
+  estimatedBudget  Decimal       @default(0) @db.Decimal(18, 4)
+  contractValue    Decimal       @default(0) @db.Decimal(18, 4)
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   company  Company          @relation(fields: [companyId], references: [id])
   customer Customer         @relation(fields: [customerId], references: [id])
+  manager  Employee?        @relation("ProjectManager", fields: [projectManagerId], references: [id])
   expenses ProjectExpense[]
 
   @@index([companyId])

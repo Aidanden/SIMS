@@ -124,6 +124,13 @@ export const API_CACHE_CONFIG = {
     refetchOnFocus: false, // لا نجلب عند التركيز
     refetchOnReconnect: true, // جلب عند إعادة الاتصال
   },
+  // إعدادات المشاريع - كاش متوسط
+  projects: {
+    keepUnusedDataFor: 300, // 5 دقائق كاش
+    refetchOnMountOrArgChange: 30, // جلب كل 30 ثانية
+    refetchOnFocus: false, // لا نجلب عند التركيز
+    refetchOnReconnect: true, // جلب عند إعادة الاتصال
+  },
 };
 
 

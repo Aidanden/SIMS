@@ -212,8 +212,8 @@ const CompaniesPage = () => {
             <div className="flex items-center gap-3">
               <Building2 className="w-8 h-8 text-blue-600" />
               <div>
-                <h1 className="text-3xl font-bold text-slate-800 dark:text-text-primary">إدارة الشركات</h1>
-                <p className="text-slate-500 dark:text-text-secondary">إدارة الشركات الأم والشركات التابعة </p>
+                <h1 className="text-3xl font-bold text-slate-800 dark:text-text-primary">إدارة الشركات و الفروع</h1>
+                <p className="text-slate-500 dark:text-text-secondary">إدارة الشركات و الشركات التابعة و الفروع </p>
               </div>
             </div>
             <button

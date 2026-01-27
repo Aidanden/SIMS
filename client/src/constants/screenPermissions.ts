@@ -10,6 +10,7 @@ export const SCREEN_PERMISSIONS = {
     // الإدارة الأساسية
     COMPANIES: 'screen.companies',
     PRODUCTS: 'screen.products',
+    PROJECTS: 'screen.projects',
 
     // المبيعات
     SALES: 'screen.sales',

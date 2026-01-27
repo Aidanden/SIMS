@@ -40,20 +40,29 @@ export const baseQueryWithAuth = fetchBaseQuery({
   timeout: API_CONFIG.timeout,
   prepareHeaders: (headers, { getState }) => {
     const token = getAuthToken(getState);
-    
+
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
-    
+
+    // Debug logging
+    if (typeof window !== 'undefined' && (window as any).debugAPI) {
+      console.log('API Request Headers:', {
+        url: headers.get('url'), // fetchBaseQuery doesn't put URL here, but let's see
+        hasAuth: !!token,
+        auth: headers.get('Authorization') ? 'present' : 'missing'
+      });
+    }
+
     // Set standard headers
     headers.set("Content-Type", "application/json");
     headers.set("Accept", "application/json");
-    
+
     // منع الـ cache في المتصفح
     headers.set("Cache-Control", "no-cache, no-store, must-revalidate");
     headers.set("Pragma", "no-cache");
     headers.set("Expires", "0");
-    
+
     return headers;
   },
 });
@@ -64,22 +73,22 @@ export const baseQueryWithAuth = fetchBaseQuery({
  */
 export const baseQueryWithAuthInterceptor = async (args: any, api: any, extraOptions: any) => {
   const result = await baseQueryWithAuth(args, api, extraOptions);
-  
+
   // Handle 401 Unauthorized responses
   if (result.error?.status === 401) {
     // Log out user and clear data
     api.dispatch(logout());
     clearAuthData();
     redirectToLogin();
-    
+
     // Only log in development
     if (process.env.NODE_ENV === 'development') {
       console.warn('🔐 Authentication failed - user logged out');
     }
   }
-  
+
   // تم تعطيل logging للأخطاء - يتم عرضها في notifications فقط
-  
+
   return result;
 };
 
@@ -88,7 +97,7 @@ export const baseQueryWithAuthInterceptor = async (args: any, api: any, extraOpt
  */
 export const isTokenExpired = (token: string): boolean => {
   if (!token) return true;
-  
+
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     const currentTime = Date.now() / 1000;
@@ -103,7 +112,7 @@ export const isTokenExpired = (token: string): boolean => {
  */
 export const getTokenExpiration = (token: string): Date | null => {
   if (!token) return null;
-  
+
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
     return new Date(payload.exp * 1000);
