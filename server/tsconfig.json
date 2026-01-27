@@ -28,12 +28,7 @@
     "allowUnreachableCode": false,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "baseUrl": ".",
-    "paths": {
-      "@prisma/client": [
-        "./src/generated/client"
-      ]
-    }
+    "baseUrl": "."
   },
   "include": [
     "src/**/*"

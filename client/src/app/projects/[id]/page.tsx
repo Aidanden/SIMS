@@ -19,10 +19,9 @@ import {
     DollarSign,
     TrendingDown,
     TrendingUp,
-    Target,
+    Layout,
     FileText,
-    LayoutGrid,
-    ChevronDown
+    AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -109,7 +108,7 @@ const ProjectDetailsPage = () => {
                         <div className="relative group">
                             <button className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-surface-primary border dark:border-border-primary rounded-xl font-bold dark:text-text-primary shadow-sm hover:border-blue-300 transition-all">
                                 {getStatusText(project.status)}
-                                <ChevronDown className="w-4 h-4 text-slate-400" />
+                                <ArrowRight className="w-4 h-4 text-slate-400 rotate-90" />
                             </button>
                             <div className="absolute left-0 mt-2 w-48 bg-white dark:bg-surface-secondary border dark:border-border-primary rounded-xl shadow-xl overflow-hidden hidden group-hover:block z-50 animate-in slide-in-from-top-2 duration-200">
                                 {['NEW', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED'].map((s) => (
@@ -255,7 +254,7 @@ const ProjectDetailsPage = () => {
                         <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-40 h-40 bg-white/10 rounded-full -translate-x-20 -translate-y-20 blur-3xl"></div>
 
-                            <Target className="w-12 h-12 mb-6 opacity-30 bg-white/20 p-2 rounded-2xl" />
+                            <TrendingUp className="w-12 h-12 mb-6 opacity-30 bg-white/20 p-2 rounded-2xl" />
                             <h3 className="text-sm font-black mb-1 opacity-60 uppercase tracking-widest">قيمة التعاقد (العائد)</h3>
                             <p className="text-4xl font-black tabular-nums tracking-tight">
                                 {project.contractValue?.toLocaleString()}
@@ -299,7 +298,7 @@ const ProjectDetailsPage = () => {
                         {/* Financial Details */}
                         <div className="bg-white dark:bg-surface-primary rounded-3xl p-8 border dark:border-border-primary shadow-sm space-y-8">
                             <h4 className="font-black flex items-center gap-3 border-b dark:border-border-primary pb-6 text-slate-800 dark:text-text-primary uppercase tracking-widest text-xs">
-                                <LayoutGrid className="w-5 h-5 text-blue-600" />
+                                <Layout className="w-5 h-5 text-blue-600" />
                                 الربحية المتوقعة
                             </h4>
 
@@ -407,49 +406,49 @@ const ExpenseModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
 
     return (
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" dir="rtl">
-            <div className="bg-white dark:bg-surface-primary rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-in zoom-in duration-200 border dark:border-border-primary">
-                <div className="p-8 border-b dark:border-border-primary flex justify-between items-center bg-slate-50 dark:bg-surface-secondary">
+            <div className="bg-white dark:bg-surface-primary rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl border dark:border-border-primary animate-in fade-in zoom-in duration-200">
+                <div className="p-6 border-b dark:border-border-primary flex justify-between items-center bg-slate-50 dark:bg-surface-secondary">
                     <div>
-                        <h2 className="text-2xl font-black dark:text-text-primary tracking-tight">إضافة مصروف جديد</h2>
-                        <p className="text-xs text-slate-400 font-bold uppercase mt-1">توثيق مالي وحسم مخزني</p>
+                        <h2 className="text-2xl font-bold dark:text-text-primary">إضافة مصروف جديد</h2>
+                        <p className="text-xs text-slate-500 dark:text-text-tertiary mt-1">توثيق مالي وحسم مخزني</p>
                     </div>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-200 dark:hover:bg-surface-elevated rounded-full transition-colors">
-                        <Plus className="w-8 h-8 rotate-45 text-slate-400 hover:text-slate-600" />
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors focus:outline-none">
+                        <Plus className="w-8 h-8 rotate-45" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8">
-                    <div className="space-y-8">
+                <form onSubmit={handleSubmit} className="p-6 max-h-[80vh] overflow-y-auto">
+                    <div className="space-y-6">
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">وصف البند</label>
+                            <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">وصف البند</label>
                             <input
                                 required
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full px-5 py-4 bg-slate-50 dark:bg-surface-secondary border-2 border-transparent dark:border-border-primary rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none dark:text-text-primary transition-all font-bold text-lg"
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary transition-all font-semibold"
                                 placeholder="بند المصروف..."
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">نوع التسجيل</label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">نوع التسجيل</label>
                                 <select
                                     value={formData.expenseType}
                                     onChange={(e) => setFormData({ ...formData, expenseType: e.target.value as any })}
-                                    className="w-full px-5 py-4 bg-slate-50 dark:bg-surface-secondary border-2 border-transparent rounded-2xl focus:border-blue-500 outline-none dark:text-text-primary font-black text-sm transition-all"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary font-bold transition-all text-sm"
                                 >
                                     <option value="ACTUAL">🟢 مصروف فعلي</option>
                                     <option value="ESTIMATED">🔵 رصيد تقديري</option>
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">نوع المورد</label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">نوع المورد</label>
                                 <select
                                     value={formData.itemType}
                                     onChange={(e) => setFormData({ ...formData, itemType: e.target.value as any })}
-                                    className="w-full px-5 py-4 bg-slate-50 dark:bg-surface-secondary border-2 border-transparent rounded-2xl focus:border-blue-500 outline-none dark:text-text-primary font-black text-sm transition-all"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary font-bold transition-all text-sm"
                                 >
                                     <option value="SERVICE">🛠️ خدمة / عام</option>
                                     <option value="MATERIAL">📦 بضاعة (مخزن)</option>
@@ -459,12 +458,12 @@ const ExpenseModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
 
                         {formData.itemType === 'MATERIAL' && (
                             <div className="animate-in fade-in slide-in-from-top-4 duration-300">
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">الصنف المخصص</label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">الصنف المخصص</label>
                                 <select
                                     required
                                     value={formData.productId}
                                     onChange={(e) => setFormData({ ...formData, productId: e.target.value })}
-                                    className="w-full px-5 py-4 bg-slate-100 dark:bg-surface-secondary border-2 border-transparent rounded-2xl focus:border-blue-500 outline-none dark:text-text-primary font-bold text-sm"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary font-bold text-sm"
                                 >
                                     <option value="">اختر من المخزن...</option>
                                     {products.map((p: any) => (
@@ -474,9 +473,9 @@ const ExpenseModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
                             </div>
                         )}
 
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">الكمية</label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">الكمية</label>
                                 <input
                                     required
                                     type="number"
@@ -484,11 +483,11 @@ const ExpenseModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
                                     step="0.01"
                                     value={formData.quantity}
                                     onChange={(e) => setFormData({ ...formData, quantity: Number(e.target.value) })}
-                                    className="w-full px-5 py-4 bg-slate-50 dark:bg-surface-secondary border-2 border-transparent rounded-2xl focus:border-blue-500 outline-none dark:text-text-primary font-black text-lg tabular-nums"
+                                    className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary font-bold tabular-nums"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[10px] font-black text-slate-400 mb-2 uppercase tracking-widest">سعر الوحدة</label>
+                                <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">سعر الوحدة</label>
                                 <div className="relative">
                                     <input
                                         required
@@ -497,26 +496,47 @@ const ExpenseModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
                                         step="0.01"
                                         value={formData.unitPrice || ''}
                                         onChange={(e) => setFormData({ ...formData, unitPrice: Number(e.target.value) })}
-                                        className="w-full pr-5 pl-14 py-4 bg-slate-50 dark:bg-surface-secondary border-2 border-transparent rounded-2xl focus:border-blue-500 outline-none dark:text-text-primary font-black text-lg text-left shadow-inner tabular-nums"
+                                        className="w-full pr-4 pl-12 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary font-bold tabular-nums"
                                         placeholder="0.00"
                                     />
-                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase">د.ل</span>
+                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">د.ل</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex gap-4 pt-6 border-t dark:border-border-primary">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">التاريخ</label>
+                            <input
+                                type="date"
+                                value={formData.expenseDate}
+                                onChange={(e) => setFormData({ ...formData, expenseDate: e.target.value })}
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary transition-all font-semibold"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 dark:text-text-secondary mb-2">ملاحظات</label>
+                            <textarea
+                                rows={2}
+                                value={formData.notes}
+                                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                                className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-secondary border dark:border-border-primary rounded-xl focus:ring-2 focus:ring-blue-500 outline-none dark:text-text-primary resize-none transition-all"
+                                placeholder="أي ملاحظات إضافية..."
+                            />
+                        </div>
+
+                        <div className="flex gap-4 pt-4 border-t dark:border-border-primary">
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="flex-[2] bg-blue-600 text-white py-5 rounded-2xl font-black text-lg hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 dark:shadow-none active:scale-95 disabled:bg-slate-300 disabled:shadow-none uppercase tracking-widest"
+                                className="flex-1 bg-blue-600 text-white py-4 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-[0.98] disabled:bg-slate-400 disabled:shadow-none"
                             >
-                                {isLoading ? 'جاري الإرسال...' : 'تأكيد العملية'}
+                                {isLoading ? 'جاري الحفظ...' : 'تأكيد الإضافة'}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="flex-1 bg-slate-100 dark:bg-surface-elevated text-slate-700 dark:text-text-primary py-5 rounded-2xl font-black hover:bg-slate-200 dark:hover:bg-surface-hover transition-all uppercase tracking-widest text-sm"
+                                className="flex-1 bg-slate-100 dark:bg-surface-elevated text-slate-700 dark:text-text-primary py-4 rounded-xl font-bold hover:bg-slate-200 dark:hover:bg-surface-hover transition-all"
                             >
                                 إلغاء
                             </button>

@@ -59,3 +59,4 @@ export type CreateProjectDto = z.infer<typeof CreateProjectDtoSchema>;
 export type UpdateProjectDto = z.infer<typeof UpdateProjectDtoSchema>;
 export type CreateProjectExpenseDto = z.infer<typeof CreateProjectExpenseDtoSchema>;
 export type GetProjectsQueryDto = z.infer<typeof GetProjectsQueryDtoSchema>;
+

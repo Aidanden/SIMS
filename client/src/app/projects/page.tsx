@@ -8,7 +8,7 @@ import { useGetEmployeesQuery } from '@/state/payrollApi';
 import { useToast } from '@/components/ui/Toast';
 import PermissionGuard from '@/components/PermissionGuard';
 import {
-    Briefcase,
+    Layout,
     Plus,
     Search,
     Edit,
@@ -16,9 +16,9 @@ import {
     Eye,
     Download,
     Calendar,
-    User,
-    Clock,
-    CheckCircle2,
+    Users,
+    TrendingUp,
+    FileText,
     AlertCircle
 } from 'lucide-react';
 import { format } from 'date-fns';
@@ -91,7 +91,7 @@ const ProjectsPage = () => {
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                     <div className="flex items-center gap-3">
                         <div className="p-3 bg-blue-600 rounded-xl text-white">
-                            <Briefcase className="w-8 h-8" />
+                            <Layout className="w-8 h-8" />
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-slate-800 dark:text-text-primary">إدارة المشاريع</h1>
@@ -111,9 +111,9 @@ const ProjectsPage = () => {
 
                 {/* Stats Summary */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    <StatCard title="إجمالي المشاريع" value={projectsData?.pagination.total || 0} icon={Briefcase} color="blue" />
-                    <StatCard title="نشطة حالياً" value={projectsData?.projects.filter(p => p.status === 'IN_PROGRESS').length || 0} icon={Clock} color="orange" />
-                    <StatCard title="مكتملة" value={projectsData?.projects.filter(p => p.status === 'COMPLETED').length || 0} icon={CheckCircle2} color="green" />
+                    <StatCard title="إجمالي المشاريع" value={projectsData?.pagination.total || 0} icon={Layout} color="blue" />
+                    <StatCard title="نشطة حالياً" value={projectsData?.projects.filter(p => p.status === 'IN_PROGRESS').length || 0} icon={TrendingUp} color="orange" />
+                    <StatCard title="مكتملة" value={projectsData?.projects.filter(p => p.status === 'COMPLETED').length || 0} icon={FileText} color="green" />
                     <StatCard title="متوقفة" value={projectsData?.projects.filter(p => p.status === 'ON_HOLD').length || 0} icon={AlertCircle} color="red" />
                 </div>
 
@@ -159,7 +159,7 @@ const ProjectsPage = () => {
                         </div>
                     ) : !projectsData?.projects || projectsData.projects.length === 0 ? (
                         <div className="col-span-full py-20 text-center bg-white dark:bg-surface-primary rounded-2xl border dark:border-border-primary">
-                            <Briefcase className="w-16 h-16 text-slate-200 mx-auto mb-4" />
+                            <Layout className="w-16 h-16 text-slate-200 mx-auto mb-4" />
                             <p className="text-slate-500 dark:text-text-secondary text-lg">لا توجد مشاريع مضافة حالياً</p>
                         </div>
                     ) : projectsData.projects.map((project) => (
@@ -177,7 +177,7 @@ const ProjectsPage = () => {
                                     </div>
                                     <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-text-secondary">
                                         <span className="flex items-center gap-1">
-                                            <User className="w-4 h-4" />
+                                            <Users className="w-4 h-4" />
                                             {project.customer?.name}
                                         </span>
                                         <span className="flex items-center gap-1 text-xs">
@@ -312,8 +312,33 @@ const ProjectModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
     const [selectedEmployeeName, setSelectedEmployeeName] = useState('');
     const employeeSearchRef = React.useRef<HTMLDivElement>(null);
 
-    const { data: customersData, isLoading: customersLoading } = useGetCustomersQuery({ limit: 1000 });
-    const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery({ isActive: true });
+    const [debouncedCustomerSearchTerm, setDebouncedCustomerSearchTerm] = useState('');
+    const [debouncedEmployeeSearchTerm, setDebouncedEmployeeSearchTerm] = useState('');
+
+    // Debounce search terms
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedCustomerSearchTerm(customerSearchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [customerSearchTerm]);
+
+    React.useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedEmployeeSearchTerm(employeeSearchTerm);
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [employeeSearchTerm]);
+
+    const { data: customersData, isLoading: customersLoading } = useGetCustomersQuery({
+        limit: 50,
+        search: debouncedCustomerSearchTerm || undefined
+    });
+
+    const { data: employeesData, isLoading: employeesLoading } = useGetEmployeesQuery({
+        isActive: true,
+        search: debouncedEmployeeSearchTerm || undefined
+    });
     const [createCustomer] = useCreateCustomerMutation();
 
     // Close suggestions on click outside
@@ -399,39 +424,43 @@ const ProjectModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
                                             </div>
                                         )}
 
-                                        {showCustomerSuggestions && !customersLoading && (
+                                        {showCustomerSuggestions && (
                                             <div className="absolute z-[70] w-full mt-1 bg-white dark:bg-surface-elevated border border-slate-300 dark:border-border-primary rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                                                {customersData?.data?.customers
-                                                    ?.filter((customer: any) =>
-                                                    (customer.name.toLowerCase().includes(customerSearchTerm.toLowerCase()) ||
-                                                        customer.phone?.includes(customerSearchTerm))
-                                                    )
-                                                    ?.map((customer: any) => (
-                                                        <div
-                                                            key={customer.id}
-                                                            onClick={() => {
-                                                                setFormData(prev => ({ ...prev, customerId: customer.id }));
-                                                                setSelectedCustomerName(customer.name);
-                                                                setCustomerSearchTerm('');
-                                                                setShowCustomerSuggestions(false);
-                                                            }}
-                                                            className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors"
-                                                        >
-                                                            <div className="font-medium text-slate-900 dark:text-text-primary">{customer.name}</div>
-                                                            {customer.phone && (
-                                                                <div className="text-xs text-slate-500 dark:text-text-tertiary">📱 {customer.phone}</div>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                {customersData?.data?.customers
-                                                    ?.filter((customer: any) =>
-                                                    (customer.name.toLowerCase().includes(customerSearchTerm.toLowerCase()) ||
-                                                        customer.phone?.includes(customerSearchTerm))
-                                                    )?.length === 0 && (
-                                                        <div className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">
-                                                            لا توجد نتائج
-                                                        </div>
-                                                    )}
+                                                {customersLoading && !customersData && (
+                                                    <div className="px-4 py-6 text-center">
+                                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                                                    </div>
+                                                )}
+
+                                                {customersData?.data?.customers?.length === 0 && !customersLoading && (
+                                                    <div className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">
+                                                        لا توجد نتائج
+                                                    </div>
+                                                )}
+
+                                                {customersData?.data?.customers?.map((customer: any) => (
+                                                    <div
+                                                        key={customer.id}
+                                                        onClick={() => {
+                                                            setFormData(prev => ({ ...prev, customerId: customer.id }));
+                                                            setSelectedCustomerName(customer.name);
+                                                            setCustomerSearchTerm('');
+                                                            setShowCustomerSuggestions(false);
+                                                        }}
+                                                        className="px-4 py-3 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors"
+                                                    >
+                                                        <div className="font-medium text-slate-900 dark:text-text-primary">{customer.name}</div>
+                                                        {customer.phone && (
+                                                            <div className="text-xs text-slate-500 dark:text-text-tertiary">📱 {customer.phone}</div>
+                                                        )}
+                                                    </div>
+                                                ))}
+
+                                                {customersLoading && customersData && (
+                                                    <div className="absolute inset-0 bg-white/50 dark:bg-black/20 flex items-center justify-center">
+                                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                                    </div>
+                                                )}
                                             </div>
                                         )}
                                     </div>
@@ -470,45 +499,50 @@ const ProjectModal = ({ isOpen, onClose, onSubmit, isLoading }: any) => {
                                         </div>
                                     )}
 
-                                    {showEmployeeSuggestions && !employeesLoading && (
+                                    {showEmployeeSuggestions && (
                                         <div className="absolute z-[70] w-full mt-1 bg-white dark:bg-surface-elevated border border-slate-300 dark:border-border-primary rounded-xl shadow-xl max-h-60 overflow-y-auto">
-                                            {employeesData?.data
-                                                ?.filter((employee: any) =>
-                                                    employee.name.toLowerCase().includes(employeeSearchTerm.toLowerCase()) ||
-                                                    employee.jobTitle?.toLowerCase().includes(employeeSearchTerm.toLowerCase())
-                                                )
-                                                ?.map((employee: any) => (
-                                                    <div
-                                                        key={employee.id}
-                                                        onClick={() => {
-                                                            if (Number(employee.baseSalary) <= 0) {
-                                                                toast.error('خطأ', 'لا يمكن اختيار هذا الموظف لأن راتبه 0');
-                                                                return;
-                                                            }
-                                                            setFormData(prev => ({ ...prev, projectManagerId: employee.id }));
-                                                            setSelectedEmployeeName(employee.name);
-                                                            setEmployeeSearchTerm('');
-                                                            setShowEmployeeSuggestions(false);
-                                                        }}
-                                                        className={`px-4 py-3 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors ${Number(employee.baseSalary) <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
-                                                    >
-                                                        <div className="font-medium text-slate-900 dark:text-text-primary">
-                                                            {employee.name}
-                                                            {Number(employee.baseSalary) <= 0 && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md mr-2">بدون راتب</span>}
-                                                        </div>
-                                                        <div className="text-xs text-slate-500 dark:text-text-tertiary">
-                                                            {employee.jobTitle || 'موظف'} | الراتب: {Number(employee.baseSalary).toLocaleString()} د.ل
-                                                        </div>
+                                            {employeesLoading && !employeesData && (
+                                                <div className="px-4 py-6 text-center">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                                                </div>
+                                            )}
+
+                                            {employeesData?.data?.length === 0 && !employeesLoading && (
+                                                <div className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">
+                                                    لا توجد نتائج
+                                                </div>
+                                            )}
+
+                                            {employeesData?.data?.map((employee: any) => (
+                                                <div
+                                                    key={employee.id}
+                                                    onClick={() => {
+                                                        if (Number(employee.baseSalary) <= 0) {
+                                                            toast.error('خطأ', 'لا يمكن اختيار هذا الموظف لأن راتبه 0');
+                                                            return;
+                                                        }
+                                                        setFormData(prev => ({ ...prev, projectManagerId: employee.id }));
+                                                        setSelectedEmployeeName(employee.name);
+                                                        setEmployeeSearchTerm('');
+                                                        setShowEmployeeSuggestions(false);
+                                                    }}
+                                                    className={`px-4 py-3 hover:bg-blue-50 dark:hover:bg-surface-hover cursor-pointer border-b border-slate-100 dark:border-border-primary last:border-b-0 transition-colors ${Number(employee.baseSalary) <= 0 ? 'opacity-50 grayscale cursor-not-allowed' : ''}`}
+                                                >
+                                                    <div className="font-medium text-slate-900 dark:text-text-primary">
+                                                        {employee.name}
+                                                        {Number(employee.baseSalary) <= 0 && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-md mr-2">بدون راتب</span>}
                                                     </div>
-                                                ))}
-                                            {employeesData?.data
-                                                ?.filter((employee: any) =>
-                                                    employee.name.toLowerCase().includes(employeeSearchTerm.toLowerCase())
-                                                )?.length === 0 && (
-                                                    <div className="px-4 py-3 text-slate-500 dark:text-text-tertiary text-sm">
-                                                        لا توجد نتائج
+                                                    <div className="text-xs text-slate-500 dark:text-text-tertiary">
+                                                        {employee.jobTitle || 'موظف'} | الراتب: {Number(employee.baseSalary).toLocaleString()} د.ل
                                                     </div>
-                                                )}
+                                                </div>
+                                            ))}
+
+                                            {employeesLoading && employeesData && (
+                                                <div className="absolute inset-0 bg-white/50 dark:bg-black/20 flex items-center justify-center">
+                                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>
